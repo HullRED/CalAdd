@@ -77,31 +77,38 @@ fetch(basePath)
     document.getElementById('eventTitle').innerText = event.title;
     document.getElementById('eventSubtitle').innerText = event.subtitle;
     document.getElementById('eventDescription').innerText = event.description;
-    document.getElementById('eventDate').innerText = event.date;
-    document.getElementById('eventTime').innerText = event.time;
     document.getElementById('eventLocation').innerText = event.location;
+
+    // Parse ISO date and time
+    const startDate = new Date(`${event.date}T${event.startTime}`);
+    const endDate = new Date(`${event.date}T${event.endTime}`);
+
+    if (isNaN(startDate) || isNaN(endDate)) {
+      console.error('Invalid date/time in JSON:', event.date, event.startTime, event.endTime);
+      document.getElementById('eventDate').innerText = event.date;
+      document.getElementById('eventTime').innerText = `${event.startTime} – ${event.endTime}`;
+    } else {
+      // Display date in DD-MM-YYYY format
+      const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+      document.getElementById('eventDate').innerText = startDate.toLocaleDateString('en-GB', options);
+      document.getElementById('eventTime').innerText = `${event.startTime} – ${event.endTime}`;
+    }
 
     // Map links
     const loc = encodeURIComponent(event.location);
     document.getElementById('googleMapLink').href = `https://www.google.com/maps/search/?api=1&query=${loc}`;
     document.getElementById('appleMapLink').href = `https://maps.apple.com/?q=${loc}`;
 
-    // Time parsing fix
-    const [startStr, endStr] = event.time.replace(/[–—−]/g, '-').split('-').map(t => t.trim());
-    const startDate = new Date(`${event.date}T${startStr}`);
-    const endDate = new Date(`${event.date}T${endStr}`);
-
-    if (isNaN(startDate) || isNaN(endDate)) {
-      console.error('Invalid date/time in JSON:', event.date, event.time);
-    } else {
-      const start = startDate.toISOString().replace(/-|:|\.\d+/g,'');
-      const end = endDate.toISOString().replace(/-|:|\.\d+/g,'');
-    
+    // Calendar links
+    const start = startDate.toISOString().replace(/-|:|\.\d+/g,'');
+    const end = endDate.toISOString().replace(/-|:|\.\d+/g,'');
     const title = encodeURIComponent(event.title);
     const desc = encodeURIComponent(`${event.subtitle}\n${event.description}`);
     const location = encodeURIComponent(event.location);
 
-    document.getElementById('appleLink').href = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR
+    // Apple / ICS
+    const appleLink = document.getElementById('appleLink');
+    appleLink.href = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
 SUMMARY:${title}
@@ -112,19 +119,25 @@ DTEND:${end}
 END:VEVENT
 END:VCALENDAR`;
 
+    // Google
     document.getElementById('googleLink').href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${desc}&location=${location}`;
 
+    // Outlook.com
     document.getElementById('outlookLink').href = `https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${start}&enddt=${end}&location=${location}&body=${desc}`;
 
+    // Office 365
     document.getElementById('officeLink').href = `https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${start}&enddt=${end}&location=${location}&body=${desc}`;
 
+    // Yahoo
     document.getElementById('yahooLink').href = `https://calendar.yahoo.com/?v=60&title=${title}&st=${start}&et=${end}&desc=${desc}&in_loc=${location}`;
 
+    // ICS download
     const icsLink = document.getElementById('icsLink');
-    icsLink.href = document.getElementById('appleLink').href;
+    icsLink.href = appleLink.href;
     icsLink.setAttribute('download', `${event.title}.ics`);
+
   })
-  .catch(err => console.error(err)); // <- catch attached to fetch
+  .catch(err => console.error(err));
 </script>
 
 </body>
