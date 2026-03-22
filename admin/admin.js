@@ -1,71 +1,141 @@
-const loginOverlay = document.getElementById('loginOverlay');
-const adminPanel = document.getElementById('adminPanel');
-const loginBtn = document.getElementById('loginBtn');
+// admin.js
 
-const usernameInput = document.getElementById('username');
-const passwordInput = document.getElementById('password');
+// === LOGIN LOGIC ===
+const loginOverlay = document.getElementById("loginOverlay");
+const loginBtn = document.getElementById("loginBtn");
+const usernameInput = document.getElementById("username");
+const passwordInput = document.getElementById("password");
+const adminPanel = document.getElementById("adminPanel");
 
-const eventTitleInput = document.getElementById('eventTitleInput');
-const eventSubtitleInput = document.getElementById('eventSubtitleInput');
-const eventDescriptionInput = document.getElementById('eventDescriptionInput');
-const eventDateInput = document.getElementById('eventDateInput');
-const eventTimeInput = document.getElementById('eventTimeInput');
-const eventLocationInput = document.getElementById('eventLocationInput');
+// Replace with your real admin credentials
+const ADMIN_USERNAME = "admin";
+const ADMIN_PASSWORD = "password";
 
-const saveBtn = document.getElementById('saveBtn');
-
-// Admin credentials in .env or local variables
-const ADMIN_USER = 'admin';
-const ADMIN_PASS = 'password123';
-
-// Login logic
-loginBtn.addEventListener('click', () => {
+loginBtn.addEventListener("click", () => {
   const username = usernameInput.value.trim();
   const password = passwordInput.value.trim();
 
-  if(username === ADMIN_USER && password === ADMIN_PASS) {
-    loginOverlay.style.display = 'none';
-    adminPanel.style.display = 'block';
+  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    loginOverlay.style.display = "none";
+    adminPanel.style.display = "block";
     loadEvent();
   } else {
-    alert('Incorrect username or password');
+    alert("Invalid credentials");
   }
 });
 
-// Load event.json
+// === EVENT JSON LOGIC ===
+const fs = window.fs || null; // Only works locally with Node.js
+const eventPath = "event.json"; // Relative to server root
+
 function loadEvent() {
-  fetch('../data/event.json')
+  fetch(eventPath)
     .then(res => res.json())
     .then(event => {
-      eventTitleInput.value = event.title;
-      eventSubtitleInput.value = event.subtitle;
-      eventDescriptionInput.value = event.description;
-      eventDateInput.value = event.date;
-      eventTimeInput.value = event.time;
-      eventLocationInput.value = event.location;
+      document.getElementById("eventTitleInput").value = event.title;
+      document.getElementById("eventSubtitleInput").value = event.subtitle;
+      document.getElementById("eventDescriptionInput").value = event.description;
+      document.getElementById("eventDateInput").value = event.date;
+      document.getElementById("eventTimeInput").value = event.time;
+      document.getElementById("eventLocationInput").value = event.location;
     })
-    .catch(err => console.error('Cannot load event.json', err));
+    .catch(err => console.error("Could not load event.json:", err));
 }
 
-// Save event.json via POST to server (Node.js required)
-saveBtn.addEventListener('click', () => {
+document.getElementById("saveBtn").addEventListener("click", () => {
   const updatedEvent = {
-    title: eventTitleInput.value,
-    subtitle: eventSubtitleInput.value,
-    description: eventDescriptionInput.value,
-    date: eventDateInput.value,
-    time: eventTimeInput.value,
-    location: eventLocationInput.value
+    title: document.getElementById("eventTitleInput").value,
+    subtitle: document.getElementById("eventSubtitleInput").value,
+    description: document.getElementById("eventDescriptionInput").value,
+    date: document.getElementById("eventDateInput").value,
+    time: document.getElementById("eventTimeInput").value,
+    location: document.getElementById("eventLocationInput").value
   };
 
-  fetch('/update-event', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(updatedEvent)
-  })
-  .then(res => {
-    if(res.ok) alert('Event updated successfully');
-    else alert('Failed to update event');
-  })
-  .catch(err => alert('Server not running locally'));
+  if (!fs) {
+    alert("Saving only works on a local server environment with Node.js");
+    console.log("Updated event:", updatedEvent);
+    return;
+  }
+
+  fs.writeFile(eventPath, JSON.stringify(updatedEvent, null, 2), err => {
+    if (err) return console.error(err);
+    alert("Event saved successfully!");
+  });
 });
+
+// === CALENDAR PICKER ===
+const calendarContainer = document.createElement("div");
+calendarContainer.className = "calendar-container";
+document.getElementById("eventDateInput").parentNode.appendChild(calendarContainer);
+
+// Generate month/year wheels
+const calendarHeader = document.createElement("div");
+calendarHeader.className = "calendar-header";
+
+const monthSelect = document.createElement("select");
+const yearSelect = document.createElement("select");
+
+// Populate month options
+const months = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+months.forEach((m, i) => {
+  const opt = document.createElement("option");
+  opt.value = i;
+  opt.textContent = m;
+  monthSelect.appendChild(opt);
+});
+
+// Populate year options (current year ±5)
+const currentYear = new Date().getFullYear();
+for (let y = currentYear - 5; y <= currentYear + 5; y++) {
+  const opt = document.createElement("option");
+  opt.value = y;
+  opt.textContent = y;
+  yearSelect.appendChild(opt);
+}
+
+calendarHeader.appendChild(monthSelect);
+calendarHeader.appendChild(yearSelect);
+calendarContainer.appendChild(calendarHeader);
+
+// Calendar grid
+const calendarGrid = document.createElement("div");
+calendarGrid.className = "calendar-grid";
+calendarContainer.appendChild(calendarGrid);
+
+function renderCalendar(month, year) {
+  calendarGrid.innerHTML = "";
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  // Fill empty days
+  for (let i = 0; i < firstDay; i++) {
+    const empty = document.createElement("div");
+    calendarGrid.appendChild(empty);
+  }
+
+  // Fill days
+  for (let d = 1; d <= daysInMonth; d++) {
+    const day = document.createElement("div");
+    day.className = "calendar-day";
+    day.textContent = d;
+
+    day.addEventListener("click", () => {
+      document.querySelectorAll(".calendar-day").forEach(e => e.classList.remove("selected"));
+      day.classList.add("selected");
+      document.getElementById("eventDateInput").value = `${d} ${months[month]} ${year}`;
+    });
+
+    calendarGrid.appendChild(day);
+  }
+}
+
+// Initial render
+renderCalendar(new Date().getMonth(), new Date().getFullYear());
+
+// Update on wheel change
+monthSelect.addEventListener("change", () => renderCalendar(+monthSelect.value, +yearSelect.value));
+yearSelect.addEventListener("change", () => renderCalendar(+monthSelect.value, +yearSelect.value));
