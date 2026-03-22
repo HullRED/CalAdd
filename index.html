@@ -86,11 +86,18 @@ fetch(basePath)
     document.getElementById('googleMapLink').href = `https://www.google.com/maps/search/?api=1&query=${loc}`;
     document.getElementById('appleMapLink').href = `https://maps.apple.com/?q=${loc}`;
 
-    // Calendar times
-    const [startStr, endStr] = event.time.split('–').map(t => t.trim());
-    const start = new Date(`${event.date} ${startStr}`).toISOString().replace(/-|:|\.\d+/g,'');
-    const end = new Date(`${event.date} ${endStr}`).toISOString().replace(/-|:|\.\d+/g,'');
+    const [startStr, endStr] = event.time.replace('–','-').split('-').map(t => t.trim());
+const startDate = new Date(`${event.date} ${startStr}`);
+const endDate = new Date(`${event.date} ${endStr}`);
 
+if (isNaN(startDate) || isNaN(endDate)) {
+  console.error('Invalid date/time:', event.date, event.time);
+} else {
+  const start = startDate.toISOString().replace(/-|:|\.\d+/g,'');
+  const end = endDate.toISOString().replace(/-|:|\.\d+/g,'');
+  // ... continue setting calendar links
+}
+    
     const title = encodeURIComponent(event.title);
     const desc = encodeURIComponent(`${event.subtitle}\n${event.description}`);
     const location = encodeURIComponent(event.location);
