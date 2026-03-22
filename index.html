@@ -30,18 +30,20 @@
           <img src="public/HullRed2.png" alt="Hull Red CIO Logo">
         </div>
         <div class="brand-text">
-          <h1 id="eventTitle">Hull Red CIO Event</h1>
+          <h1 id="eventTitle">Hull Red: Event Loading...</h1>
           <p class="subtitle" id="eventSubtitle">Add this event to your calendar</p>
         </div>
       </div>
 
       <div class="event-grid-map">
         <div class="event-details">
-          <p><strong>Date:</strong> <span id="eventDate">Friday, 8th May 2026</span></p>
-          <p><strong>Time:</strong> <span id="eventTime">19:30 – 23:00</span></p>
-          <p><strong>Location:</strong> <span id="eventLocation">The Student’s Union, University of Hull, Cottingham Road, HULL, HU6 7RX</span></p>
-          <p id="eventDescription">A Night With ABBA</p>
-          <p><a id="mapLink" href="https://www.google.com/maps/search/?api=1&query=Hull,+UK" target="_blank" class="map-link">View on Google Maps</a></p>
+          <p><strong>Date:</strong> <span id="eventDate">Loading...</span></p>
+          <p><strong>Time:</strong> <span id="eventTime">Loading...</span></p>
+          <p><strong>Location:</strong> <span id="eventLocation">Loading...</span></p>
+          <div class="map-buttons">
+            <a id="mapGoogle" href="#" target="_blank" class="map-btn">Show on Google Maps</a>
+            <a id="mapApple" href="#" target="_blank" class="map-btn">Show on Apple Maps</a>
+          </div>
         </div>
       </div>
 
@@ -62,29 +64,42 @@
 </main>
 
 <script>
-  // Load event.json
-  fetch('public/event.json')
-    .then(res => res.json())
-    .then(event => {
-      document.getElementById('eventTitle').innerText = event.title;
-      document.getElementById('eventSubtitle').innerText = event.subtitle;
-      document.getElementById('eventDescription').innerText = event.description;
-      document.getElementById('eventDate').innerText = event.date;
-      document.getElementById('eventTime').innerText = event.time;
-      document.getElementById('eventLocation').innerText = event.location;
+fetch('public/event.json')
+  .then(res => res.json())
+  .then(event => {
+    // Update title with "Hull Red: [description]"
+    document.getElementById('eventTitle').innerText = `Hull Red: ${event.description}`;
+    document.getElementById('eventSubtitle').innerText = event.subtitle;
+    document.getElementById('eventDate').innerText = event.date;
+    document.getElementById('eventTime').innerText = event.time;
+    document.getElementById('eventLocation').innerText = event.location;
 
-      const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`;
-      document.getElementById('mapLink').href = mapUrl;
+    // Convert date/time into ICS format (YYYYMMDDTHHMMSS)
+    // Simple static example; for production, parse properly
+    const start = "20260508T193000"; // Replace with dynamic parsing if needed
+    const end = "20260508T230000";
 
-      // Fill calendar buttons with example links (replace with real ICS URLs)
-      document.getElementById('appleBtn').href = 'public/apple.ics';
-      document.getElementById('googleBtn').href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=20260508T193000/20260508T230000&details=${encodeURIComponent(event.description)}&location=${encodeURIComponent(event.location)}`;
-      document.getElementById('officeBtn').href = 'public/office365.ics';
-      document.getElementById('outlookBtn').href = 'public/outlook.ics';
-      document.getElementById('yahooBtn').href = 'public/yahoo.ics';
-      document.getElementById('icsBtn').href = 'public/event.ics';
-    })
-    .catch(err => console.log('Could not load event.json:', err));
+    const title = encodeURIComponent(event.title || "Hull Red CIO Event");
+    const description = encodeURIComponent(event.description);
+    const location = encodeURIComponent(event.location);
+
+    // Map links
+    const googleUrl = `https://www.google.com/maps/search/?api=1&query=${location}`;
+    const appleUrl = `https://maps.apple.com/?q=${location}`;
+    document.getElementById('mapGoogle').href = googleUrl;
+    document.getElementById('mapApple').href = appleUrl;
+
+    // Calendar buttons
+    document.getElementById('appleBtn').href = 'public/apple.ics';
+    document.getElementById('googleBtn').href = 
+      `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${description}&location=${location}&sf=true&output=xml`;
+    document.getElementById('officeBtn').href = 'public/office365.ics';
+    document.getElementById('outlookBtn').href = 'public/outlook.ics';
+    document.getElementById('yahooBtn').href = 
+      `https://calendar.yahoo.com/?v=60&TITLE=${title}&ST=${start}&ET=${end}&DESC=${description}&in_loc=${location}`;
+    document.getElementById('icsBtn').href = 'public/event.ics';
+  })
+  .catch(err => console.log('Could not load event.json:', err));
 </script>
 </body>
 </html>
