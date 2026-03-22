@@ -10,111 +10,172 @@
 
   <title>Hull Red CIO Admin</title>
   <link rel="stylesheet" href="../style.css" />
+  <style>
+    .admin-panel {
+      max-width: 500px;
+      margin: 40px auto;
+      padding: 24px;
+      background: linear-gradient(180deg, #31303a 0%, #2d2c35 100%);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .admin-panel h2 {
+      margin: 0 0 16px;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--muted);
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 6px 10px;
+      font-size: 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      color: var(--text);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .btn-save {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: var(--accent);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.18s ease;
+    }
+
+    .btn-save:hover {
+      background: rgba(233,1,0,0.85);
+    }
+
+    /* login overlay */
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .login-box {
+      background: var(--panel-2);
+      padding: 24px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      max-width: 350px;
+      width: 100%;
+    }
+
+    .login-box h3 {
+      margin: 0 0 16px;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .login-box input {
+      width: 100%;
+      padding: 6px 10px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .login-box button {
+      width: 100%;
+      padding: 6px 14px;
+      border: none;
+      border-radius: 12px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .login-box button:hover {
+      background: rgba(233,1,0,0.85);
+    }
+  </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="topbar-inner">
-      <div class="nav-brand">
-        <div class="nav-logo">
-          <img src="../HullRed2.png" alt="Hull Red CIO Logo">
-        </div>
-        <div class="nav-title">Hull Red CIO Admin</div>
-      </div>
-
-      <nav class="nav-links">
-        <a href="../">Back to Event</a>
-      </nav>
+  <!-- Login overlay -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-box">
+      <h3>Admin Login</h3>
+      <input type="text" id="username" placeholder="Username">
+      <input type="password" id="password" placeholder="Password">
+      <button id="loginBtn">Login</button>
     </div>
-  </header>
+  </div>
 
-  <main class="container">
-    <div class="login-box" id="loginBox">
-      <div class="admin-card">
-        <h1 class="admin-title">Admin Login</h1>
-        <p class="admin-subtitle">Static version only.</p>
+  <div class="admin-panel" id="adminPanel" style="display:none;">
+    <h2>Edit Event Details</h2>
 
-        <div class="form-grid">
-          <div class="form-row">
-            <label for="username">Username</label>
-            <input type="text" id="username" autocomplete="username" />
-          </div>
-
-          <div class="form-row">
-            <label for="password">Password</label>
-            <input type="password" id="password" autocomplete="current-password" />
-          </div>
-        </div>
-
-        <div class="admin-actions">
-          <button class="btn btn-primary" id="loginBtn">Login</button>
-        </div>
-
-        <div class="notice" id="loginNotice"></div>
-      </div>
+    <div class="form-group">
+      <label for="eventTitleInput">Event Title</label>
+      <input type="text" id="eventTitleInput">
     </div>
 
-    <div class="admin-shell hidden" id="adminShell">
-      <div class="admin-card">
-        <h1 class="admin-title">Edit Event</h1>
-        <p class="admin-subtitle">Update the public event details shown on the main page.</p>
-
-        <div class="form-grid">
-          <div class="form-row">
-            <label for="title">Event Title</label>
-            <input type="text" id="title" />
-          </div>
-
-          <div class="form-row">
-            <label for="subtitle">Subtitle</label>
-            <input type="text" id="subtitle" />
-          </div>
-
-          <div class="form-row two-col">
-            <div class="form-row">
-              <label for="startDate">Start Date</label>
-              <input type="date" id="startDate" />
-            </div>
-
-            <div class="form-row">
-              <label for="startTime">Start Time</label>
-              <input type="time" id="startTime" />
-            </div>
-          </div>
-
-          <div class="form-row two-col">
-            <div class="form-row">
-              <label for="endDate">End Date</label>
-              <input type="date" id="endDate" />
-            </div>
-
-            <div class="form-row">
-              <label for="endTime">End Time</label>
-              <input type="time" id="endTime" />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <label for="location">Location</label>
-            <input type="text" id="location" />
-          </div>
-
-          <div class="form-row">
-            <label for="description">Description</label>
-            <textarea id="description"></textarea>
-          </div>
-        </div>
-
-        <div class="admin-actions">
-          <button class="btn btn-primary" id="saveBtn">Save Event</button>
-          <button class="btn" id="resetBtn">Reset to Default</button>
-          <button class="btn" id="logoutBtn">Logout</button>
-        </div>
-
-        <div class="notice" id="saveNotice"></div>
-      </div>
+    <div class="form-group">
+      <label for="eventSubtitleInput">Event Subtitle</label>
+      <input type="text" id="eventSubtitleInput">
     </div>
-  </main>
 
-  <script src="admin.js"></script>
+    <div class="form-group">
+      <label for="eventDescriptionInput">Event Description</label>
+      <textarea id="eventDescriptionInput"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="eventDateInput">Date</label>
+      <input type="text" id="eventDateInput" placeholder="e.g., Saturday, 30 May 2026">
+    </div>
+
+    <div class="form-group">
+      <label for="eventTimeInput">Time</label>
+      <input type="text" id="eventTimeInput" placeholder="e.g., 18:00 – 21:00">
+    </div>
+
+    <div class="form-group">
+      <label for="eventLocationInput">Location</label>
+      <input type="text" id="eventLocationInput" placeholder="e.g., Hull, UK">
+    </div>
+
+    <button class="btn-save" id="saveBtn">Save Event</button>
+  </div>
+
+  <script src="../admin.js"></script>
 </body>
 </html>
