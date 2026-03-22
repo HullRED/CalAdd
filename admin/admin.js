@@ -6,6 +6,13 @@ const PASS = 'password';
 
 const loginBtn = document.getElementById('loginBtn');
 
+let eventData = {}; // store event.json
+let selectedDate = null;
+const today = new Date();
+let currentMonth = today.getMonth();
+let currentYear = today.getFullYear();
+
+// --- Login logic ---
 loginBtn.addEventListener('click', () => {
   const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;
@@ -19,21 +26,33 @@ loginBtn.addEventListener('click', () => {
   }
 });
 
-// Load event.json values into form
+// --- Load event.json ---
 function loadEvent() {
   fetch('../public/event.json')
     .then(res => res.json())
     .then(event => {
+      eventData = event;
+
       document.getElementById('eventTitleInput').value = event.title;
       document.getElementById('eventSubtitleInput').value = event.subtitle;
       document.getElementById('eventDescriptionInput').value = event.description;
       document.getElementById('eventDateInput').value = event.date;
       document.getElementById('eventTimeInput').value = event.time;
       document.getElementById('eventLocationInput').value = event.location;
+
+      // Parse date to pre-select in calendar
+      const parsedDate = new Date(event.date);
+      if(!isNaN(parsedDate)){
+        currentMonth = parsedDate.getMonth();
+        currentYear = parsedDate.getFullYear();
+        renderCalendar(currentMonth, currentYear, parsedDate.getDate());
+      } else {
+        renderCalendar();
+      }
     });
 }
 
-// Save updated event
+// --- Save event ---
 document.getElementById('saveBtn').addEventListener('click', () => {
   const updatedEvent = {
     title: document.getElementById('eventTitleInput').value,
@@ -44,7 +63,7 @@ document.getElementById('saveBtn').addEventListener('click', () => {
     location: document.getElementById('eventLocationInput').value
   };
 
-  // Save to JSON (Node.js server required)
+  // Save via server (Node.js needed)
   fetch('/save-event', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
@@ -55,16 +74,13 @@ document.getElementById('saveBtn').addEventListener('click', () => {
   .catch(err => alert('Error saving event'));
 });
 
-/* --- Calendar logic --- */
+// --- Calendar logic ---
 const calendarDiv = document.getElementById('calendar');
-let selectedDate = null;
-const today = new Date();
-let currentMonth = today.getMonth();
-let currentYear = today.getFullYear();
 
-function renderCalendar(month=currentMonth, year=currentYear){
+function renderCalendar(month=currentMonth, year=currentYear, preselectDay=null){
   calendarDiv.innerHTML = '';
 
+  // Header
   const header = document.createElement('div');
   header.innerHTML = `
     <button id="prevMonth">&lt;</button>
@@ -73,6 +89,7 @@ function renderCalendar(month=currentMonth, year=currentYear){
   `;
   calendarDiv.appendChild(header);
 
+  // Table
   const table = document.createElement('table');
   const daysRow = document.createElement('tr');
   ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => {
@@ -98,12 +115,20 @@ function renderCalendar(month=currentMonth, year=currentYear){
     }
     const td = document.createElement('td');
     td.innerText = d;
+
+    // Pre-select day
+    if(preselectDay && d === preselectDay){
+      td.classList.add('selected');
+      selectedDate = td;
+    }
+
     td.addEventListener('click', () => {
       if(selectedDate) selectedDate.classList.remove('selected');
       td.classList.add('selected');
       selectedDate = td;
       document.getElementById('eventDateInput').value = `${d}-${month+1}-${year}`;
     });
+
     tr.appendChild(td);
   }
   table.appendChild(tr);
@@ -120,5 +145,3 @@ function renderCalendar(month=currentMonth, year=currentYear){
     renderCalendar(currentMonth,currentYear);
   });
 }
-
-renderCalendar();
