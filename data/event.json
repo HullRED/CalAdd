@@ -2,9 +2,8 @@
   "title": "Hull Red CIO Event",
   "subtitle": "Add this event to your calendar",
   "description": "A Night With ABBA",
-  "date": "Friday, 8th of May 2026",
-  "time": "19:30 – 23:00",
+  "date": "08-05-2026",
+  "startTime": "19:30",
+  "endTime": "23:00",
   "location": "Asylum, University of Hull,\nCottingham Road, HULL, HU6 7RX",
-  "lat": 53.7442,
-  "lng": -0.3350
 }
