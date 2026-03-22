@@ -96,6 +96,10 @@ fetch(basePath)
       return; // stop here
     }
 
+    const startDate = new Date(`${event.date}T${event.startTime}`);
+    const endDate = new Date(`${event.date}T${event.endTime}`);
+
+    // Format for calendar links
     const start = startDate.toISOString().replace(/-|:|\.\d+/g,'');
     const end = endDate.toISOString().replace(/-|:|\.\d+/g,'');
     
