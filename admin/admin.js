@@ -1,123 +1,257 @@
-// admin.js
-
-// === LOGIN LOGIC ===
+// =========================
+// ELEMENTS
+// =========================
 const loginOverlay = document.getElementById("loginOverlay");
 const loginBtn = document.getElementById("loginBtn");
 const usernameInput = document.getElementById("username");
 const passwordInput = document.getElementById("password");
 const adminPanel = document.getElementById("adminPanel");
 
-// Fetch credentials from environment via backend (for local testing)
-const ADMIN_USERNAME = process.env.ADMIN_USER || "admin";
-const ADMIN_PASSWORD = process.env.ADMIN_PASS || "password123";
+const eventTitleInput = document.getElementById("eventTitleInput");
+const eventSubtitleInput = document.getElementById("eventSubtitleInput");
+const eventDescriptionInput = document.getElementById("eventDescriptionInput");
+const eventDateInput = document.getElementById("eventDateInput");
+const eventTimeInput = document.getElementById("eventTimeInput");
+const eventLocationInput = document.getElementById("eventLocationInput");
+const saveBtn = document.getElementById("saveBtn");
 
-loginBtn.addEventListener("click", () => {
-  const username = usernameInput.value.trim();
-  const password = passwordInput.value.trim();
+// Detect if running locally
+const isLocalhost =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1";
 
-  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-    loginOverlay.style.display = "none";
-    adminPanel.style.display = "block";
-    loadEvent();
-  } else {
-    alert("Invalid credentials");
+// =========================
+// GITHUB PAGES PROTECTION
+// =========================
+if (!isLocalhost) {
+  if (loginOverlay) {
+    loginOverlay.innerHTML = `
+      <div class="restricted-card">
+        <h2>Restricted Access</h2>
+        <p>Sorry, this page is restricted to Admins of Hull Red CIO ONLY.</p>
+        <a href="../index.html" class="return-home-btn">Return to Home</a>
+      </div>
+    `;
   }
-});
 
-// === LOAD EVENT ===
-function loadEvent() {
-  fetch('/event')
-    .then(res => res.json())
-    .then(event => {
-      document.getElementById("eventTitleInput").value = event.title;
-      document.getElementById("eventSubtitleInput").value = event.subtitle;
-      document.getElementById("eventDescriptionInput").value = event.description;
-      document.getElementById("eventDateInput").value = event.date;
-      document.getElementById("eventTimeInput").value = event.time;
-      document.getElementById("eventLocationInput").value = event.location;
-    })
-    .catch(err => console.error("Could not load event.json:", err));
-}
+  if (adminPanel) {
+    adminPanel.style.display = "none";
+  }
+} else {
+  // =========================
+  // LOGIN LOGIC (LOCAL ONLY)
+  // =========================
+  if (loginBtn) {
+    loginBtn.addEventListener("click", async () => {
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value.trim();
 
-// === SAVE EVENT ===
-document.getElementById("saveBtn").addEventListener("click", async () => {
-  const updatedEvent = {
-    title: document.getElementById("eventTitleInput").value,
-    subtitle: document.getElementById("eventSubtitleInput").value,
-    description: document.getElementById("eventDescriptionInput").value,
-    date: document.getElementById("eventDateInput").value,
-    time: document.getElementById("eventTimeInput").value,
-    location: document.getElementById("eventLocationInput").value
-  };
+      try {
+        const res = await fetch("/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ username, password })
+        });
 
-  try {
-    const resp = await fetch('/event', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedEvent)
+        const data = await res.json();
+
+        if (data.success) {
+          loginOverlay.style.display = "none";
+          adminPanel.style.display = "block";
+          loadEvent();
+        } else {
+          alert("Invalid credentials");
+        }
+      } catch (err) {
+        console.error("Login error:", err);
+        alert("Could not connect to local server. Is server.js running?");
+      }
     });
-    const data = await resp.json();
-    if (data.success) {
-      alert('Event updated successfully and pushed to GitHub!');
-    } else {
-      alert('Failed to push to GitHub: ' + JSON.stringify(data.error));
+  }
+
+  // =========================
+  // LOAD EVENT
+  // =========================
+  async function loadEvent() {
+    try {
+      const res = await fetch("/api/event");
+      const event = await res.json();
+
+      eventTitleInput.value = event.title || "";
+      eventSubtitleInput.value = event.subtitle || "";
+      eventDescriptionInput.value = event.description || "";
+      eventDateInput.value = event.date || "";
+      eventTimeInput.value = event.time || "";
+      eventLocationInput.value = event.location || "";
+    } catch (err) {
+      console.error("Could not load event.json:", err);
+      alert("Could not load event data.");
     }
-  } catch (err) {
-    console.error(err);
-    alert('Error updating event.');
   }
-});
 
-// === CALENDAR PICKER ===
-const calendarContainer = document.createElement("div");
-calendarContainer.className = "calendar-container";
-document.getElementById("eventDateInput").parentNode.appendChild(calendarContainer);
+  // =========================
+  // SAVE EVENT
+  // =========================
+  if (saveBtn) {
+    saveBtn.addEventListener("click", async () => {
+      const updatedEvent = {
+        title: eventTitleInput.value.trim(),
+        subtitle: eventSubtitleInput.value.trim(),
+        description: eventDescriptionInput.value.trim(),
+        date: eventDateInput.value.trim(),
+        time: eventTimeInput.value.trim(),
+        location: eventLocationInput.value.trim()
+      };
 
-const calendarHeader = document.createElement("div");
-calendarHeader.className = "calendar-header";
+      try {
+        const res = await fetch("/api/save-event", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(updatedEvent)
+        });
 
-const monthSelect = document.createElement("select");
-const yearSelect = document.createElement("select");
+        const data = await res.json();
 
-const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-months.forEach((m,i)=> { const o=document.createElement("option"); o.value=i;o.textContent=m;monthSelect.appendChild(o); });
+        if (data.success) {
+          if (data.pushed) {
+            alert("Event saved locally and pushed to GitHub Pages successfully.");
+          } else {
+            alert(data.message || "Event saved locally only.");
+          }
+        } else {
+          alert(data.message || "Failed to save event.");
+          console.error(data.details || data);
+        }
+      } catch (err) {
+        console.error("Save error:", err);
+        alert("Could not save event. Is server.js running?");
+      }
+    });
+  }
 
-const currentYear = new Date().getFullYear();
-for(let y=currentYear-5; y<=currentYear+5; y++){ const o=document.createElement("option"); o.value=y;o.textContent=y;yearSelect.appendChild(o); }
+  // =========================
+  // CALENDAR PICKER
+  // =========================
+  if (eventDateInput && eventDateInput.parentNode) {
+    const calendarContainer = document.createElement("div");
+    calendarContainer.className = "calendar-container";
+    eventDateInput.parentNode.appendChild(calendarContainer);
 
-calendarHeader.appendChild(monthSelect);
-calendarHeader.appendChild(yearSelect);
-calendarContainer.appendChild(calendarHeader);
+    const calendarHeader = document.createElement("div");
+    calendarHeader.className = "calendar-header";
 
-const calendarGrid = document.createElement("div");
-calendarGrid.className="calendar-grid";
-calendarContainer.appendChild(calendarGrid);
+    const monthWheel = document.createElement("select");
+    monthWheel.className = "calendar-wheel month-wheel";
 
-function renderCalendar(month, year) {
-  calendarGrid.innerHTML="";
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month+1,0).getDate();
+    const yearWheel = document.createElement("select");
+    yearWheel.className = "calendar-wheel year-wheel";
 
-  for(let i=0;i<firstDay;i++){ calendarGrid.appendChild(document.createElement("div")); }
+    const months = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
 
-  for(let d=1; d<=daysInMonth; d++){
-    const day = document.createElement("div");
-    day.className="calendar-day";
-    day.textContent=d;
-
-    day.addEventListener("click",()=>{
-      document.querySelectorAll(".calendar-day").forEach(e=>e.classList.remove("selected"));
-      day.classList.add("selected");
-      document.getElementById("eventDateInput").value=`${d} ${months[month]} ${year}`;
+    months.forEach((month, i) => {
+      const opt = document.createElement("option");
+      opt.value = i;
+      opt.textContent = month;
+      monthWheel.appendChild(opt);
     });
 
-    calendarGrid.appendChild(day);
+    const currentYear = new Date().getFullYear();
+    for (let y = currentYear - 5; y <= currentYear + 8; y++) {
+      const opt = document.createElement("option");
+      opt.value = y;
+      opt.textContent = y;
+      yearWheel.appendChild(opt);
+    }
+
+    monthWheel.value = new Date().getMonth();
+    yearWheel.value = new Date().getFullYear();
+
+    calendarHeader.appendChild(monthWheel);
+    calendarHeader.appendChild(yearWheel);
+    calendarContainer.appendChild(calendarHeader);
+
+    const weekdayRow = document.createElement("div");
+    weekdayRow.className = "calendar-weekdays";
+    ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].forEach(day => {
+      const d = document.createElement("div");
+      d.textContent = day;
+      weekdayRow.appendChild(d);
+    });
+    calendarContainer.appendChild(weekdayRow);
+
+    const calendarGrid = document.createElement("div");
+    calendarGrid.className = "calendar-grid";
+    calendarContainer.appendChild(calendarGrid);
+
+    let selectedDay = null;
+
+    function renderCalendar(month, year) {
+      calendarGrid.innerHTML = "";
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement("div");
+        empty.className = "calendar-empty";
+        calendarGrid.appendChild(empty);
+      }
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const day = document.createElement("button");
+        day.type = "button";
+        day.className = "calendar-day";
+        day.textContent = d;
+
+        if (selectedDay === d) {
+          day.classList.add("selected");
+        }
+
+        day.addEventListener("click", () => {
+          selectedDay = d;
+          document.querySelectorAll(".calendar-day").forEach(el => el.classList.remove("selected"));
+          day.classList.add("selected");
+
+          // Format: Friday, 8th of May 2026
+          const fullDate = new Date(year, month, d);
+          const weekday = fullDate.toLocaleDateString("en-GB", { weekday: "long" });
+          const monthName = months[month];
+          const ordinal = getOrdinal(d);
+
+          eventDateInput.value = `${weekday}, ${d}${ordinal} of ${monthName} ${year}`;
+        });
+
+        calendarGrid.appendChild(day);
+      }
+    }
+
+    function getOrdinal(n) {
+      if (n > 3 && n < 21) return "th";
+      switch (n % 10) {
+        case 1: return "st";
+        case 2: return "nd";
+        case 3: return "rd";
+        default: return "th";
+      }
+    }
+
+    monthWheel.addEventListener("change", () => {
+      selectedDay = null;
+      renderCalendar(parseInt(monthWheel.value, 10), parseInt(yearWheel.value, 10));
+    });
+
+    yearWheel.addEventListener("change", () => {
+      selectedDay = null;
+      renderCalendar(parseInt(monthWheel.value, 10), parseInt(yearWheel.value, 10));
+    });
+
+    renderCalendar(parseInt(monthWheel.value, 10), parseInt(yearWheel.value, 10));
   }
 }
-
-// Initial render
-renderCalendar(new Date().getMonth(), new Date().getFullYear());
-
-// Update calendar on month/year change
-monthSelect.addEventListener("change", ()=> renderCalendar(+monthSelect.value, +yearSelect.value));
-yearSelect.addEventListener("change", ()=> renderCalendar(+monthSelect.value, +yearSelect.value));
