@@ -1,68 +1,181 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hull Red CIO Admin</title>
-<link rel="stylesheet" href="../public/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <title>Hull Red CIO Admin</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    .admin-panel {
+      max-width: 500px;
+      margin: 40px auto;
+      padding: 24px;
+      background: linear-gradient(180deg, #31303a 0%, #2d2c35 100%);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .admin-panel h2 {
+      margin: 0 0 16px;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--muted);
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 6px 10px;
+      font-size: 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      color: var(--text);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .btn-save {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: var(--accent);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.18s ease;
+    }
+
+    .btn-save:hover {
+      background: rgba(233,1,0,0.85);
+    }
+
+    /* login overlay */
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .login-box {
+      background: var(--panel-2);
+      padding: 24px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      max-width: 350px;
+      width: 100%;
+    }
+
+    .login-box h3 {
+      margin: 0 0 16px;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .login-box input {
+      width: 100%;
+      padding: 6px 10px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .login-box button {
+      width: 100%;
+      padding: 6px 14px;
+      border: none;
+      border-radius: 12px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .login-box button:hover {
+      background: rgba(233,1,0,0.85);
+    }
+  </style>
 </head>
 <body>
-<header class="topbar">
-  <div class="topbar-inner">
-    <div class="nav-brand">
-      <div class="nav-logo">
-        <img src="../public/HullRed2.png" alt="Hull Red CIO Logo">
-      </div>
-      <div class="nav-title">Admin Panel</div>
+  <!-- Login overlay -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-box">
+      <h3>Admin Login</h3>
+      <input type="text" id="username" placeholder="Username">
+      <input type="password" id="password" placeholder="Password">
+      <button id="loginBtn">Login</button>
     </div>
-    <nav class="nav-links">
-      <a href="../index.html">Return to Site</a>
-    </nav>
   </div>
-</header>
 
-<main class="container">
-  <div class="panel">
-    <h2>Update Event Details</h2>
-    <form id="eventForm">
-      <label>Title: <input type="text" name="title"></label><br>
-      <label>Subtitle: <input type="text" name="subtitle"></label><br>
-      <label>Description: <textarea name="description"></textarea></label><br>
-      <label>Date: <input type="text" name="date"></label><br>
-      <label>Time: <input type="text" name="time"></label><br>
-      <label>Location: <input type="text" name="location"></label><br>
-      <button type="submit">Save Event</button>
-    </form>
-    <p id="status"></p>
+  <div class="admin-panel" id="adminPanel" style="display:none;">
+    <h2>Edit Event Details</h2>
+
+    <div class="form-group">
+      <label for="eventTitleInput">Event Title</label>
+      <input type="text" id="eventTitleInput">
+    </div>
+
+    <div class="form-group">
+      <label for="eventSubtitleInput">Event Subtitle</label>
+      <input type="text" id="eventSubtitleInput">
+    </div>
+
+    <div class="form-group">
+      <label for="eventDescriptionInput">Event Description</label>
+      <textarea id="eventDescriptionInput"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="eventDateInput">Date</label>
+      <input type="text" id="eventDateInput" placeholder="e.g., Saturday, 30 May 2026">
+    </div>
+
+    <div class="form-group">
+      <label for="eventTimeInput">Time</label>
+      <input type="text" id="eventTimeInput" placeholder="e.g., 18:00 – 21:00">
+    </div>
+
+    <div class="form-group">
+      <label for="eventLocationInput">Location</label>
+      <input type="text" id="eventLocationInput" placeholder="e.g., Hull, UK">
+    </div>
+
+    <button class="btn-save" id="saveBtn">Save Event</button>
   </div>
-</main>
 
-<script>
-async function loadEvent() {
-  const res = await fetch('../data/event.json');
-  const data = await res.json();
-  const form = document.getElementById('eventForm');
-  Object.keys(data).forEach(key => {
-    if(form[key]) form[key].value = data[key];
-  });
-}
-loadEvent();
-
-document.getElementById('eventForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const form = e.target;
-  const eventData = {};
-  Object.keys(form.elements).forEach(key => {
-    if(form.elements[key].name) eventData[form.elements[key].name] = form.elements[key].value;
-  });
-  const res = await fetch('/admin/save-event', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(eventData)
-  });
-  const result = await res.json();
-  document.getElementById('status').innerText = result.message;
-});
-</script>
+  <script src="../admin.js"></script>
 </body>
 </html>
