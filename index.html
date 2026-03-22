@@ -74,30 +74,36 @@ fetch('public/event.json')
     document.getElementById('eventTime').innerText = event.time;
     document.getElementById('eventLocation').innerText = event.location;
 
-    // Convert date/time into ICS format (YYYYMMDDTHHMMSS)
-    // Simple static example; for production, parse properly
-    const start = "20260508T193000"; // Replace with dynamic parsing if needed
-    const end = "20260508T230000";
+    // Map links
+    const locationEncoded = encodeURIComponent(event.location);
+    document.getElementById('mapGoogle').href = `https://www.google.com/maps/search/?api=1&query=${locationEncoded}`;
+    document.getElementById('mapApple').href = `https://maps.apple.com/?q=${locationEncoded}`;
 
-    const title = encodeURIComponent(event.title || "Hull Red CIO Event");
+    // Parse date and time for ICS / URL formats
+    // Example: "Friday, 8th of May 2026" + "19:30 – 23:00"
+    const startDate = new Date(event.date.split(',')[1] + ' ' + event.time.split('–')[0].trim());
+    const endDate = new Date(event.date.split(',')[1] + ' ' + event.time.split('–')[1].trim());
+
+    function toICSDate(d) {
+      return d.toISOString().replace(/-|:|\.\d+/g,'');
+    }
+
+    const startICS = toICSDate(startDate).slice(0,15);
+    const endICS = toICSDate(endDate).slice(0,15);
+
+    const title = encodeURIComponent(event.title);
     const description = encodeURIComponent(event.description);
     const location = encodeURIComponent(event.location);
 
-    // Map links
-    const googleUrl = `https://www.google.com/maps/search/?api=1&query=${location}`;
-    const appleUrl = `https://maps.apple.com/?q=${location}`;
-    document.getElementById('mapGoogle').href = googleUrl;
-    document.getElementById('mapApple').href = appleUrl;
-
     // Calendar buttons
     document.getElementById('appleBtn').href = 'public/apple.ics';
-    document.getElementById('googleBtn').href = 
-      `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${description}&location=${location}&sf=true&output=xml`;
     document.getElementById('officeBtn').href = 'public/office365.ics';
     document.getElementById('outlookBtn').href = 'public/outlook.ics';
-    document.getElementById('yahooBtn').href = 
-      `https://calendar.yahoo.com/?v=60&TITLE=${title}&ST=${start}&ET=${end}&DESC=${description}&in_loc=${location}`;
     document.getElementById('icsBtn').href = 'public/event.ics';
+    document.getElementById('googleBtn').href = 
+      `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startICS}/${endICS}&details=${description}&location=${location}&sf=true&output=xml`;
+    document.getElementById('yahooBtn').href = 
+      `https://calendar.yahoo.com/?v=60&TITLE=${title}&ST=${startICS}&ET=${endICS}&DESC=${description}&in_loc=${location}`;
   })
   .catch(err => console.log('Could not load event.json:', err));
 </script>
