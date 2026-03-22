@@ -5,55 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hull Red CIO Admin</title>
 <link rel="stylesheet" href="../public/style.css">
-<style>
-/* Liquid glass / frosted glass style for admin panel */
-.panel {
-  background: rgba(33,32,38,0.7); /* semi-transparent */
-  backdrop-filter: blur(12px);     /* frosted effect */
-  border-radius: 24px;
-  border: 1px solid rgba(233,1,0,0.3); /* red highlight */
-  padding: 24px;
-  box-shadow: 0 8px 30px rgba(233,1,0,0.16);
-  transition: all 0.3s ease;
-}
-
-/* Restricted access message */
-#restricted {
-  display:none;
-  background: rgba(33,32,38,0.7);
-  border: 2px solid var(--accent);
-  color: var(--text);
-  padding: 20px;
-  border-radius: 24px;
-  text-align:center;
-  font-weight:700;
-  font-size:16px;
-  margin-top:40px;
-  box-shadow: 0 6px 20px rgba(233,1,0,0.16);
-}
-
-#restricted span {
-  color: var(--accent);
-  font-weight:800;
-}
-
-button, input, textarea {
-  font-family: "Montserrat", sans-serif;
-  font-size: 14px;
-  padding: 6px 12px;
-  margin: 4px 0;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: linear-gradient(180deg, #2a2931 0%, #27262d 100%);
-  color: var(--text);
-}
-
-button:hover {
-  background: linear-gradient(180deg, rgba(233,1,0,0.4) 0%, rgba(233,1,0,0.1) 50%, #27262d 100%);
-  border-color: var(--accent);
-  cursor: pointer;
-}
-</style>
 </head>
 <body>
 <header class="topbar">
@@ -65,54 +16,53 @@ button:hover {
       <div class="nav-title">Admin Panel</div>
     </div>
     <nav class="nav-links">
-      <a href="../public/">Return to Site</a>
+      <a href="../index.html">Return to Site</a>
     </nav>
   </div>
 </header>
 
 <main class="container">
-  <section class="hero">
-    <div class="panel">
-      <div id="restricted">
-        Sorry, this page is restricted to <span>Admins of Hull Red CIO ONLY</span>
-      </div>
-
-      <div id="loginSection">
-        <h2>Login to Edit Event</h2>
-        <form id="loginForm">
-          <label>Username: <input type="text" name="username" required></label><br><br>
-          <label>Password: <input type="password" name="password" required></label><br><br>
-          <button type="submit">Login</button>
-        </form>
-      </div>
-
-      <div id="editor" style="display:none;">
-        <h3>Edit Event</h3>
-        <label>Title: <input type="text" id="editTitle"></label><br><br>
-        <label>Subtitle: <input type="text" id="editSubtitle"></label><br><br>
-        <label>Description: <textarea id="editDescription"></textarea></label><br><br>
-        <label>Date: <input type="text" id="editDate"></label><br><br>
-        <label>Time: <input type="text" id="editTime"></label><br><br>
-        <label>Location: <input type="text" id="editLocation"></label><br><br>
-        <button id="saveBtn">Save Changes</button>
-        <br><br>
-        <a href="../public/">Return to Site</a>
-      </div>
-    </div>
-  </section>
+  <div class="panel">
+    <h2>Update Event Details</h2>
+    <form id="eventForm">
+      <label>Title: <input type="text" name="title"></label><br>
+      <label>Subtitle: <input type="text" name="subtitle"></label><br>
+      <label>Description: <textarea name="description"></textarea></label><br>
+      <label>Date: <input type="text" name="date"></label><br>
+      <label>Time: <input type="text" name="time"></label><br>
+      <label>Location: <input type="text" name="location"></label><br>
+      <button type="submit">Save Event</button>
+    </form>
+    <p id="status"></p>
+  </div>
 </main>
 
-<script src="admin.js"></script>
 <script>
-  // Show restricted message if user is not logged in
-  document.addEventListener('DOMContentLoaded',()=>{
-    const params = new URLSearchParams(window.location.search);
-    if(!params.get('loggedIn')) {
-      document.getElementById('restricted').style.display = 'block';
-      document.getElementById('loginSection').style.display = 'block';
-      document.getElementById('editor').style.display = 'none';
-    }
+async function loadEvent() {
+  const res = await fetch('../data/event.json');
+  const data = await res.json();
+  const form = document.getElementById('eventForm');
+  Object.keys(data).forEach(key => {
+    if(form[key]) form[key].value = data[key];
   });
+}
+loadEvent();
+
+document.getElementById('eventForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const form = e.target;
+  const eventData = {};
+  Object.keys(form.elements).forEach(key => {
+    if(form.elements[key].name) eventData[form.elements[key].name] = form.elements[key].value;
+  });
+  const res = await fetch('/admin/save-event', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(eventData)
+  });
+  const result = await res.json();
+  document.getElementById('status').innerText = result.message;
+});
 </script>
 </body>
 </html>
