@@ -1,29 +1,30 @@
 const STORAGE_KEY = "hullRedCioEventData";
 
 const defaultEvent = {
-  title: "Hull Red CIO Community Event",
-  startDate: "2026-04-25",
-  endDate: "2026-04-25",
-  startTime: "18:30",
-  endTime: "21:00",
+  title: "Hull Red CIO Event",
+  subtitle: "Add this event to your calendar.",
+  description: "Join us for our upcoming Hull Red CIO event.",
   location: "Hull, United Kingdom",
-  description: "Join us for our latest Hull Red CIO gathering. Add this event to your calendar so you never miss important updates, activities, or community moments."
+  startDate: "2026-05-30",
+  startTime: "18:00",
+  endDate: "2026-05-30",
+  endTime: "21:00"
 };
 
-function loadEvent() {
+function loadEventData() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return { ...defaultEvent };
+    if (!saved) return defaultEvent;
+
     const parsed = JSON.parse(saved);
     return { ...defaultEvent, ...parsed };
-  } catch (err) {
-    return { ...defaultEvent };
+  } catch (error) {
+    return defaultEvent;
   }
 }
 
-function formatDateLong(dateStr) {
-  const [year, month, day] = dateStr.split("-").map(Number);
-  const date = new Date(year, month - 1, day);
+function formatDateForDisplay(dateStr) {
+  const date = new Date(`${dateStr}T12:00:00`);
   return date.toLocaleDateString("en-GB", {
     weekday: "long",
     day: "numeric",
@@ -32,41 +33,33 @@ function formatDateLong(dateStr) {
   });
 }
 
-function formatTimeRange(startTime, endTime) {
-  return `${startTime} - ${endTime}`;
+function formatTimeForDisplay(startTime, endTime) {
+  return `${startTime} – ${endTime}`;
 }
 
-function toICSDateTime(dateStr, timeStr) {
-  return `${dateStr.replaceAll("-", "")}T${timeStr.replaceAll(":", "")}00`;
+function toCalendarDateTime(dateStr, timeStr) {
+  const dt = new Date(`${dateStr}T${timeStr}:00`);
+  const yyyy = dt.getUTCFullYear();
+  const mm = String(dt.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(dt.getUTCDate()).padStart(2, "0");
+  const hh = String(dt.getUTCHours()).padStart(2, "0");
+  const mi = String(dt.getUTCMinutes()).padStart(2, "0");
+  const ss = String(dt.getUTCSeconds()).padStart(2, "0");
+  return `${yyyy}${mm}${dd}T${hh}${mi}${ss}Z`;
 }
 
-function toGoogleDateTime(dateStr, timeStr) {
-  return `${dateStr.replaceAll("-", "")}T${timeStr.replaceAll(":", "")}00`;
-}
-
-function toYahooDuration(startDate, startTime, endDate, endTime) {
-  const start = new Date(`${startDate}T${startTime}:00`);
-  const end = new Date(`${endDate}T${endTime}:00`);
-  const diffMs = Math.max(0, end - start);
-  const totalMinutes = Math.round(diffMs / 60000);
-  const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
-  const minutes = String(totalMinutes % 60).padStart(2, "0");
-  return `${hours}${minutes}`;
-}
-
-function escapeICS(value) {
-  return String(value || "")
+function escapeICS(text) {
+  return String(text || "")
     .replace(/\\/g, "\\\\")
     .replace(/\n/g, "\\n")
     .replace(/,/g, "\\,")
     .replace(/;/g, "\\;");
 }
 
-function buildICS(data) {
-  const uid = `hull-red-cio-${Date.now()}@hullredcio.local`;
-  const dtStamp = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-  const dtStart = toICSDateTime(data.startDate, data.startTime);
-  const dtEnd = toICSDateTime(data.endDate, data.endTime);
+function buildICS(event) {
+  const dtStart = toCalendarDateTime(event.startDate, event.startTime);
+  const dtEnd = toCalendarDateTime(event.endDate, event.endTime);
+  const dtStamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
 
   return [
     "BEGIN:VCALENDAR",
@@ -74,119 +67,103 @@ function buildICS(data) {
     "PRODID:-//Hull Red CIO//Event Calendar//EN",
     "CALSCALE:GREGORIAN",
     "BEGIN:VEVENT",
-    `UID:${uid}`,
+    `UID:${Date.now()}@hullredcio.local`,
     `DTSTAMP:${dtStamp}`,
     `DTSTART:${dtStart}`,
     `DTEND:${dtEnd}`,
-    `SUMMARY:${escapeICS(data.title)}`,
-    `DESCRIPTION:${escapeICS(data.description)}`,
-    `LOCATION:${escapeICS(data.location)}`,
+    `SUMMARY:${escapeICS(event.title)}`,
+    `DESCRIPTION:${escapeICS(event.description)}`,
+    `LOCATION:${escapeICS(event.location)}`,
     "END:VEVENT",
     "END:VCALENDAR"
   ].join("\r\n");
 }
 
-function downloadICS(data) {
-  const ics = buildICS(data);
-  const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  const safeName = (data.title || "event").replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-");
-  a.href = url;
-  a.download = `${safeName || "event"}.ics`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+function buildGoogleUrl(event) {
+  const start = toCalendarDateTime(event.startDate, event.startTime);
+  const end = toCalendarDateTime(event.endDate, event.endTime);
+
+  const url = new URL("https://calendar.google.com/calendar/render");
+  url.searchParams.set("action", "TEMPLATE");
+  url.searchParams.set("text", event.title);
+  url.searchParams.set("dates", `${start}/${end}`);
+  url.searchParams.set("details", event.description);
+  url.searchParams.set("location", event.location);
+  return url.toString();
 }
 
-function buildGoogleUrl(data) {
-  const base = "https://calendar.google.com/calendar/render?action=TEMPLATE";
-  const params = new URLSearchParams({
-    text: data.title,
-    dates: `${toGoogleDateTime(data.startDate, data.startTime)}/${toGoogleDateTime(data.endDate, data.endTime)}`,
-    details: data.description,
-    location: data.location
-  });
-  return `${base}&${params.toString()}`;
+function buildOffice365Url(event) {
+  const start = new Date(`${event.startDate}T${event.startTime}:00`).toISOString();
+  const end = new Date(`${event.endDate}T${event.endTime}:00`).toISOString();
+
+  const url = new URL("https://outlook.office.com/calendar/0/deeplink/compose");
+  url.searchParams.set("path", "/calendar/action/compose");
+  url.searchParams.set("rru", "addevent");
+  url.searchParams.set("subject", event.title);
+  url.searchParams.set("startdt", start);
+  url.searchParams.set("enddt", end);
+  url.searchParams.set("body", event.description);
+  url.searchParams.set("location", event.location);
+  return url.toString();
 }
 
-function buildOffice365Url(data) {
-  const base = "https://outlook.office.com/calendar/0/deeplink/compose";
-  const start = `${data.startDate}T${data.startTime}:00`;
-  const end = `${data.endDate}T${data.endTime}:00`;
-  const params = new URLSearchParams({
-    path: "/calendar/action/compose",
-    rru: "addevent",
-    subject: data.title,
-    body: data.description,
-    location: data.location,
-    startdt: start,
-    enddt: end
-  });
-  return `${base}?${params.toString()}`;
+function buildOutlookUrl(event) {
+  const start = new Date(`${event.startDate}T${event.startTime}:00`).toISOString();
+  const end = new Date(`${event.endDate}T${event.endTime}:00`).toISOString();
+
+  const url = new URL("https://outlook.live.com/calendar/0/deeplink/compose");
+  url.searchParams.set("path", "/calendar/action/compose");
+  url.searchParams.set("rru", "addevent");
+  url.searchParams.set("subject", event.title);
+  url.searchParams.set("startdt", start);
+  url.searchParams.set("enddt", end);
+  url.searchParams.set("body", event.description);
+  url.searchParams.set("location", event.location);
+  return url.toString();
 }
 
-function buildOutlookUrl(data) {
-  const base = "https://outlook.live.com/calendar/0/deeplink/compose";
-  const start = `${data.startDate}T${data.startTime}:00`;
-  const end = `${data.endDate}T${data.endTime}:00`;
-  const params = new URLSearchParams({
-    path: "/calendar/action/compose",
-    rru: "addevent",
-    subject: data.title,
-    body: data.description,
-    location: data.location,
-    startdt: start,
-    enddt: end
-  });
-  return `${base}?${params.toString()}`;
+function buildYahooUrl(event) {
+  const start = toCalendarDateTime(event.startDate, event.startTime);
+  const end = toCalendarDateTime(event.endDate, event.endTime);
+
+  const startDate = start.slice(0, 8);
+  const startTime = start.slice(9, 15);
+  const endDate = end.slice(0, 8);
+  const endTime = end.slice(9, 15);
+
+  const url = new URL("https://calendar.yahoo.com/");
+  url.searchParams.set("v", "60");
+  url.searchParams.set("view", "d");
+  url.searchParams.set("type", "20");
+  url.searchParams.set("title", event.title);
+  url.searchParams.set("st", `${startDate}T${startTime}Z`);
+  url.searchParams.set("et", `${endDate}T${endTime}Z`);
+  url.searchParams.set("desc", event.description);
+  url.searchParams.set("in_loc", event.location);
+  return url.toString();
 }
 
-function buildYahooUrl(data) {
-  const base = "https://calendar.yahoo.com/";
-  const params = new URLSearchParams({
-    v: "60",
-    view: "d",
-    type: "20",
-    title: data.title,
-    st: toICSDateTime(data.startDate, data.startTime),
-    dur: toYahooDuration(data.startDate, data.startTime, data.endDate, data.endTime),
-    desc: data.description,
-    in_loc: data.location
-  });
-  return `${base}?${params.toString()}`;
+function applyEventToPage(event) {
+  document.getElementById("eventTitle").textContent = event.title;
+  document.getElementById("eventSubtitle").textContent = event.subtitle;
+  document.getElementById("eventDate").textContent = formatDateForDisplay(event.startDate);
+  document.getElementById("eventTime").textContent = formatTimeForDisplay(event.startTime, event.endTime);
+  document.getElementById("eventLocation").textContent = event.location;
+  document.getElementById("eventDescription").textContent = event.description;
+
+  const icsContent = buildICS(event);
+  const icsBlob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+  const icsUrl = URL.createObjectURL(icsBlob);
+
+  document.getElementById("btnGoogle").href = buildGoogleUrl(event);
+  document.getElementById("btnOffice365").href = buildOffice365Url(event);
+  document.getElementById("btnOutlook").href = buildOutlookUrl(event);
+  document.getElementById("btnYahoo").href = buildYahooUrl(event);
+  document.getElementById("btnApple").href = icsUrl;
+  document.getElementById("btnICS").href = icsUrl;
 }
 
-function initPublicPage() {
-  const data = loadEvent();
-
-  const displayTitle = document.getElementById("displayTitle");
-  const displayDate = document.getElementById("displayDate");
-  const displayTime = document.getElementById("displayTime");
-  const displayLocation = document.getElementById("displayLocation");
-  const displayDescription = document.getElementById("displayDescription");
-
-  const googleBtn = document.getElementById("googleBtn");
-  const office365Btn = document.getElementById("office365Btn");
-  const outlookBtn = document.getElementById("outlookBtn");
-  const yahooBtn = document.getElementById("yahooBtn");
-  const appleBtn = document.getElementById("appleBtn");
-  const icsBtn = document.getElementById("icsBtn");
-
-  displayTitle.textContent = data.title;
-  displayDate.textContent = formatDateLong(data.startDate);
-  displayTime.textContent = formatTimeRange(data.startTime, data.endTime);
-  displayLocation.textContent = data.location;
-  displayDescription.textContent = data.description || "";
-
-  googleBtn.href = buildGoogleUrl(data);
-  office365Btn.href = buildOffice365Url(data);
-  outlookBtn.href = buildOutlookUrl(data);
-  yahooBtn.href = buildYahooUrl(data);
-
-  appleBtn.addEventListener("click", () => downloadICS(data));
-  icsBtn.addEventListener("click", () => downloadICS(data));
-}
-
-document.addEventListener("DOMContentLoaded", initPublicPage);
+document.addEventListener("DOMContentLoaded", () => {
+  const event = loadEventData();
+  applyEventToPage(event);
+});
