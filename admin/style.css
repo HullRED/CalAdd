@@ -145,19 +145,24 @@ body {
   max-width: 220px;
 }
 
-.return-home-btn {
-  color: #ffffff; /* White text */
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 16px;
+/* Return Home button — only for admin page */
+.admin-panel .return-home {
   display: inline-block;
-  padding: 8px 16px;
+  margin-top: 12px;
+  padding: 10px 16px;
+  background-color: #f00;   /* Red background */
+  border: 2px solid #fff;   /* White border */
+  border-radius: 8px;
+  color: #fff;               /* White text */
+  font-weight: 700;
+  text-decoration: none;
+  text-align: center;
   transition: 0.2s ease;
 }
 
-.return-home-btn:hover {
-  background-color: rgba(255,255,255,0.1); /* Subtle hover effect */
-  border-color: #ffffff;
+.admin-panel .return-home:hover {
+  background-color: #c00;   /* Darker red on hover */
+  border-color: #fff;
 }
 
 /* Calendar styles */
