@@ -1,66 +1,54 @@
-fetch('data/event.json')
+fetch('/data/event.json')
   .then(res => res.json())
   .then(event => {
+    // Event details
     document.getElementById('eventTitle').innerText = event.title;
     document.getElementById('eventSubtitle').innerText = event.subtitle;
     document.getElementById('eventDescription').innerText = event.description;
-
-    document.getElementById('eventLocation').innerHTML = event.location.replace(/\n/g, '<br>');
     document.getElementById('eventDate').innerText = event.date;
     document.getElementById('eventTime').innerText = event.time;
+    document.getElementById('eventLocation').innerText = event.location;
 
-    const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location.replace(/\n/g, ' '))}`;
-    document.getElementById('mapLink').href = mapUrl;
+    // Map links
+    const loc = encodeURIComponent(event.location);
+    document.getElementById('googleMapLink').href = `https://www.google.com/maps/search/?api=1&query=${loc}`;
+    document.getElementById('appleMapLink').href = `https://maps.apple.com/?q=${loc}`;
+
+    // Calendar links
+    const startTime = new Date(`${event.date} ${event.time.split('–')[0]}`).toISOString().replace(/-|:|\.\d+/g,'');
+    const endTime = new Date(`${event.date} ${event.time.split('–')[1]}`).toISOString().replace(/-|:|\.\d+/g,'');
 
     const title = encodeURIComponent(event.title);
     const description = encodeURIComponent(`${event.subtitle}\n${event.description}`);
-    const location = encodeURIComponent(event.location.replace(/\n/g, ' '));
-    
-    const timeParts = event.time.split('–').map(t => t.trim());
-    const startDate = new Date(`${event.date} ${timeParts[0]}`).toISOString().replace(/-|:|\.\d+/g,'');
-    const endDate = new Date(`${event.date} ${timeParts[1]}`).toISOString().replace(/-|:|\.\d+/g,'');
+    const location = encodeURIComponent(event.location);
 
     // Apple ICS
-    const appleIcs = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR
+    document.getElementById('appleLink').href = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
 SUMMARY:${title}
 DESCRIPTION:${description}
 LOCATION:${location}
-DTSTART:${startDate}
-DTEND:${endDate}
+DTSTART:${startTime}
+DTEND:${endTime}
 END:VEVENT
 END:VCALENDAR`;
-    document.getElementById('appleLink').href = appleIcs;
 
-    // Google Calendar
-    const gcal = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startDate}/${endDate}&details=${description}&location=${location}`;
-    document.getElementById('googleLink').href = gcal;
+    // Google
+    document.getElementById('googleLink').href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startTime}/${endTime}&details=${description}&location=${location}`;
 
     // Outlook.com
-    const outlook = `https://outlook.live.com/owa/?rru=addevent&startdt=${startDate}&enddt=${endDate}&subject=${title}&location=${location}&body=${description}`;
-    document.getElementById('outlookLink').href = outlook;
+    document.getElementById('outlookLink').href = `https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${startTime}&enddt=${endTime}&location=${location}&body=${description}`;
 
     // Office 365
-    const office365 = `https://outlook.office.com/owa/?rru=addevent&startdt=${startDate}&enddt=${endDate}&subject=${title}&location=${location}&body=${description}`;
-    document.getElementById('officeLink').href = office365;
+    document.getElementById('officeLink').href = `https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${startTime}&enddt=${endTime}&location=${location}&body=${description}`;
 
     // Yahoo
-    const yahoo = `https://calendar.yahoo.com/?v=60&title=${title}&st=${startDate}&et=${endDate}&desc=${description}&in_loc=${location}`;
-    document.getElementById('yahooLink').href = yahoo;
+    document.getElementById('yahooLink').href = `https://calendar.yahoo.com/?v=60&title=${title}&st=${startTime}&et=${endTime}&desc=${description}&in_loc=${location}`;
 
     // ICS download
-    const icsFile = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR
-VERSION:2.0
-BEGIN:VEVENT
-SUMMARY:${title}
-DESCRIPTION:${description}
-LOCATION:${location}
-DTSTART:${startDate}
-DTEND:${endDate}
-END:VEVENT
-END:VCALENDAR`;
-    document.getElementById('icsLink').href = icsFile;
-    document.getElementById('icsLink').setAttribute('download', `${event.title}.ics`);
+    const icsLink = document.getElementById('icsLink');
+    icsLink.href = document.getElementById('appleLink').href;
+    icsLink.setAttribute('download', `${event.title}.ics`);
   })
-  .catch(err => console.log('Could not load event.json:', err));
+  .catch(err => console.error('Could not load event.json:', err));
