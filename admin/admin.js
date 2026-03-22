@@ -1,165 +1,112 @@
 const STORAGE_KEY = "hullRedCioEventData";
-const AUTH_KEY = "hullRedCioAdminAuth";
+const LOGIN_KEY = "hullRedCioAdminLoggedIn";
+
 const ADMIN_USERNAME = "admin";
 const ADMIN_PASSWORD = "HullRed2026!";
 
 const defaultEvent = {
-  title: "Hull Red CIO Community Event",
-  startDate: "2026-04-25",
-  endDate: "2026-04-25",
-  startTime: "18:30",
-  endTime: "21:00",
+  title: "Hull Red CIO Event",
+  subtitle: "Add this event to your calendar.",
+  description: "Join us for our upcoming Hull Red CIO event.",
   location: "Hull, United Kingdom",
-  description: "Join us for our latest Hull Red CIO gathering. Add this event to your calendar so you never miss important updates, activities, or community moments."
+  startDate: "2026-05-30",
+  startTime: "18:00",
+  endDate: "2026-05-30",
+  endTime: "21:00"
 };
 
-function loadEvent() {
+function loadEventData() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return { ...defaultEvent };
+    if (!saved) return defaultEvent;
+
     const parsed = JSON.parse(saved);
     return { ...defaultEvent, ...parsed };
-  } catch (err) {
-    return { ...defaultEvent };
+  } catch (error) {
+    return defaultEvent;
   }
 }
 
-function saveEvent(data) {
+function saveEventData(data) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
-function setAuthState(isAuthed) {
-  localStorage.setItem(AUTH_KEY, isAuthed ? "1" : "0");
+function populateForm(data) {
+  document.getElementById("title").value = data.title;
+  document.getElementById("subtitle").value = data.subtitle;
+  document.getElementById("startDate").value = data.startDate;
+  document.getElementById("startTime").value = data.startTime;
+  document.getElementById("endDate").value = data.endDate;
+  document.getElementById("endTime").value = data.endTime;
+  document.getElementById("location").value = data.location;
+  document.getElementById("description").value = data.description;
 }
 
-function isAuthed() {
-  return localStorage.getItem(AUTH_KEY) === "1";
-}
-
-function populateAdminForm(data) {
-  document.getElementById("eventTitle").value = data.title || "";
-  document.getElementById("eventStartDate").value = data.startDate || "";
-  document.getElementById("eventEndDate").value = data.endDate || "";
-  document.getElementById("eventStartTime").value = data.startTime || "";
-  document.getElementById("eventEndTime").value = data.endTime || "";
-  document.getElementById("eventLocation").value = data.location || "";
-  document.getElementById("eventDescription").value = data.description || "";
-}
-
-function getFormData() {
+function collectFormData() {
   return {
-    title: document.getElementById("eventTitle").value.trim(),
-    startDate: document.getElementById("eventStartDate").value,
-    endDate: document.getElementById("eventEndDate").value,
-    startTime: document.getElementById("eventStartTime").value,
-    endTime: document.getElementById("eventEndTime").value,
-    location: document.getElementById("eventLocation").value.trim(),
-    description: document.getElementById("eventDescription").value.trim()
+    title: document.getElementById("title").value.trim() || defaultEvent.title,
+    subtitle: document.getElementById("subtitle").value.trim() || defaultEvent.subtitle,
+    startDate: document.getElementById("startDate").value || defaultEvent.startDate,
+    startTime: document.getElementById("startTime").value || defaultEvent.startTime,
+    endDate: document.getElementById("endDate").value || defaultEvent.endDate,
+    endTime: document.getElementById("endTime").value || defaultEvent.endTime,
+    location: document.getElementById("location").value.trim() || defaultEvent.location,
+    description: document.getElementById("description").value.trim() || defaultEvent.description
   };
 }
 
-function validateEvent(data) {
-  if (!data.title || !data.startDate || !data.endDate || !data.startTime || !data.endTime || !data.location) {
-    return "Please complete all required fields.";
-  }
-
-  const start = new Date(`${data.startDate}T${data.startTime}:00`);
-  const end = new Date(`${data.endDate}T${data.endTime}:00`);
-
-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-    return "Please enter valid date and time values.";
-  }
-
-  if (end <= start) {
-    return "End date/time must be after the start date/time.";
-  }
-
-  return "";
+function showAdmin() {
+  document.getElementById("loginBox").classList.add("hidden");
+  document.getElementById("adminShell").classList.remove("hidden");
+  populateForm(loadEventData());
 }
 
-function setStatus(el, message, type = "") {
-  el.textContent = message;
-  el.className = "status";
-  if (type) el.classList.add(type);
+function showLogin() {
+  document.getElementById("adminShell").classList.add("hidden");
+  document.getElementById("loginBox").classList.remove("hidden");
 }
 
-function showAdminUI() {
-  document.getElementById("loginCard").classList.add("hidden");
-  document.getElementById("adminPanel").classList.remove("hidden");
-  populateAdminForm(loadEvent());
-  setStatus(document.getElementById("adminStatus"), "");
+function setNotice(id, message) {
+  document.getElementById(id).textContent = message;
 }
 
-function showLoginUI() {
-  document.getElementById("loginCard").classList.remove("hidden");
-  document.getElementById("adminPanel").classList.add("hidden");
-}
+document.addEventListener("DOMContentLoaded", () => {
+  const isLoggedIn = localStorage.getItem(LOGIN_KEY) === "true";
 
-function login() {
-  const username = document.getElementById("adminUsername").value.trim();
-  const password = document.getElementById("adminPassword").value;
-
-  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-    setAuthState(true);
-    showAdminUI();
-    setStatus(document.getElementById("loginStatus"), "");
-    setStatus(document.getElementById("adminStatus"), "Admin access granted.", "success");
+  if (isLoggedIn) {
+    showAdmin();
   } else {
-    setStatus(document.getElementById("loginStatus"), "Invalid username or password.", "error");
-  }
-}
-
-function logout() {
-  setAuthState(false);
-  showLoginUI();
-  setStatus(document.getElementById("loginStatus"), "Logged out.", "success");
-}
-
-function initAdminPage() {
-  const loginBtn = document.getElementById("loginBtn");
-  const logoutBtn = document.getElementById("logoutBtn");
-  const saveBtn = document.getElementById("saveBtn");
-  const resetBtn = document.getElementById("resetBtn");
-  const adminPassword = document.getElementById("adminPassword");
-  const adminUsername = document.getElementById("adminUsername");
-  const adminStatus = document.getElementById("adminStatus");
-
-  if (isAuthed()) {
-    showAdminUI();
-  } else {
-    showLoginUI();
+    showLogin();
   }
 
-  loginBtn.addEventListener("click", login);
+  document.getElementById("loginBtn").addEventListener("click", () => {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
 
-  adminPassword.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") login();
-  });
-
-  adminUsername.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") login();
-  });
-
-  saveBtn.addEventListener("click", () => {
-    const updated = getFormData();
-    const validationError = validateEvent(updated);
-
-    if (validationError) {
-      setStatus(adminStatus, validationError, "error");
-      return;
+    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+      localStorage.setItem(LOGIN_KEY, "true");
+      setNotice("loginNotice", "");
+      showAdmin();
+    } else {
+      setNotice("loginNotice", "Invalid username or password.");
     }
-
-    saveEvent(updated);
-    setStatus(adminStatus, "Event saved successfully. The public page will reflect this in the same browser.", "success");
   });
 
-  resetBtn.addEventListener("click", () => {
-    saveEvent(defaultEvent);
-    populateAdminForm(defaultEvent);
-    setStatus(adminStatus, "Event reset to default values.", "success");
+  document.getElementById("saveBtn").addEventListener("click", () => {
+    const data = collectFormData();
+    saveEventData(data);
+    setNotice("saveNotice", "Event saved successfully. Refresh the main page if it's already open.");
   });
 
-  logoutBtn.addEventListener("click", logout);
-}
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    saveEventData(defaultEvent);
+    populateForm(defaultEvent);
+    setNotice("saveNotice", "Event reset to default values.");
+  });
 
-document.addEventListener("DOMContentLoaded", initAdminPage);
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    localStorage.removeItem(LOGIN_KEY);
+    setNotice("saveNotice", "");
+    showLogin();
+  });
+});
