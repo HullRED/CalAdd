@@ -1,128 +1,165 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <title>Hull Red CIO | Admin</title>
-  <link rel="stylesheet" href="../style.css" />
-</head>
-<body data-page="admin">
-  <header class="topbar">
-    <div class="topbar-inner">
-      <div class="nav-brand">
-        <div class="nav-logo">
-          <img src="../HullRed.png" alt="Hull Red CIO Logo">
-        </div>
-        <div class="nav-title">Hull Red CIO Admin</div>
-      </div>
+const STORAGE_KEY = "hullRedCioEventData";
+const AUTH_KEY = "hullRedCioAdminAuth";
+const ADMIN_USERNAME = "admin";
+const ADMIN_PASSWORD = "HullRed2026!";
 
-      <nav class="nav-links">
-        <a href="../">Back to Event</a>
-      </nav>
-    </div>
-  </header>
+const defaultEvent = {
+  title: "Hull Red CIO Community Event",
+  startDate: "2026-04-25",
+  endDate: "2026-04-25",
+  startTime: "18:30",
+  endTime: "21:00",
+  location: "Hull, United Kingdom",
+  description: "Join us for our latest Hull Red CIO gathering. Add this event to your calendar so you never miss important updates, activities, or community moments."
+};
 
-  <main class="container">
-    <section class="hero">
-      <div class="brand">
-        <div class="logo">
-          <img src="../HullRed.png" alt="Hull Red CIO Logo">
-        </div>
+function loadEvent() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return { ...defaultEvent };
+    const parsed = JSON.parse(saved);
+    return { ...defaultEvent, ...parsed };
+  } catch (err) {
+    return { ...defaultEvent };
+  }
+}
 
-        <div class="brand-text">
-          <h1>Admin Event Editor</h1>
-          <p class="subtitle">Sign in to update the public event shown on the main page.</p>
-        </div>
-      </div>
+function saveEvent(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
 
-      <div class="admin-wrap">
-        <div class="login-card" id="loginCard">
-          <h2 class="login-title">Admin Login</h2>
-          <p class="login-copy">Enter your credentials to edit the current event.</p>
+function setAuthState(isAuthed) {
+  localStorage.setItem(AUTH_KEY, isAuthed ? "1" : "0");
+}
 
-          <div class="field">
-            <label for="adminUsername">Username</label>
-            <input type="text" id="adminUsername" autocomplete="username" placeholder="Enter username">
-          </div>
+function isAuthed() {
+  return localStorage.getItem(AUTH_KEY) === "1";
+}
 
-          <div class="field">
-            <label for="adminPassword">Password</label>
-            <input type="password" id="adminPassword" autocomplete="current-password" placeholder="Enter password">
-          </div>
+function populateAdminForm(data) {
+  document.getElementById("eventTitle").value = data.title || "";
+  document.getElementById("eventStartDate").value = data.startDate || "";
+  document.getElementById("eventEndDate").value = data.endDate || "";
+  document.getElementById("eventStartTime").value = data.startTime || "";
+  document.getElementById("eventEndTime").value = data.endTime || "";
+  document.getElementById("eventLocation").value = data.location || "";
+  document.getElementById("eventDescription").value = data.description || "";
+}
 
-          <div class="login-actions">
-            <button class="btn-primary" id="loginBtn" type="button">Login</button>
-            <a class="btn-secondary" href="../">Cancel</a>
-          </div>
+function getFormData() {
+  return {
+    title: document.getElementById("eventTitle").value.trim(),
+    startDate: document.getElementById("eventStartDate").value,
+    endDate: document.getElementById("eventEndDate").value,
+    startTime: document.getElementById("eventStartTime").value,
+    endTime: document.getElementById("eventEndTime").value,
+    location: document.getElementById("eventLocation").value.trim(),
+    description: document.getElementById("eventDescription").value.trim()
+  };
+}
 
-          <div class="status" id="loginStatus"></div>
-          <div class="small-note">Default login: <strong>admin</strong> / <strong>HullRed2026!</strong></div>
-        </div>
+function validateEvent(data) {
+  if (!data.title || !data.startDate || !data.endDate || !data.startTime || !data.endTime || !data.location) {
+    return "Please complete all required fields.";
+  }
 
-        <section class="admin-panel hidden" id="adminPanel">
-          <div class="admin-head">
-            <div>
-              <h3 class="admin-title">Edit Live Event</h3>
-              <p class="admin-note">Changes are saved locally in this browser and reflected on the public page.</p>
-            </div>
-            <button class="btn-danger" id="logoutBtn" type="button">Logout</button>
-          </div>
+  const start = new Date(`${data.startDate}T${data.startTime}:00`);
+  const end = new Date(`${data.endDate}T${data.endTime}:00`);
 
-          <div class="form-grid">
-            <div class="field full">
-              <label for="eventTitle">Event title</label>
-              <input type="text" id="eventTitle" placeholder="Event title">
-            </div>
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return "Please enter valid date and time values.";
+  }
 
-            <div class="field">
-              <label for="eventStartDate">Start date</label>
-              <input type="date" id="eventStartDate">
-            </div>
+  if (end <= start) {
+    return "End date/time must be after the start date/time.";
+  }
 
-            <div class="field">
-              <label for="eventEndDate">End date</label>
-              <input type="date" id="eventEndDate">
-            </div>
+  return "";
+}
 
-            <div class="field">
-              <label for="eventStartTime">Start time</label>
-              <input type="time" id="eventStartTime">
-            </div>
+function setStatus(el, message, type = "") {
+  el.textContent = message;
+  el.className = "status";
+  if (type) el.classList.add(type);
+}
 
-            <div class="field">
-              <label for="eventEndTime">End time</label>
-              <input type="time" id="eventEndTime">
-            </div>
+function showAdminUI() {
+  document.getElementById("loginCard").classList.add("hidden");
+  document.getElementById("adminPanel").classList.remove("hidden");
+  populateAdminForm(loadEvent());
+  setStatus(document.getElementById("adminStatus"), "");
+}
 
-            <div class="field full">
-              <label for="eventLocation">Location</label>
-              <input type="text" id="eventLocation" placeholder="Event location">
-            </div>
+function showLoginUI() {
+  document.getElementById("loginCard").classList.remove("hidden");
+  document.getElementById("adminPanel").classList.add("hidden");
+}
 
-            <div class="field full">
-              <label for="eventDescription">Description</label>
-              <textarea id="eventDescription" placeholder="Event description"></textarea>
-            </div>
-          </div>
+function login() {
+  const username = document.getElementById("adminUsername").value.trim();
+  const password = document.getElementById("adminPassword").value;
 
-          <div class="admin-actions">
-            <button class="btn-primary" id="saveBtn" type="button">Save Event</button>
-            <button class="btn-secondary" id="resetBtn" type="button">Reset to Default</button>
-          </div>
+  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    setAuthState(true);
+    showAdminUI();
+    setStatus(document.getElementById("loginStatus"), "");
+    setStatus(document.getElementById("adminStatus"), "Admin access granted.", "success");
+  } else {
+    setStatus(document.getElementById("loginStatus"), "Invalid username or password.", "error");
+  }
+}
 
-          <div class="status" id="adminStatus"></div>
-        </section>
-      </div>
-    </section>
+function logout() {
+  setAuthState(false);
+  showLoginUI();
+  setStatus(document.getElementById("loginStatus"), "Logged out.", "success");
+}
 
-    <div class="footer">
-      © 2026 Hull Red CIO • Admin Panel • Static Version
-    </div>
-  </main>
+function initAdminPage() {
+  const loginBtn = document.getElementById("loginBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const saveBtn = document.getElementById("saveBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const adminPassword = document.getElementById("adminPassword");
+  const adminUsername = document.getElementById("adminUsername");
+  const adminStatus = document.getElementById("adminStatus");
 
-  <script src="admin.js"></script>
-</body>
-</html>
+  if (isAuthed()) {
+    showAdminUI();
+  } else {
+    showLoginUI();
+  }
+
+  loginBtn.addEventListener("click", login);
+
+  adminPassword.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") login();
+  });
+
+  adminUsername.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") login();
+  });
+
+  saveBtn.addEventListener("click", () => {
+    const updated = getFormData();
+    const validationError = validateEvent(updated);
+
+    if (validationError) {
+      setStatus(adminStatus, validationError, "error");
+      return;
+    }
+
+    saveEvent(updated);
+    setStatus(adminStatus, "Event saved successfully. The public page will reflect this in the same browser.", "success");
+  });
+
+  resetBtn.addEventListener("click", () => {
+    saveEvent(defaultEvent);
+    populateAdminForm(defaultEvent);
+    setStatus(adminStatus, "Event reset to default values.", "success");
+  });
+
+  logoutBtn.addEventListener("click", logout);
+}
+
+document.addEventListener("DOMContentLoaded", initAdminPage);
