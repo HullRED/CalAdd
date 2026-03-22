@@ -1,43 +1,27 @@
-const runningOnServer = true; // Change to false for GitHub Pages detection if fetch/write fails
-
 const loginOverlay = document.getElementById('loginOverlay');
 const adminPanel = document.getElementById('adminPanel');
-const restrictedMessage = document.getElementById('restrictedMessage');
 
-const USERNAME = 'admin';
-const PASSWORD = 'password123'; // replace with your secure credentials
+const USER = 'admin';
+const PASS = 'password';
 
-function initAdmin() {
-  // Check if running on server
-  fetch('../data/event.json')
-    .then(() => {
-      loginOverlay.style.display = 'flex';
-    })
-    .catch(() => {
-      loginOverlay.style.display = 'none';
-      restrictedMessage.style.display = 'block';
-    });
-}
+const loginBtn = document.getElementById('loginBtn');
 
-initAdmin();
+loginBtn.addEventListener('click', () => {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
 
-// Handle login
-document.getElementById('loginBtn').addEventListener('click', () => {
-  const user = document.getElementById('username').value;
-  const pass = document.getElementById('password').value;
-
-  if (user === USERNAME && pass === PASSWORD) {
+  if(username === USER && password === PASS) {
     loginOverlay.style.display = 'none';
     adminPanel.style.display = 'block';
-    loadEventData();
+    loadEvent();
   } else {
-    alert('Incorrect credentials!');
+    alert('Incorrect credentials');
   }
 });
 
-// Load current event.json
-function loadEventData() {
-  fetch('../data/event.json')
+// Load event.json values into form
+function loadEvent() {
+  fetch('../public/event.json')
     .then(res => res.json())
     .then(event => {
       document.getElementById('eventTitleInput').value = event.title;
@@ -46,11 +30,10 @@ function loadEventData() {
       document.getElementById('eventDateInput').value = event.date;
       document.getElementById('eventTimeInput').value = event.time;
       document.getElementById('eventLocationInput').value = event.location;
-    })
-    .catch(err => console.log('Error loading event.json:', err));
+    });
 }
 
-// Save updated event.json
+// Save updated event
 document.getElementById('saveBtn').addEventListener('click', () => {
   const updatedEvent = {
     title: document.getElementById('eventTitleInput').value,
@@ -61,11 +44,81 @@ document.getElementById('saveBtn').addEventListener('click', () => {
     location: document.getElementById('eventLocationInput').value
   };
 
-  fetch('../data/event.json', {
+  // Save to JSON (Node.js server required)
+  fetch('/save-event', {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(updatedEvent, null, 2)
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(updatedEvent)
   })
-  .then(() => alert('Event updated successfully!'))
-  .catch(err => alert('Error saving event.json: ' + err));
+  .then(res => res.json())
+  .then(resp => alert('Event saved!'))
+  .catch(err => alert('Error saving event'));
 });
+
+/* --- Calendar logic --- */
+const calendarDiv = document.getElementById('calendar');
+let selectedDate = null;
+const today = new Date();
+let currentMonth = today.getMonth();
+let currentYear = today.getFullYear();
+
+function renderCalendar(month=currentMonth, year=currentYear){
+  calendarDiv.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.innerHTML = `
+    <button id="prevMonth">&lt;</button>
+    <span>${year}-${month+1}</span>
+    <button id="nextMonth">&gt;</button>
+  `;
+  calendarDiv.appendChild(header);
+
+  const table = document.createElement('table');
+  const daysRow = document.createElement('tr');
+  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => {
+    const th = document.createElement('th');
+    th.innerText = d;
+    daysRow.appendChild(th);
+  });
+  table.appendChild(daysRow);
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const lastDate = new Date(year, month+1, 0).getDate();
+
+  let tr = document.createElement('tr');
+  for(let i=0;i<firstDay;i++){
+    const td = document.createElement('td');
+    tr.appendChild(td);
+  }
+
+  for(let d=1; d<=lastDate; d++){
+    if(tr.children.length===7){
+      table.appendChild(tr);
+      tr = document.createElement('tr');
+    }
+    const td = document.createElement('td');
+    td.innerText = d;
+    td.addEventListener('click', () => {
+      if(selectedDate) selectedDate.classList.remove('selected');
+      td.classList.add('selected');
+      selectedDate = td;
+      document.getElementById('eventDateInput').value = `${d}-${month+1}-${year}`;
+    });
+    tr.appendChild(td);
+  }
+  table.appendChild(tr);
+  calendarDiv.appendChild(table);
+
+  document.getElementById('prevMonth').addEventListener('click', () => {
+    currentMonth--;
+    if(currentMonth<0){currentMonth=11;currentYear--;}
+    renderCalendar(currentMonth,currentYear);
+  });
+  document.getElementById('nextMonth').addEventListener('click', () => {
+    currentMonth++;
+    if(currentMonth>11){currentMonth=0;currentYear++;}
+    renderCalendar(currentMonth,currentYear);
+  });
+}
+
+renderCalendar();
