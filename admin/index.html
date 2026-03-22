@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <title>Hull Red CIO Admin</title>
-  <link rel="stylesheet" href="../style.css" />
+  <link rel="stylesheet" href="../public/style.css" />
   <style>
     .admin-panel {
       max-width: 500px;
@@ -137,12 +137,13 @@
       <input type="text" id="username" placeholder="Username">
       <input type="password" id="password" placeholder="Password">
       <button id="loginBtn">Login</button>
+      <p id="loginError" style="color: #e90100; font-weight: 700; margin-top:8px; display:none;">Sorry, this page is restricted to Admins of Hull Red CIO ONLY</p>
     </div>
   </div>
-<div class="admin-panel" id="adminPanel" style="display:none;">
-  <a href="../" class="btn-save" style="background: var(--panel); color: var(--text); margin-bottom:12px; text-align:center; display:block;">← Return to Site</a>
-  
+
   <div class="admin-panel" id="adminPanel" style="display:none;">
+    <a href="../index.html" class="btn-save" style="background: var(--panel); color: var(--text); margin-bottom:12px; text-align:center; display:block;">← Return to Site</a>
+
     <h2>Edit Event Details</h2>
 
     <div class="form-group">
@@ -176,8 +177,66 @@
     </div>
 
     <button class="btn-save" id="saveBtn">Save Event</button>
+    <p id="saveStatus" style="margin-top:10px;"></p>
   </div>
 
-  <script src="../admin.js"></script>
+<script>
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = 'password';
+
+const loginOverlay = document.getElementById('loginOverlay');
+const adminPanel = document.getElementById('adminPanel');
+const loginBtn = document.getElementById('loginBtn');
+const loginError = document.getElementById('loginError');
+
+loginBtn.addEventListener('click', () => {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+  if(username === ADMIN_USER && password === ADMIN_PASS){
+    loginOverlay.style.display = 'none';
+    adminPanel.style.display = 'block';
+    loadEvent();
+  } else {
+    loginError.style.display = 'block';
+  }
+});
+
+// Load event.json into form
+function loadEvent(){
+  fetch('../data/event.json')
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('eventTitleInput').value = data.title;
+      document.getElementById('eventSubtitleInput').value = data.subtitle;
+      document.getElementById('eventDescriptionInput').value = data.description;
+      document.getElementById('eventDateInput').value = data.date;
+      document.getElementById('eventTimeInput').value = data.time;
+      document.getElementById('eventLocationInput').value = data.location;
+    });
+}
+
+// Save event locally (only works with Node.js server)
+document.getElementById('saveBtn').addEventListener('click', () => {
+  const eventData = {
+    title: document.getElementById('eventTitleInput').value,
+    subtitle: document.getElementById('eventSubtitleInput').value,
+    description: document.getElementById('eventDescriptionInput').value,
+    date: document.getElementById('eventDateInput').value,
+    time: document.getElementById('eventTimeInput').value,
+    location: document.getElementById('eventLocationInput').value
+  };
+
+  fetch('/admin/save-event', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(eventData)
+  }).then(res => res.json())
+    .then(resp => {
+      document.getElementById('saveStatus').innerText = resp.message;
+    }).catch(err => {
+      document.getElementById('saveStatus').innerText = 'Failed to save event locally.';
+    });
+});
+</script>
 </body>
 </html>
