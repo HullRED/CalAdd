@@ -1,1 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <title>Hull Red CIO | Add to Calendar</title>
+
+  <style>
+    :root {
+      --bg: #212026;
+      --panel: #2a2931;
+      --panel-2: #31303a;
+      --border: #3c3a45;
+      --text: #ffffff;
+      --muted: #cfcfcf;
+      --accent: #e90100;
+      --accent-soft: rgba(233, 1, 0, 0.18);
+      --shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
+      --radius: 18px;
+      --success: #23c552;
+      --danger: #ff5d5d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #212026 0%, #1c1b21 100%);
+      color: var(--text);
+      font-family: "Montserrat", Arial, sans-serif;
+      line-height: 1.7;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 20px 40px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      backdrop-filter: blur(10px);
+      background: rgba(33, 32, 38, 0.88);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .topbar-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .nav-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      flex-shrink: 0;
+    }
+
+    .nav-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .nav-title {
+      font-weight: 700;
+      font-size: 15px;
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-links button,
+    .nav-links a {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      transition: 0.18s ease;
+      background: transparent;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .nav-links button:hover,
+    .nav-links a:hover {
+      border-color: rgba(233, 1, 0, 0.5);
+      background: rgba(233, 1, 0, 0.08);
+    }
+
+    .hero {
+      margin-top: 28px;
+      background: linear-gradient(180deg, var(--panel) 0%, #27262d 100%);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+
+    .logo {
+      width: 90px;
+      height: 90px;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      flex-shrink: 0;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+    }
+
+    .logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .brand-text {
+      min-width: 0;
+      flex: 1;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1.15;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, var(--panel-2) 0%, #2d2c35 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    .event-grid {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .event-card {
+      background: linear-gradient(180deg, #2a2931 0%, #27262d 100%);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .event-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at top right, rgba(233, 1, 0, 0.12), transparent 32%);
+    }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .event-title {
+      margin: 0 0 14px;
+      font-size: 28px;
+      line-height: 1.2;
+      font-weight: 800;
+    }
+
+    .event-meta {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 14px;
+      padding: 12px 14px;
+    }
+
+    .meta-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(233, 1, 0, 0.10);
+      color: var(--accent);
+      font-size: 16px;
+      flex-shrink: 0;
+      border: 1px solid rgba(233, 1, 0, 0.20);
+    }
+
+    .meta-content {
+      min-width: 0;
+    }
+
+    .meta-label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .meta-value {
+      display: block;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .event-description {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .actions-card {
+      background: linear-gradient(180deg, #2a2931 0%, #27262d 100%);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+    }
+
+    .actions-title {
+      margin: 0 0 10px;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .actions-copy {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .calendar-buttons {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .calendar-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+      background: linear-gradient(180deg, #2f2e37 0%, #292830 100%);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-weight: 700;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 14px;
+      width: 100%;
+    }
+
+    .calendar-btn:hover {
+      transform: translateY(-2px);
+      border-color: rgba(233, 1, 0, 0.6);
+      background:
+        linear-gradient(
+          to top,
+          rgba(233, 1, 0, 0.32) 0%,
+          rgba(233, 1, 0, 0.10) 40%,
+          rgba(233, 1, 0, 0.00) 100%
+        ),
+        linear-gradient(180deg, #2f2e37 0%, #292830 100%);
+      box-shadow: 0 10px 26px rgba(233, 1, 0, 0.12);
+    }
+
+    .calendar-btn span:last-child {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .admin-panel {
+      margin-top: 22px;
+      display: none;
+      background: linear-gradient(180deg, #2b2a33 0%, #26252d 100%);
+      border: 1px solid rgba(233, 1, 0, 0.25);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 8px 24px rgba(233, 1, 0, 0.08);
+    }
+
+    .admin-panel.active {
+      display: block;
+    }
+
+    .admin-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .admin-title {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .admin-note {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    .field label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
+    .field input,
+    .field textarea {
+      width: 100%;
+      background: #222128;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .field input:focus,
+    .field textarea:focus {
+      border-color: rgba(233, 1, 0, 0.55);
+      box-shadow: 0 0 0 4px rgba(233, 1, 0, 0.08);
+    }
+
+    .field textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .admin-actions {
+      margin-top: 16px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger {
+      border: 1px solid transparent;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.18s ease;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: rgba(255,255,255,0.06);
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.04);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #34333d;
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: rgba(233, 1, 0, 0.35);
+      background: rgba(233, 1, 0, 0.08);
+    }
+
+    .btn-danger {
+      background: rgba(255, 93, 93, 0.08);
+      color: #ffd6d6;
+      border-color: rgba(255, 93, 93, 0.22);
+    }
+
+    .btn-danger:hover {
+      background: rgba(255, 93, 93, 0.14);
+    }
+
+    .status {
+      margin-top: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      min-height: 22px;
+    }
+
+    .status.success {
+      color: var(--success);
+    }
+
+    .status.error {
+      color: var(--danger);
+    }
+
+    .footer {
+      margin-top: 24px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      padding: 8px 0;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 14, 0.70);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 440px;
+      background: linear-gradient(180deg, #2b2a33 0%, #26252d 100%);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .modal h2 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .modal p {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .modal .field {
+      margin-bottom: 12px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .small-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .event-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .hero {
+        padding: 24px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      .subtitle {
+        font-size: 15px;
+      }
+
+      .nav-title {
+        white-space: normal;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .event-title {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="nav-brand">
+        <div class="nav-logo">
+          <img src="RailWorks.png" alt="Hull Red CIO Logo">
+        </div>
+        <div class="nav-title">Hull Red CIO</div>
+      </div>
+
+      <nav class="nav-links">
+        <button id="adminOpenBtn" type="button">Admin</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="brand">
+        <div class="logo">
+          <img src="RailWorks.png" alt="Hull Red CIO Logo">
+        </div>
+
+        <div class="brand-text">
+          <h1>Hull Red CIO Event Calendar</h1>
+          <p class="subtitle">Save our latest event to your preferred calendar in one click.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="event-grid">
+          <div class="event-card">
+            <span class="eyebrow">Upcoming Event</span>
+            <h2 class="event-title" id="displayTitle">Hull Red CIO Community Event</h2>
+
+            <div class="event-meta">
+              <div class="meta-item">
+                <div class="meta-icon">📅</div>
+                <div class="meta-content">
+                  <span class="meta-label">Date</span>
+                  <span class="meta-value" id="displayDate">Saturday, 25 April 2026</span>
+                </div>
+              </div>
+
+              <div class="meta-item">
+                <div class="meta-icon">⏰</div>
+                <div class="meta-content">
+                  <span class="meta-label">Time</span>
+                  <span class="meta-value" id="displayTime">18:30 - 21:00</span>
+                </div>
+              </div>
+
+              <div class="meta-item">
+                <div class="meta-icon">📍</div>
+                <div class="meta-content">
+                  <span class="meta-label">Location</span>
+                  <span class="meta-value" id="displayLocation">Hull, United Kingdom</span>
+                </div>
+              </div>
+            </div>
+
+            <p class="event-description" id="displayDescription">
+              Join us for our latest Hull Red CIO gathering. Add this event to your calendar so you never miss important updates, activities, or community moments.
+            </p>
+          </div>
+
+          <div class="actions-card">
+            <h3 class="actions-title">Add to your calendar</h3>
+            <p class="actions-copy">Choose your preferred calendar service below. Apple Calendar works best using the ICS option.</p>
+
+            <div class="calendar-buttons">
+              <a class="calendar-btn" id="googleBtn" href="#" target="_blank" rel="noopener noreferrer">
+                <span>Google Calendar</span>
+                <span>Open</span>
+              </a>
+
+              <a class="calendar-btn" id="office365Btn" href="#" target="_blank" rel="noopener noreferrer">
+                <span>Office 365</span>
+                <span>Open</span>
+              </a>
+
+              <a class="calendar-btn" id="outlookBtn" href="#" target="_blank" rel="noopener noreferrer">
+                <span>Outlook</span>
+                <span>Open</span>
+              </a>
+
+              <a class="calendar-btn" id="yahooBtn" href="#" target="_blank" rel="noopener noreferrer">
+                <span>Yahoo Calendar</span>
+                <span>Open</span>
+              </a>
+
+              <button class="calendar-btn" id="appleBtn" type="button">
+                <span>Apple Calendar</span>
+                <span>ICS</span>
+              </button>
+
+              <button class="calendar-btn" id="icsBtn" type="button">
+                <span>Download ICS</span>
+                <span>.ics</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <section class="admin-panel" id="adminPanel">
+          <div class="admin-head">
+            <div>
+              <h3 class="admin-title">Admin Event Editor</h3>
+              <p class="admin-note">Update the live event details shown on this page. Changes are saved in your browser.</p>
+            </div>
+            <button class="btn-danger" id="logoutBtn" type="button">Logout</button>
+          </div>
+
+          <div class="form-grid">
+            <div class="field full">
+              <label for="eventTitle">Event title</label>
+              <input type="text" id="eventTitle" placeholder="Event title">
+            </div>
+
+            <div class="field">
+              <label for="eventStartDate">Start date</label>
+              <input type="date" id="eventStartDate">
+            </div>
+
+            <div class="field">
+              <label for="eventEndDate">End date</label>
+              <input type="date" id="eventEndDate">
+            </div>
+
+            <div class="field">
+              <label for="eventStartTime">Start time</label>
+              <input type="time" id="eventStartTime">
+            </div>
+
+            <div class="field">
+              <label for="eventEndTime">End time</label>
+              <input type="time" id="eventEndTime">
+            </div>
+
+            <div class="field full">
+              <label for="eventLocation">Location</label>
+              <input type="text" id="eventLocation" placeholder="Event location">
+            </div>
+
+            <div class="field full">
+              <label for="eventDescription">Description</label>
+              <textarea id="eventDescription" placeholder="Event description"></textarea>
+            </div>
+          </div>
+
+          <div class="admin-actions">
+            <button class="btn-primary" id="saveBtn" type="button">Save Event</button>
+            <button class="btn-secondary" id="resetBtn" type="button">Reset to Default</button>
+          </div>
+
+          <div class="status" id="adminStatus"></div>
+        </section>
+      </div>
+    </section>
+
+    <div class="footer">
+      © 2026 Hull Red CIO • Event Calendar • Hosted via GitHub Pages
+    </div>
+  </main>
+
+  <div class="modal-backdrop" id="loginModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+      <h2 id="loginTitle">Admin Access</h2>
+      <p>Sign in to edit the event shown on this page.</p>
+
+      <div class="field">
+        <label for="adminUsername">Username</label>
+        <input type="text" id="adminUsername" autocomplete="username" placeholder="Enter username">
+      </div>
+
+      <div class="field">
+        <label for="adminPassword">Password</label>
+        <input type="password" id="adminPassword" autocomplete="current-password" placeholder="Enter password">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-primary" id="loginBtn" type="button">Login</button>
+        <button class="btn-secondary" id="closeModalBtn" type="button">Cancel</button>
+      </div>
+
+      <div class="status" id="loginStatus"></div>
+      <div class="small-note">Default login: <strong>admin</strong> / <strong>HullRed2026!</strong></div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "hullRedCioEventData";
+    const AUTH_KEY = "hullRedCioAdminAuth";
+    const ADMIN_USERNAME = "admin";
+    const ADMIN_PASSWORD = "HullRed2026!";
+
+    const defaultEvent = {
+      title: "Hull Red CIO Community Event",
+      startDate: "2026-04-25",
+      endDate: "2026-04-25",
+      startTime: "18:30",
+      endTime: "21:00",
+      location: "Hull, United Kingdom",
+      description: "Join us for our latest Hull Red CIO gathering. Add this event to your calendar so you never miss important updates, activities, or community moments."
+    };
+
+    const els = {
+      displayTitle: document.getElementById("displayTitle"),
+      displayDate: document.getElementById("displayDate"),
+      displayTime: document.getElementById("displayTime"),
+      displayLocation: document.getElementById("displayLocation"),
+      displayDescription: document.getElementById("displayDescription"),
+
+      googleBtn: document.getElementById("googleBtn"),
+      office365Btn: document.getElementById("office365Btn"),
+      outlookBtn: document.getElementById("outlookBtn"),
+      yahooBtn: document.getElementById("yahooBtn"),
+      appleBtn: document.getElementById("appleBtn"),
+      icsBtn: document.getElementById("icsBtn"),
+
+      adminOpenBtn: document.getElementById("adminOpenBtn"),
+      adminPanel: document.getElementById("adminPanel"),
+      logoutBtn: document.getElementById("logoutBtn"),
+
+      eventTitle: document.getElementById("eventTitle"),
+      eventStartDate: document.getElementById("eventStartDate"),
+      eventEndDate: document.getElementById("eventEndDate"),
+      eventStartTime: document.getElementById("eventStartTime"),
+      eventEndTime: document.getElementById("eventEndTime"),
+      eventLocation: document.getElementById("eventLocation"),
+      eventDescription: document.getElementById("eventDescription"),
+
+      saveBtn: document.getElementById("saveBtn"),
+      resetBtn: document.getElementById("resetBtn"),
+      adminStatus: document.getElementById("adminStatus"),
+
+      loginModal: document.getElementById("loginModal"),
+      adminUsername: document.getElementById("adminUsername"),
+      adminPassword: document.getElementById("adminPassword"),
+      loginBtn: document.getElementById("loginBtn"),
+      closeModalBtn: document.getElementById("closeModalBtn"),
+      loginStatus: document.getElementById("loginStatus")
+    };
+
+    function loadEvent() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) return { ...defaultEvent };
+        const parsed = JSON.parse(saved);
+        return { ...defaultEvent, ...parsed };
+      } catch (err) {
+        return { ...defaultEvent };
+      }
+    }
+
+    function saveEvent(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function setAuthState(isAuthed) {
+      localStorage.setItem(AUTH_KEY, isAuthed ? "1" : "0");
+    }
+
+    function isAuthed() {
+      return localStorage.getItem(AUTH_KEY) === "1";
+    }
+
+    function formatDateLong(dateStr) {
+      const [year, month, day] = dateStr.split("-").map(Number);
+      const date = new Date(year, month - 1, day);
+      return date.toLocaleDateString("en-GB", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      });
+    }
+
+    function formatTimeRange(startTime, endTime) {
+      return `${startTime} - ${endTime}`;
+    }
+
+    function toICSDateTime(dateStr, timeStr) {
+      return `${dateStr.replaceAll("-", "")}T${timeStr.replaceAll(":", "")}00`;
+    }
+
+    function toGoogleDateTime(dateStr, timeStr) {
+      return `${dateStr.replaceAll("-", "")}T${timeStr.replaceAll(":", "")}00`;
+    }
+
+    function toYahooDuration(startDate, startTime, endDate, endTime) {
+      const start = new Date(`${startDate}T${startTime}:00`);
+      const end = new Date(`${endDate}T${endTime}:00`);
+      const diffMs = Math.max(0, end - start);
+      const totalMinutes = Math.round(diffMs / 60000);
+      const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
+      const minutes = String(totalMinutes % 60).padStart(2, "0");
+      return `${hours}${minutes}`;
+    }
+
+    function escapeICS(value) {
+      return String(value || "")
+        .replace(/\\/g, "\\\\")
+        .replace(/\n/g, "\\n")
+        .replace(/,/g, "\\,")
+        .replace(/;/g, "\\;");
+    }
+
+    function buildICS(data) {
+      const uid = `hull-red-cio-${Date.now()}@hullredcio.local`;
+      const dtStamp = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+      const dtStart = toICSDateTime(data.startDate, data.startTime);
+      const dtEnd = toICSDateTime(data.endDate, data.endTime);
+
+      return [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Hull Red CIO//Event Calendar//EN",
+        "CALSCALE:GREGORIAN",
+        "BEGIN:VEVENT",
+        `UID:${uid}`,
+        `DTSTAMP:${dtStamp}`,
+        `DTSTART:${dtStart}`,
+        `DTEND:${dtEnd}`,
+        `SUMMARY:${escapeICS(data.title)}`,
+        `DESCRIPTION:${escapeICS(data.description)}`,
+        `LOCATION:${escapeICS(data.location)}`,
+        "END:VEVENT",
+        "END:VCALENDAR"
+      ].join("\r\n");
+    }
+
+    function downloadICS(data) {
+      const ics = buildICS(data);
+      const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const safeName = (data.title || "event").replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-");
+      a.href = url;
+      a.download = `${safeName || "event"}.ics`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function buildGoogleUrl(data) {
+      const base = "https://calendar.google.com/calendar/render?action=TEMPLATE";
+      const params = new URLSearchParams({
+        text: data.title,
+        dates: `${toGoogleDateTime(data.startDate, data.startTime)}/${toGoogleDateTime(data.endDate, data.endTime)}`,
+        details: data.description,
+        location: data.location
+      });
+      return `${base}&${params.toString()}`;
+    }
+
+    function buildOffice365Url(data) {
+      const base = "https://outlook.office.com/calendar/0/deeplink/compose";
+      const start = `${data.startDate}T${data.startTime}:00`;
+      const end = `${data.endDate}T${data.endTime}:00`;
+      const params = new URLSearchParams({
+        path: "/calendar/action/compose",
+        rru: "addevent",
+        subject: data.title,
+        body: data.description,
+        location: data.location,
+        startdt: start,
+        enddt: end
+      });
+      return `${base}?${params.toString()}`;
+    }
+
+    function buildOutlookUrl(data) {
+      const base = "https://outlook.live.com/calendar/0/deeplink/compose";
+      const start = `${data.startDate}T${data.startTime}:00`;
+      const end = `${data.endDate}T${data.endTime}:00`;
+      const params = new URLSearchParams({
+        path: "/calendar/action/compose",
+        rru: "addevent",
+        subject: data.title,
+        body: data.description,
+        location: data.location,
+        startdt: start,
+        enddt: end
+      });
+      return `${base}?${params.toString()}`;
+    }
+
+    function buildYahooUrl(data) {
+      const base = "https://calendar.yahoo.com/";
+      const params = new URLSearchParams({
+        v: "60",
+        view: "d",
+        type: "20",
+        title: data.title,
+        st: toICSDateTime(data.startDate, data.startTime),
+        dur: toYahooDuration(data.startDate, data.startTime, data.endDate, data.endTime),
+        desc: data.description,
+        in_loc: data.location
+      });
+      return `${base}?${params.toString()}`;
+    }
+
+    function populateAdminForm(data) {
+      els.eventTitle.value = data.title || "";
+      els.eventStartDate.value = data.startDate || "";
+      els.eventEndDate.value = data.endDate || "";
+      els.eventStartTime.value = data.startTime || "";
+      els.eventEndTime.value = data.endTime || "";
+      els.eventLocation.value = data.location || "";
+      els.eventDescription.value = data.description || "";
+    }
+
+    function getFormData() {
+      return {
+        title: els.eventTitle.value.trim(),
+        startDate: els.eventStartDate.value,
+        endDate: els.eventEndDate.value,
+        startTime: els.eventStartTime.value,
+        endTime: els.eventEndTime.value,
+        location: els.eventLocation.value.trim(),
+        description: els.eventDescription.value.trim()
+      };
+    }
+
+    function validateEvent(data) {
+      if (!data.title || !data.startDate || !data.endDate || !data.startTime || !data.endTime || !data.location) {
+        return "Please complete all required fields.";
+      }
+
+      const start = new Date(`${data.startDate}T${data.startTime}:00`);
+      const end = new Date(`${data.endDate}T${data.endTime}:00`);
+
+      if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+        return "Please enter valid date and time values.";
+      }
+
+      if (end <= start) {
+        return "End date/time must be after the start date/time.";
+      }
+
+      return "";
+    }
+
+    function setStatus(el, message, type = "") {
+      el.textContent = message;
+      el.className = "status";
+      if (type) el.classList.add(type);
+    }
+
+    function render(data) {
+      els.displayTitle.textContent = data.title;
+      els.displayDate.textContent = formatDateLong(data.startDate);
+      els.displayTime.textContent = formatTimeRange(data.startTime, data.endTime);
+      els.displayLocation.textContent = data.location;
+      els.displayDescription.textContent = data.description || "";
+
+      els.googleBtn.href = buildGoogleUrl(data);
+      els.office365Btn.href = buildOffice365Url(data);
+      els.outlookBtn.href = buildOutlookUrl(data);
+      els.yahooBtn.href = buildYahooUrl(data);
+
+      els.appleBtn.onclick = () => downloadICS(data);
+      els.icsBtn.onclick = () => downloadICS(data);
+
+      populateAdminForm(data);
+    }
+
+    function openLoginModal() {
+      els.loginModal.classList.add("active");
+      setStatus(els.loginStatus, "");
+      els.adminUsername.value = "";
+      els.adminPassword.value = "";
+      setTimeout(() => els.adminUsername.focus(), 30);
+    }
+
+    function closeLoginModal() {
+      els.loginModal.classList.remove("active");
+    }
+
+    function showAdminPanel() {
+      els.adminPanel.classList.add("active");
+      els.adminOpenBtn.textContent = "Admin Open";
+      setStatus(els.adminStatus, "");
+    }
+
+    function hideAdminPanel() {
+      els.adminPanel.classList.remove("active");
+      els.adminOpenBtn.textContent = "Admin";
+    }
+
+    function login() {
+      const username = els.adminUsername.value.trim();
+      const password = els.adminPassword.value;
+
+      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+        setAuthState(true);
+        closeLoginModal();
+        showAdminPanel();
+        setStatus(els.adminStatus, "Admin access granted.", "success");
+      } else {
+        setStatus(els.loginStatus, "Invalid username or password.", "error");
+      }
+    }
+
+    function logout() {
+      setAuthState(false);
+      hideAdminPanel();
+      setStatus(els.adminStatus, "");
+    }
+
+    function init() {
+      const data = loadEvent();
+      render(data);
+
+      if (isAuthed()) {
+        showAdminPanel();
+      }
+
+      els.adminOpenBtn.addEventListener("click", () => {
+        if (isAuthed()) {
+          els.adminPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else {
+          openLoginModal();
+        }
+      });
+
+      els.closeModalBtn.addEventListener("click", closeLoginModal);
+      els.loginBtn.addEventListener("click", login);
+
+      els.loginModal.addEventListener("click", (e) => {
+        if (e.target === els.loginModal) closeLoginModal();
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          closeLoginModal();
+        }
+      });
+
+      els.adminPassword.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") login();
+      });
+
+      els.adminUsername.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") login();
+      });
+
+      els.saveBtn.addEventListener("click", () => {
+        const updated = getFormData();
+        const validationError = validateEvent(updated);
+
+        if (validationError) {
+          setStatus(els.adminStatus, validationError, "error");
+          return;
+        }
+
+        saveEvent(updated);
+        render(updated);
+        setStatus(els.adminStatus, "Event saved successfully.", "success");
+      });
+
+      els.resetBtn.addEventListener("click", () => {
+        saveEvent(defaultEvent);
+        render(defaultEvent);
+        setStatus(els.adminStatus, "Event reset to default values.", "success");
+      });
+
+      els.logoutBtn.addEventListener("click", logout);
+    }
+
+    init();
+  </script>
+</body>
+</html>
