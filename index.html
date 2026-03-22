@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hull Red CIO Event</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
 <header class="topbar">
   <div class="topbar-inner">
     <div class="nav-brand">
@@ -48,12 +49,12 @@
       </div>
 
       <div class="calendar-actions">
-        <a id="appleLink" class="calendar-btn" href="#"><img src="public/icons/apple.svg" alt="Apple"><span>Apple</span></a>
-        <a id="googleLink" class="calendar-btn" href="#"><img src="public/icons/google.svg" alt="Google"><span>Google</span></a>
-        <a id="officeLink" class="calendar-btn" href="#"><img src="public/icons/office365.svg" alt="Office 365"><span>Office 365</span></a>
-        <a id="outlookLink" class="calendar-btn" href="#"><img src="public/icons/outlook.svg" alt="Outlook"><span>Outlook</span></a>
-        <a id="yahooLink" class="calendar-btn" href="#"><img src="public/icons/yahoo.svg" alt="Yahoo"><span>Yahoo</span></a>
-        <a id="icsLink" class="calendar-btn" href="#"><img src="public/icons/ics.svg" alt="ICS"><span>ICS</span></a>
+        <a id="appleLink" class="calendar-btn"><img src="public/icons/apple.svg" alt="Apple"><span>Apple</span></a>
+        <a id="googleLink" class="calendar-btn"><img src="public/icons/google.svg" alt="Google"><span>Google</span></a>
+        <a id="officeLink" class="calendar-btn"><img src="public/icons/office365.svg" alt="Office 365"><span>Office 365</span></a>
+        <a id="outlookLink" class="calendar-btn"><img src="public/icons/outlook.svg" alt="Outlook"><span>Outlook</span></a>
+        <a id="yahooLink" class="calendar-btn"><img src="public/icons/yahoo.svg" alt="Yahoo"><span>Yahoo</span></a>
+        <a id="icsLink" class="calendar-btn"><img src="public/icons/ics.svg" alt="ICS"><span>ICS</span></a>
       </div>
     </div>
   </section>
@@ -64,10 +65,15 @@
 </main>
 
 <script>
-fetch('data/event.json')
-  .then(res => res.json())
+const basePath = '/CalAdd/data/event.json'; // path for GitHub Pages
+
+fetch(basePath)
+  .then(res => {
+    if (!res.ok) throw new Error('Could not load event.json');
+    return res.json();
+  })
   .then(event => {
-    // Event details
+    // Fill event details
     document.getElementById('eventTitle').innerText = event.title;
     document.getElementById('eventSubtitle').innerText = event.subtitle;
     document.getElementById('eventDescription').innerText = event.description;
@@ -80,13 +86,13 @@ fetch('data/event.json')
     document.getElementById('googleMapLink').href = `https://www.google.com/maps/search/?api=1&query=${loc}`;
     document.getElementById('appleMapLink').href = `https://maps.apple.com/?q=${loc}`;
 
-    // Calendar link times
-    const timeParts = event.time.split('–').map(t => t.trim());
-    const startTime = new Date(`${event.date} ${timeParts[0]}`).toISOString().replace(/-|:|\.\d+/g,'');
-    const endTime = new Date(`${event.date} ${timeParts[1]}`).toISOString().replace(/-|:|\.\d+/g,'');
+    // Calendar times
+    const [startStr, endStr] = event.time.split('–').map(t => t.trim());
+    const start = new Date(`${event.date} ${startStr}`).toISOString().replace(/-|:|\.\d+/g,'');
+    const end = new Date(`${event.date} ${endStr}`).toISOString().replace(/-|:|\.\d+/g,'');
 
     const title = encodeURIComponent(event.title);
-    const description = encodeURIComponent(`${event.subtitle}\n${event.description}`);
+    const desc = encodeURIComponent(`${event.subtitle}\n${event.description}`);
     const location = encodeURIComponent(event.location);
 
     // Apple ICS
@@ -94,39 +100,32 @@ fetch('data/event.json')
 VERSION:2.0
 BEGIN:VEVENT
 SUMMARY:${title}
-DESCRIPTION:${description}
+DESCRIPTION:${desc}
 LOCATION:${location}
-DTSTART:${startTime}
-DTEND:${endTime}
+DTSTART:${start}
+DTEND:${end}
 END:VEVENT
 END:VCALENDAR`;
 
     // Google Calendar
-    document.getElementById('googleLink').href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startTime}/${endTime}&details=${description}&location=${location}`;
+    document.getElementById('googleLink').href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${desc}&location=${location}`;
 
     // Outlook.com
-    document.getElementById('outlookLink').href = `https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${startTime}&enddt=${endTime}&location=${location}&body=${description}`;
+    document.getElementById('outlookLink').href = `https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${start}&enddt=${end}&location=${location}&body=${desc}`;
 
     // Office 365
-    document.getElementById('officeLink').href = `https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${startTime}&enddt=${endTime}&location=${location}&body=${description}`;
+    document.getElementById('officeLink').href = `https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${start}&enddt=${end}&location=${location}&body=${desc}`;
 
     // Yahoo
-    document.getElementById('yahooLink').href = `https://calendar.yahoo.com/?v=60&title=${title}&st=${startTime}&et=${endTime}&desc=${description}&in_loc=${location}`;
+    document.getElementById('yahooLink').href = `https://calendar.yahoo.com/?v=60&title=${title}&st=${start}&et=${end}&desc=${desc}&in_loc=${location}`;
 
     // ICS download
     const icsLink = document.getElementById('icsLink');
     icsLink.href = document.getElementById('appleLink').href;
     icsLink.setAttribute('download', `${event.title}.ics`);
-
-    // Add button hover + selected effect
-    document.querySelectorAll('.calendar-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.calendar-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-      });
-    });
   })
-  .catch(err => console.error('Could not load event.json:', err));
+  .catch(err => console.error(err));
 </script>
+
 </body>
 </html>
