@@ -5,77 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Hull Red CIO Event</title>
 <link rel="stylesheet" href="public/style.css">
-<style>
-  /* Admin button */
-.nav-links a {
-  background: var(--panel-2);
-  padding: 8px 14px;
-  border-radius: 20px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  color: var(--text);
-  text-decoration: none;
-}
-.nav-links a:hover {
-  background: linear-gradient(90deg, #e90100 0%, #212026 50%, #e90100 100%);
-  color: #fff;
-  box-shadow: 0 6px 16px rgba(233, 1, 0, 0.45);
-}
-
-/* Map link */
-.event-details a {
-  display: inline-block;
-  padding: 6px 12px;
-  border-radius: 16px;
-  background: var(--panel-2);
-  color: #fff;
-  text-decoration: none;
-  font-weight: 600;
-  transition: 0.3s ease;
-}
-.event-details a:hover {
-  background: linear-gradient(90deg, #e90100 0%, #212026 50%, #e90100 100%);
-  color: #fff;
-  box-shadow: 0 6px 16px rgba(233, 1, 0, 0.45);
-}
-
-/* Calendar buttons */
-.calendar-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 20px;
-}
-.calendar-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: var(--panel-2);
-  border-radius: 16px;
-  color: #fff;
-  font-weight: 600;
-  text-decoration: none;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  backdrop-filter: blur(4px);
-}
-.calendar-btn img {
-  width: 25px;
-  height: 25px;
-}
-.calendar-btn:hover {
-  background: linear-gradient(90deg, #e90100 0%, #212026 50%, #e90100 100%);
-  transform: scale(1.1); /* magnifying glass / dock effect */
-  box-shadow: 0 8px 20px rgba(233, 1, 0, 0.5);
-}
-
-  .event-grid-map {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
-    margin-top: 20px;
-  }
-</style>
 </head>
 <body>
 <header class="topbar">
@@ -111,7 +40,7 @@
           <p><strong>Date:</strong> <span id="eventDate">Saturday, 30 May 2026</span></p>
           <p><strong>Time:</strong> <span id="eventTime">18:00 – 21:00</span></p>
           <p><strong>Location:</strong> <span id="eventLocation">Hull, United Kingdom</span></p>
-          <p id="eventDescription">Hull Red CIO event details can be updated via admin panel.</p>
+          <p id="eventDescription">Hull Red CIO event details can be updated manually in event.json</p>
           <p><a id="mapLink" href="https://www.google.com/maps/search/?api=1&query=Hull,+United+Kingdom" target="_blank">View on Google Maps</a></p>
         </div>
       </div>
@@ -132,71 +61,6 @@
   </div>
 </main>
 
-<script>
-  // Load event.json and update page
-  fetch('data/event.json')
-    .then(res => res.json())
-    .then(event => {
-      document.getElementById('eventTitle').innerText = event.title;
-      document.getElementById('eventSubtitle').innerText = event.subtitle;
-      document.getElementById('eventDescription').innerText = event.description;
-      document.getElementById('eventDate').innerText = event.date;
-      document.getElementById('eventTime').innerText = event.time;
-      document.getElementById('eventLocation').innerText = event.location;
-
-      const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`;
-      document.getElementById('mapLink').href = mapUrl;
-
-      const title = encodeURIComponent(event.title);
-      const description = encodeURIComponent(`${event.subtitle}\n${event.description}`);
-      const location = encodeURIComponent(event.location);
-      const startDate = new Date(`${event.date} ${event.time.split('–')[0].trim()}`).toISOString().replace(/-|:|\.\d+/g, '');
-      const endDate = new Date(`${event.date} ${event.time.split('–')[1].trim()}`).toISOString().replace(/-|:|\.\d+/g, '');
-
-      // Apple Calendar (uses ics)
-      const appleIcs = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR
-VERSION:2.0
-BEGIN:VEVENT
-SUMMARY:${title}
-DESCRIPTION:${description}
-LOCATION:${location}
-DTSTART:${startDate}
-DTEND:${endDate}
-END:VEVENT
-END:VCALENDAR`;
-      document.getElementById('appleLink').href = appleIcs;
-
-      // Google Calendar
-      const gcal = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startDate}/${endDate}&details=${description}&location=${location}`;
-      document.getElementById('googleLink').href = gcal;
-
-      // Outlook.com
-      const outlook = `https://outlook.live.com/owa/?rru=addevent&startdt=${startDate}&enddt=${endDate}&subject=${title}&location=${location}&body=${description}`;
-      document.getElementById('outlookLink').href = outlook;
-
-      // Office 365
-      const office365 = `https://outlook.office.com/owa/?rru=addevent&startdt=${startDate}&enddt=${endDate}&subject=${title}&location=${location}&body=${description}`;
-      document.getElementById('officeLink').href = office365;
-
-      // Yahoo
-      const yahoo = `https://calendar.yahoo.com/?v=60&title=${title}&st=${startDate}&et=${endDate}&desc=${description}&in_loc=${location}`;
-      document.getElementById('yahooLink').href = yahoo;
-
-      // ICS file download
-      const icsFile = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR
-VERSION:2.0
-BEGIN:VEVENT
-SUMMARY:${title}
-DESCRIPTION:${description}
-LOCATION:${location}
-DTSTART:${startDate}
-DTEND:${endDate}
-END:VEVENT
-END:VCALENDAR`;
-      document.getElementById('icsLink').href = icsFile;
-      document.getElementById('icsLink').setAttribute('download', `${title}.ics`);
-    })
-    .catch(err => console.log('Could not load event.json:', err));
-</script>
+<script src="public/script.js"></script>
 </body>
 </html>
