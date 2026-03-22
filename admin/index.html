@@ -4,145 +4,199 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Hull Red CIO Admin</title>
-<link rel="stylesheet" href="../public/style.css" />
+
+<link rel="stylesheet" href="../style.css" />
 <style>
-  .admin-panel {
-    max-width: 500px;
-    margin: 40px auto;
-    padding: 24px;
-    background: linear-gradient(180deg, #31303a 0%, #2d2c35 100%);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-  }
-  .admin-panel h2 {
-    margin: 0 0 16px;
-    font-size: 22px;
-    font-weight: 800;
-  }
-  .form-group {
-    margin-bottom: 12px;
-  }
-  .form-group label {
-    display: block;
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 4px;
-    color: var(--muted);
-  }
-  .form-group input,
-  .form-group textarea {
-    width: 100%;
-    padding: 6px 10px;
-    font-size: 14px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--panel-2);
-    color: var(--text);
-  }
-  .form-group textarea {
-    resize: vertical;
-    min-height: 60px;
-  }
-  .btn-save {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 6px 14px;
-    background: var(--accent);
-    border: none;
-    border-radius: 12px;
-    color: #fff;
-    font-weight: 700;
-    cursor: pointer;
-    transition: 0.18s ease;
-  }
-  .btn-save:hover {
-    background: rgba(233,1,0,0.85);
-  }
+/* Centered login overlay */
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
 
-  /* login overlay */
-  .login-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.75);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 50;
-  }
-  .login-box {
-    background: var(--panel-2);
-    padding: 24px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-    max-width: 350px;
-    width: 100%;
-  }
-  .login-box h3 {
-    margin: 0 0 16px;
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--text);
-  }
-  .login-box input {
-    width: 100%;
-    padding: 6px 10px;
-    margin-bottom: 12px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--panel);
-    color: var(--text);
-    font-size: 14px;
-  }
-  .login-box button {
-    width: 100%;
-    padding: 6px 14px;
-    border: none;
-    border-radius: 12px;
-    background: var(--accent);
-    color: #fff;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  .login-box button:hover {
-    background: rgba(233,1,0,0.85);
-  }
+.login-box {
+  background: var(--panel-2);
+  padding: 32px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+}
 
-  /* Restricted message */
-  .restricted {
-    max-width: 500px;
-    margin: 80px auto;
-    padding: 24px;
-    background: linear-gradient(180deg, #e90100 0%, var(--bg) 100%);
-    border-radius: 20px;
-    color: #fff;
-    text-align: center;
-    font-weight: 700;
-    font-size: 18px;
-    box-shadow: 0 8px 20px rgba(233,1,0,0.5);
-  }
-  .restricted a {
-    display: inline-block;
-    margin-top: 12px;
-    padding: 8px 16px;
-    border-radius: 20px;
-    background: #212026;
-    color: #fff;
-    text-decoration: none;
-    font-weight: 700;
-    transition: 0.3s ease;
-  }
-  .restricted a:hover {
-    background: #e90100;
-  }
+.login-box h3 {
+  margin-bottom: 20px;
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.login-box input {
+  width: 90%;
+  margin-bottom: 12px;
+  padding: 8px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+}
+
+.login-box button {
+  width: 50%;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 12px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.login-box button:hover {
+  background: rgba(233,1,0,0.85);
+}
+
+/* Admin panel */
+.admin-panel {
+  max-width: 520px;
+  margin: 40px auto;
+  padding: 24px;
+  background: linear-gradient(180deg, #31303a 0%, #2d2c35 100%);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.admin-panel h2 {
+  margin-bottom: 16px;
+  font-size: 22px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--muted);
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+/* Buttons */
+.btn-save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--accent);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.btn-save:hover {
+  background: rgba(233,1,0,0.85);
+}
+
+/* Return home */
+.return-home {
+  display: block;
+  margin-bottom: 24px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  background: #fff;
+  color: #212026;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+/* Calendar styles */
+#calendar {
+  margin-top: 16px;
+  text-align: center;
+}
+
+#calendar header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 12px;
+  margin-bottom: 12px;
+}
+
+#calendar header button {
+  background: var(--panel-2);
+  color: var(--text);
+  border: none;
+  padding: 4px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#calendar table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#calendar th {
+  color: var(--muted);
+  padding: 6px 0;
+}
+
+#calendar td {
+  padding: 10px 0;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: transform 0.18s ease;
+}
+
+/* Selected day - liquid glass effect */
+#calendar td.selected {
+  background: rgba(233,1,0,0.15);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 12px rgba(233,1,0,0.4);
+  color: #fff;
+  transform: scale(1.2);
+}
 </style>
 </head>
 <body>
+
 <!-- Login overlay -->
-<div class="login-overlay" id="loginOverlay" style="display:none;">
+<div class="login-overlay" id="loginOverlay">
   <div class="login-box">
     <h3>Admin Login</h3>
     <input type="text" id="username" placeholder="Username">
@@ -151,9 +205,8 @@
   </div>
 </div>
 
-<!-- Admin panel -->
 <div class="admin-panel" id="adminPanel" style="display:none;">
-  <a href="../index.html" class="btn-save" style="background: var(--panel); color: var(--text); margin-bottom:12px; display:block; text-align:center;">← Return to Site</a>
+  <a href="../index.html" class="return-home">← Return to Home</a>
 
   <h2>Edit Event Details</h2>
 
@@ -174,29 +227,23 @@
 
   <div class="form-group">
     <label for="eventDateInput">Date</label>
-    <input type="text" id="eventDateInput">
+    <input type="text" id="eventDateInput" placeholder="Select a date">
+    <div id="calendar"></div>
   </div>
 
   <div class="form-group">
     <label for="eventTimeInput">Time</label>
-    <input type="text" id="eventTimeInput">
+    <input type="text" id="eventTimeInput" placeholder="e.g., 19:30 – 23:00">
   </div>
 
   <div class="form-group">
     <label for="eventLocationInput">Location</label>
-    <input type="text" id="eventLocationInput">
+    <input type="text" id="eventLocationInput" placeholder="e.g., Hull, UK">
   </div>
 
   <button class="btn-save" id="saveBtn">Save Event</button>
 </div>
 
-<!-- Restricted message -->
-<div class="restricted" id="restrictedMessage" style="display:none;">
-  Sorry, this page is restricted to Admins of Hull Red CIO ONLY
-  <br>
-  <a href="../index.html">Return to Home</a>
-</div>
-
-<script src="admin.js"></script>
+<script src="../admin.js"></script>
 </body>
 </html>
