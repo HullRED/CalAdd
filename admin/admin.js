@@ -3,10 +3,9 @@ const adminPanel = document.getElementById('adminPanel');
 
 const USER = 'admin';
 const PASS = 'password';
-
 const loginBtn = document.getElementById('loginBtn');
 
-let eventData = {}; // store event.json
+let eventData = {};
 let selectedDate = null;
 const today = new Date();
 let currentMonth = today.getMonth();
@@ -63,7 +62,6 @@ document.getElementById('saveBtn').addEventListener('click', () => {
     location: document.getElementById('eventLocationInput').value
   };
 
-  // Save via server (Node.js needed)
   fetch('/save-event', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
@@ -80,7 +78,6 @@ const calendarDiv = document.getElementById('calendar');
 function renderCalendar(month=currentMonth, year=currentYear, preselectDay=null){
   calendarDiv.innerHTML = '';
 
-  // Header
   const header = document.createElement('div');
   header.innerHTML = `
     <button id="prevMonth">&lt;</button>
@@ -89,7 +86,6 @@ function renderCalendar(month=currentMonth, year=currentYear, preselectDay=null)
   `;
   calendarDiv.appendChild(header);
 
-  // Table
   const table = document.createElement('table');
   const daysRow = document.createElement('tr');
   ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => {
@@ -116,7 +112,6 @@ function renderCalendar(month=currentMonth, year=currentYear, preselectDay=null)
     const td = document.createElement('td');
     td.innerText = d;
 
-    // Pre-select day
     if(preselectDay && d === preselectDay){
       td.classList.add('selected');
       selectedDate = td;
