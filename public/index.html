@@ -1,105 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <title>Hull Red CIO Event</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hull Red CIO Event</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="topbar-inner">
-      <div class="nav-brand">
-        <div class="nav-logo">
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="nav-brand">
+      <div class="nav-logo">
+        <img src="HullRed2.png" alt="Hull Red CIO Logo">
+      </div>
+      <div class="nav-title">Hull Red CIO</div>
+    </div>
+    <nav class="nav-links">
+      <a href="./">Home</a>
+      <a href="../admin/">Admin</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <section class="hero">
+    <div class="panel">
+      <div class="brand" style="margin-bottom:16px;">
+        <div class="logo" style="width:60px; height:60px;">
           <img src="HullRed2.png" alt="Hull Red CIO Logo">
         </div>
-        <div class="nav-title">Hull Red CIO</div>
-      </div>
-
-      <nav class="nav-links">
-        <a href="./">Home</a>
-        <a href="admin/">Admin</a>
-      </nav>
-    </div>
-  </header>
-
-  <main class="container">
-    <section class="hero">
-      <div class="panel">
-        <div class="brand" style="margin-bottom:16px;">
-          <div class="logo" style="width:60px; height:60px;">
-            <img src="HullRed2.png" alt="Hull Red CIO Logo">
-          </div>
-          <div class="brand-text">
-            <h1 id="eventTitle" style="font-size:24px;">Hull Red CIO Event</h1>
-            <p class="subtitle" id="eventSubtitle" style="font-size:14px;">Add this event to your calendar</p>
-          </div>
-        </div>
-
-        <div class="event-grid-map">
-          <!-- Event Details -->
-          <div class="event-details">
-            <p><strong>Date:</strong> <span id="eventDate">Saturday, 30 May 2026</span></p>
-            <p><strong>Time:</strong> <span id="eventTime">18:00 – 21:00</span></p>
-            <p><strong>Location:</strong> <span id="eventLocation">Hull, United Kingdom</span></p>
-            <p id="eventDescription">Hull Red CIO event.</p>
-          </div>
-
-          <!-- Interactive Google Map -->
-          <div class="event-map" id="map"></div>
-        </div>
-
-        <div class="calendar-actions">
-          <a id="btnApple" class="calendar-btn" href="#"><img src="icons/apple.svg" alt="Apple"><span>Apple</span></a>
-          <a id="btnGoogle" class="calendar-btn" href="#"><img src="icons/google.svg" alt="Google"><span>Google</span></a>
-          <a id="btnOffice365" class="calendar-btn" href="#"><img src="icons/office365.svg" alt="Office 365"><span>Office 365</span></a>
-          <a id="btnOutlook" class="calendar-btn" href="#"><img src="icons/outlook.svg" alt="Outlook"><span>Outlook</span></a>
-          <a id="btnYahoo" class="calendar-btn" href="#"><img src="icons/yahoo.svg" alt="Yahoo"><span>Yahoo</span></a>
-          <a id="btnICS" class="calendar-btn" href="#" download="hull-red-cio-event.ics"><img src="icons/ics.svg" alt="ICS"><span>ICS</span></a>
+        <div class="brand-text">
+          <h1 id="eventTitle" style="font-size:24px;"></h1>
+          <p class="subtitle" id="eventSubtitle" style="font-size:14px;"></p>
         </div>
       </div>
-    </section>
 
-    <div class="footer">
-      © 2026 Hull Red CIO • Event Calendar Page
+      <div class="event-grid-map">
+        <div class="event-details">
+          <p><strong>Date:</strong> <span id="eventDate"></span></p>
+          <p><strong>Time:</strong> <span id="eventTime"></span></p>
+          <p><strong>Location:</strong> <span id="eventLocation"></span></p>
+          <p id="eventDescription"></p>
+        </div>
+        <div class="event-map" id="map"></div>
+      </div>
+
+      <div class="calendar-actions">
+        <a id="btnApple" class="calendar-btn" href="#"><img src="icons/apple.svg" alt="Apple"><span>Apple</span></a>
+        <a id="btnGoogle" class="calendar-btn" href="#"><img src="icons/google.svg" alt="Google"><span>Google</span></a>
+        <a id="btnOffice365" class="calendar-btn" href="#"><img src="icons/office365.svg" alt="Office 365"><span>Office 365</span></a>
+        <a id="btnOutlook" class="calendar-btn" href="#"><img src="icons/outlook.svg" alt="Outlook"><span>Outlook</span></a>
+        <a id="btnYahoo" class="calendar-btn" href="#"><img src="icons/yahoo.svg" alt="Yahoo"><span>Yahoo</span></a>
+        <a id="btnICS" class="calendar-btn" href="#" download="hull-red-cio-event.ics"><img src="icons/ics.svg" alt="ICS"><span>ICS</span></a>
+      </div>
     </div>
-  </main>
+  </section>
+  <div class="footer">
+    © 2026 Hull Red CIO • Event Calendar Page
+  </div>
+</main>
 
-  <!-- Google Maps JS API -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY"></script>
-  <script>
-    function initMap() {
-      const eventLocation = { lat: 53.7442, lng: -0.3350 }; // Hull, UK
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY"></script>
+<script>
+fetch('../data/event.json')
+.then(res => res.json())
+.then(event => {
+  document.getElementById('eventTitle').innerText = event.title;
+  document.getElementById('eventSubtitle').innerText = event.subtitle;
+  document.getElementById('eventDescription').innerText = event.description;
+  document.getElementById('eventDate').innerText = event.date;
+  document.getElementById('eventTime').innerText = event.time;
+  document.getElementById('eventLocation').innerText = event.location;
 
-      const map = new google.maps.Map(document.getElementById("map"), {
-        center: eventLocation,
-        zoom: 15,
-        styles: [
-          { elementType: "geometry", stylers: [{ color: "#212026" }] },
-          { elementType: "labels.text.fill", stylers: [{ color: "#cfcfcf" }] },
-          { elementType: "labels.text.stroke", stylers: [{ color: "#212026" }] },
-          { featureType: "poi", elementType: "geometry", stylers: [{ color: "#2a2931" }] },
-          { featureType: "road", elementType: "geometry", stylers: [{ color: "#2d2c35" }] },
-          { featureType: "transit", elementType: "geometry", stylers: [{ color: "#2a2931" }] },
-          { featureType: "water", elementType: "geometry", stylers: [{ color: "#1c1b21" }] }
-        ],
-        disableDefaultUI: true,
-        zoomControl: true,
-      });
-
-      new google.maps.Marker({
-        position: eventLocation,
-        map: map,
-        title: "Hull Red CIO Event",
-      });
-    }
-
-    window.addEventListener("load", initMap);
-  </script>
+  const loc = {lat: event.lat, lng: event.lng};
+  const map = new google.maps.Map(document.getElementById("map"), {
+    center: loc,
+    zoom: 15,
+    styles:[
+      {elementType:"geometry",stylers:[{color:"#212026"}]},
+      {elementType:"labels.text.fill",stylers:[{color:"#cfcfcf"}]},
+      {elementType:"labels.text.stroke",stylers:[{color:"#212026"}]},
+      {featureType:"poi",elementType:"geometry",stylers:[{color:"#2a2931"}]},
+      {featureType:"road",elementType:"geometry",stylers:[{color:"#2d2c35"}]},
+      {featureType:"transit",elementType:"geometry",stylers:[{color:"#2a2931"}]},
+      {featureType:"water",elementType:"geometry",stylers:[{color:"#1c1b21"}]}
+    ],
+    disableDefaultUI:true,
+    zoomControl:true
+  });
+  new google.maps.Marker({position: loc, map: map, title: event.title});
+});
+</script>
 </body>
 </html>
