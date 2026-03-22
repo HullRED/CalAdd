@@ -41,9 +41,18 @@
           </div>
         </div>
 
-        <p class="intro" id="eventDescription" style="margin-bottom:16px;">
-          Hull Red CIO event.
-        </p>
+        <div class="event-grid-map">
+          <!-- Event Details -->
+          <div class="event-details">
+            <p><strong>Date:</strong> <span id="eventDate">Saturday, 30 May 2026</span></p>
+            <p><strong>Time:</strong> <span id="eventTime">18:00 – 21:00</span></p>
+            <p><strong>Location:</strong> <span id="eventLocation">Hull, United Kingdom</span></p>
+            <p id="eventDescription">Hull Red CIO event.</p>
+          </div>
+
+          <!-- Interactive Google Map -->
+          <div class="event-map" id="map"></div>
+        </div>
 
         <div class="calendar-actions">
           <a id="btnApple" class="calendar-btn" href="#"><img src="icons/apple.svg" alt="Apple"><span>Apple</span></a>
@@ -61,6 +70,36 @@
     </div>
   </main>
 
-  <script src="script.js"></script>
+  <!-- Google Maps JS API -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY"></script>
+  <script>
+    function initMap() {
+      const eventLocation = { lat: 53.7442, lng: -0.3350 }; // Hull, UK
+
+      const map = new google.maps.Map(document.getElementById("map"), {
+        center: eventLocation,
+        zoom: 15,
+        styles: [
+          { elementType: "geometry", stylers: [{ color: "#212026" }] },
+          { elementType: "labels.text.fill", stylers: [{ color: "#cfcfcf" }] },
+          { elementType: "labels.text.stroke", stylers: [{ color: "#212026" }] },
+          { featureType: "poi", elementType: "geometry", stylers: [{ color: "#2a2931" }] },
+          { featureType: "road", elementType: "geometry", stylers: [{ color: "#2d2c35" }] },
+          { featureType: "transit", elementType: "geometry", stylers: [{ color: "#2a2931" }] },
+          { featureType: "water", elementType: "geometry", stylers: [{ color: "#1c1b21" }] }
+        ],
+        disableDefaultUI: true,
+        zoomControl: true,
+      });
+
+      new google.maps.Marker({
+        position: eventLocation,
+        map: map,
+        title: "Hull Red CIO Event",
+      });
+    }
+
+    window.addEventListener("load", initMap);
+  </script>
 </body>
 </html>
