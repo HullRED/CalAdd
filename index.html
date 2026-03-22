@@ -5,75 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Hull Red CIO Event</title>
 <link rel="stylesheet" href="style.css">
-<style>
-/* Additional styles for buttons and grid */
-.nav-links a.admin-btn {
-  padding: 8px 16px;
-  border-radius: 16px;
-  background: linear-gradient(90deg, #e90100 0%, #212026 100%);
-  color: #fff;
-  font-weight: 700;
-  transition: 0.2s ease;
-  text-decoration: none;
-}
-.nav-links a.admin-btn:hover {
-  background: linear-gradient(90deg, #212026 0%, #e90100 100%);
-}
-
-.event-grid-map {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  margin-top: 20px;
-}
-
-.event-details {
-  flex: 1 1 250px;
-  background: #2a2931;
-  padding: 16px;
-  border-radius: 16px;
-}
-
-.event-details p a.map-btn {
-  display: inline-block;
-  padding: 6px 12px;
-  background: #fff;
-  color: #212026;
-  border-radius: 12px;
-  text-decoration: none;
-  margin-right: 6px;
-  font-weight: 600;
-}
-
-.calendar-actions {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 16px;
-}
-
-.calendar-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  border-radius: 16px;
-  background: linear-gradient(90deg, #e90100 0%, #212026 100%);
-  color: #fff;
-  font-weight: 600;
-  text-decoration: none;
-  transition: 0.2s ease;
-}
-
-.calendar-btn img {
-  width: 25px;
-  height: 25px;
-}
-
-.calendar-btn:hover {
-  background: linear-gradient(90deg, #212026 0%, #e90100 100%);
-}
-</style>
 </head>
 <body>
 <header class="topbar">
@@ -95,7 +26,7 @@
     <div class="panel">
       <div class="brand">
         <div class="logo">
-          <img src="public/icons/apple.svg" alt="Hull Red CIO Logo">
+          <img src="public/HullRed2.png" alt="Hull Red CIO Logo">
         </div>
         <div class="brand-text">
           <h1 id="eventTitle">Hull Red: Event Description</h1>
@@ -156,7 +87,7 @@ fetch('data/event.json')
       description: event.description
     };
 
-    // Apple - use .ics
+    // Apple - ICS
     document.getElementById('appleLink').href = `data:text/calendar;charset=utf8,${encodeURIComponent(`BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
@@ -184,8 +115,16 @@ END:VCALENDAR`)}`;
     const yahooLink = `https://calendar.yahoo.com/?v=60&title=${encodeURIComponent(details.title)}&st=${details.start}&et=${details.end}&desc=${encodeURIComponent(details.description)}&in_loc=${encodeURIComponent(details.location)}`;
     document.getElementById('yahooLink').href = yahooLink;
 
-    // ICS
+    // ICS fallback
     document.getElementById('icsLink').href = document.getElementById('appleLink').href;
+
+    // Add hover + selected effect
+    document.querySelectorAll('.calendar-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.calendar-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+      });
+    });
   });
 </script>
 </body>
