@@ -6,62 +6,68 @@
 <title>Hull Red CIO Event</title>
 <link rel="stylesheet" href="public/style.css">
 <style>
-  /* Rounded Admin button */
-  .nav-links a {
-    background: var(--panel-2);
-    padding: 8px 14px;
-    border-radius: 20px;
-    font-weight: 600;
-    transition: all 0.2s ease;
-    color: var(--text);
-    text-decoration: none;
-  }
-  .nav-links a:hover {
-    background: linear-gradient(90deg, #e90100 0%, #ff3b3b 100%);
-    color: #fff;
-  }
+  /* Admin button */
+.nav-links a {
+  background: var(--panel-2);
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  color: var(--text);
+  text-decoration: none;
+}
+.nav-links a:hover {
+  background: linear-gradient(90deg, #e90100 0%, #212026 50%, #e90100 100%);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(233, 1, 0, 0.45);
+}
 
-  /* Map link styling */
-  .event-details a {
-    display: inline-block;
-    padding: 6px 12px;
-    border-radius: 16px;
-    background: var(--panel-2);
-    color: #fff;
-    text-decoration: none;
-    font-weight: 600;
-    transition: 0.18s ease;
-  }
-  .event-details a:hover {
-    background: linear-gradient(90deg, #e90100 0%, #ff3b3b 100%);
-  }
+/* Map link */
+.event-details a {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 16px;
+  background: var(--panel-2);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.3s ease;
+}
+.event-details a:hover {
+  background: linear-gradient(90deg, #e90100 0%, #212026 50%, #e90100 100%);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(233, 1, 0, 0.45);
+}
 
-  /* Calendar buttons horizontal */
-  .calendar-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 20px;
-  }
-  .calendar-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    background: var(--panel-2);
-    border-radius: 16px;
-    color: #fff;
-    font-weight: 600;
-    text-decoration: none;
-    transition: 0.18s ease;
-  }
-  .calendar-btn img {
-    width: 25px;
-    height: 25px;
-  }
-  .calendar-btn:hover {
-    background: linear-gradient(90deg, #e90100 0%, #ff3b3b 100%);
-  }
+/* Calendar buttons */
+.calendar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+.calendar-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--panel-2);
+  border-radius: 16px;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+.calendar-btn img {
+  width: 25px;
+  height: 25px;
+}
+.calendar-btn:hover {
+  background: linear-gradient(90deg, #e90100 0%, #212026 50%, #e90100 100%);
+  transform: scale(1.1); /* magnifying glass / dock effect */
+  box-shadow: 0 8px 20px rgba(233, 1, 0, 0.5);
+}
 
   .event-grid-map {
     display: grid;
