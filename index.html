@@ -64,68 +64,69 @@
 </main>
 
 <script>
-fetch('data/event.json')
+fetch('/data/event.json')
   .then(res => res.json())
   .then(event => {
-    document.getElementById('eventTitle').innerText = `Hull Red: ${event.description}`;
+    // Event details
+    document.getElementById('eventTitle').innerText = event.title;
     document.getElementById('eventSubtitle').innerText = event.subtitle;
     document.getElementById('eventDescription').innerText = event.description;
     document.getElementById('eventDate').innerText = event.date;
     document.getElementById('eventTime').innerText = event.time;
     document.getElementById('eventLocation').innerText = event.location;
 
+    // Map links
     const loc = encodeURIComponent(event.location);
     document.getElementById('googleMapLink').href = `https://www.google.com/maps/search/?api=1&query=${loc}`;
     document.getElementById('appleMapLink').href = `https://maps.apple.com/?q=${loc}`;
 
-    // Calendar links
-    const details = {
-      title: `Hull Red: ${event.description}`,
-      start: new Date(`${event.date} ${event.time.split('–')[0]}`).toISOString(),
-      end: new Date(`${event.date} ${event.time.split('–')[1]}`).toISOString(),
-      location: event.location,
-      description: event.description
-    };
+    // Calendar link times
+    const timeParts = event.time.split('–').map(t => t.trim());
+    const startTime = new Date(`${event.date} ${timeParts[0]}`).toISOString().replace(/-|:|\.\d+/g,'');
+    const endTime = new Date(`${event.date} ${timeParts[1]}`).toISOString().replace(/-|:|\.\d+/g,'');
 
-    // Apple - ICS
-    document.getElementById('appleLink').href = `data:text/calendar;charset=utf8,${encodeURIComponent(`BEGIN:VCALENDAR
+    const title = encodeURIComponent(event.title);
+    const description = encodeURIComponent(`${event.subtitle}\n${event.description}`);
+    const location = encodeURIComponent(event.location);
+
+    // Apple ICS
+    document.getElementById('appleLink').href = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
-SUMMARY:${details.title}
-DTSTART:${details.start.replace(/[-:]/g,'')}
-DTEND:${details.end.replace(/[-:]/g,'')}
-LOCATION:${details.location}
-DESCRIPTION:${details.description}
+SUMMARY:${title}
+DESCRIPTION:${description}
+LOCATION:${location}
+DTSTART:${startTime}
+DTEND:${endTime}
 END:VEVENT
-END:VCALENDAR`)}`;
+END:VCALENDAR`;
 
-    // Google
-    const gLink = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(details.title)}&dates=${details.start.replace(/[-:]/g,'')}/${details.end.replace(/[-:]/g,'')}&details=${encodeURIComponent(details.description)}&location=${encodeURIComponent(details.location)}`;
-    document.getElementById('googleLink').href = gLink;
-
-    // Office 365
-    const officeLink = `https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${encodeURIComponent(details.title)}&startdt=${details.start}&enddt=${details.end}&body=${encodeURIComponent(details.description)}&location=${encodeURIComponent(details.location)}`;
-    document.getElementById('officeLink').href = officeLink;
+    // Google Calendar
+    document.getElementById('googleLink').href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startTime}/${endTime}&details=${description}&location=${location}`;
 
     // Outlook.com
-    const outlookLink = `https://outlook.live.com/owa/?rru=addevent&subject=${encodeURIComponent(details.title)}&startdt=${details.start}&enddt=${details.end}&location=${encodeURIComponent(details.location)}&body=${encodeURIComponent(details.description)}`;
-    document.getElementById('outlookLink').href = outlookLink;
+    document.getElementById('outlookLink').href = `https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${startTime}&enddt=${endTime}&location=${location}&body=${description}`;
+
+    // Office 365
+    document.getElementById('officeLink').href = `https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${startTime}&enddt=${endTime}&location=${location}&body=${description}`;
 
     // Yahoo
-    const yahooLink = `https://calendar.yahoo.com/?v=60&title=${encodeURIComponent(details.title)}&st=${details.start}&et=${details.end}&desc=${encodeURIComponent(details.description)}&in_loc=${encodeURIComponent(details.location)}`;
-    document.getElementById('yahooLink').href = yahooLink;
+    document.getElementById('yahooLink').href = `https://calendar.yahoo.com/?v=60&title=${title}&st=${startTime}&et=${endTime}&desc=${description}&in_loc=${location}`;
 
-    // ICS fallback
-    document.getElementById('icsLink').href = document.getElementById('appleLink').href;
+    // ICS download
+    const icsLink = document.getElementById('icsLink');
+    icsLink.href = document.getElementById('appleLink').href;
+    icsLink.setAttribute('download', `${event.title}.ics`);
 
-    // Add hover + selected effect
+    // Add button hover + selected effect
     document.querySelectorAll('.calendar-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.calendar-btn').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
       });
     });
-  });
+  })
+  .catch(err => console.error('Could not load event.json:', err));
 </script>
 </body>
 </html>
