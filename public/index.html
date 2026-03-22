@@ -15,6 +15,10 @@
       </div>
       <div class="nav-title">Hull Red CIO</div>
     </div>
+    <nav class="nav-links">
+      <a href="./">Home</a>
+      <a href="admin/">Admin</a>
+    </nav>
   </div>
 </header>
 
@@ -26,7 +30,7 @@
           <img src="HullRed2.png" alt="Hull Red CIO Logo">
         </div>
         <div class="brand-text">
-          <h1 id="eventTitle"></h1>
+          <h1 id="eventTitle">Loading event...</h1>
           <p class="subtitle" id="eventSubtitle"></p>
         </div>
       </div>
@@ -37,8 +41,8 @@
           <p><strong>Time:</strong> <span id="eventTime"></span></p>
           <p><strong>Location:</strong> <span id="eventLocation"></span></p>
           <p id="eventDescription"></p>
+          <p><a id="mapLink" href="#" target="_blank">View on Google Maps</a></p>
         </div>
-        <div class="event-map" id="map"></div>
       </div>
 
       <div class="calendar-actions">
@@ -57,36 +61,34 @@
   </div>
 </main>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY"></script>
 <script>
-fetch('../data/event.json')
-  .then(res => res.json())
-  .then(event => {
-    document.getElementById('eventTitle').innerText = event.title;
-    document.getElementById('eventSubtitle').innerText = event.subtitle;
-    document.getElementById('eventDescription').innerText = event.description;
-    document.getElementById('eventDate').innerText = event.date;
-    document.getElementById('eventTime').innerText = event.time;
-    document.getElementById('eventLocation').innerText = event.location;
+(async function() {
+  let event;
+  try {
+    const res = await fetch('../data/event.json');
+    event = await res.json();
+  } catch {
+    // fallback if not running locally (GitHub Pages)
+    event = {
+      title: "Hull Red CIO Event",
+      subtitle: "Add this event to your calendar",
+      description: "Hull Red CIO event details can be updated manually in event.json",
+      date: "Saturday, 30 May 2026",
+      time: "18:00 – 21:00",
+      location: "Hull, United Kingdom"
+    };
+  }
 
-    const loc = {lat: event.lat, lng: event.lng};
-    const map = new google.maps.Map(document.getElementById("map"), {
-      center: loc,
-      zoom: 15,
-      styles:[
-        {elementType:"geometry",stylers:[{color:"#212026"}]},
-        {elementType:"labels.text.fill",stylers:[{color:"#cfcfcf"}]},
-        {elementType:"labels.text.stroke",stylers:[{color:"#212026"}]},
-        {featureType:"poi",elementType:"geometry",stylers:[{color:"#2a2931"}]},
-        {featureType:"road",elementType:"geometry",stylers:[{color:"#2d2c35"}]},
-        {featureType:"transit",elementType:"geometry",stylers:[{color:"#2a2931"}]},
-        {featureType:"water",elementType:"geometry",stylers:[{color:"#1c1b21"}]}
-      ],
-      disableDefaultUI:true,
-      zoomControl:true
-    });
-    new google.maps.Marker({position: loc, map: map, title: event.title});
-  });
+  document.getElementById('eventTitle').innerText = event.title;
+  document.getElementById('eventSubtitle').innerText = event.subtitle;
+  document.getElementById('eventDescription').innerText = event.description;
+  document.getElementById('eventDate').innerText = event.date;
+  document.getElementById('eventTime').innerText = event.time;
+  document.getElementById('eventLocation').innerText = event.location;
+
+  const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`;
+  document.getElementById('mapLink').href = mapUrl;
+})();
 </script>
 </body>
 </html>
