@@ -134,6 +134,32 @@ body {
   background: rgba(233,1,0,0.85);
 }
 
+/* Return to Home Button */
+.return-home-cell {
+  margin-top: 24px;
+  padding: 12px;
+  background-color: #e90100; /* Hull Red */
+  border: 2px solid #ffffff; /* White stroke */
+  border-radius: 12px;
+  text-align: center;
+  max-width: 220px;
+}
+
+.return-home-btn {
+  color: #ffffff; /* White text */
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 16px;
+  display: inline-block;
+  padding: 8px 16px;
+  transition: 0.2s ease;
+}
+
+.return-home-btn:hover {
+  background-color: rgba(255,255,255,0.1); /* Subtle hover effect */
+  border-color: #ffffff;
+}
+
 /* Calendar styles */
 .calendar-container {
   margin-top: 12px;
