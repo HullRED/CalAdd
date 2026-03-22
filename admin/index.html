@@ -3,18 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <title>Hull Red CIO | Admin</title>
+
+  <title>Hull Red CIO Admin</title>
   <link rel="stylesheet" href="../style.css" />
 </head>
-<body data-page="admin">
+<body>
   <header class="topbar">
     <div class="topbar-inner">
       <div class="nav-brand">
         <div class="nav-logo">
-          <img src="../HullRed.png" alt="Hull Red CIO Logo">
+          <img src="../HullRed2.png" alt="Hull Red CIO Logo">
         </div>
         <div class="nav-title">Hull Red CIO Admin</div>
       </div>
@@ -26,100 +28,90 @@
   </header>
 
   <main class="container">
-    <section class="hero">
-      <div class="brand">
-        <div class="logo">
-          <img src="../HullRed.png" alt="Hull Red CIO Logo">
+    <div class="login-box" id="loginBox">
+      <div class="admin-card">
+        <h1 class="admin-title">Admin Login</h1>
+        <p class="admin-subtitle">Static version only — credentials are client-side and not secure.</p>
+
+        <div class="form-grid">
+          <div class="form-row">
+            <label for="username">Username</label>
+            <input type="text" id="username" autocomplete="username" />
+          </div>
+
+          <div class="form-row">
+            <label for="password">Password</label>
+            <input type="password" id="password" autocomplete="current-password" />
+          </div>
         </div>
 
-        <div class="brand-text">
-          <h1>Admin Event Editor</h1>
-          <p class="subtitle">Sign in to update the public event shown on the main page.</p>
+        <div class="admin-actions">
+          <button class="btn btn-primary" id="loginBtn">Login</button>
         </div>
+
+        <div class="notice" id="loginNotice"></div>
       </div>
+    </div>
 
-      <div class="admin-wrap">
-        <div class="login-card" id="loginCard">
-          <h2 class="login-title">Admin Login</h2>
-          <p class="login-copy">Enter your credentials to edit the current event.</p>
+    <div class="admin-shell hidden" id="adminShell">
+      <div class="admin-card">
+        <h1 class="admin-title">Edit Event</h1>
+        <p class="admin-subtitle">Update the public event details shown on the main page.</p>
 
-          <div class="field">
-            <label for="adminUsername">Username</label>
-            <input type="text" id="adminUsername" autocomplete="username" placeholder="Enter username">
+        <div class="form-grid">
+          <div class="form-row">
+            <label for="title">Event Title</label>
+            <input type="text" id="title" />
           </div>
 
-          <div class="field">
-            <label for="adminPassword">Password</label>
-            <input type="password" id="adminPassword" autocomplete="current-password" placeholder="Enter password">
+          <div class="form-row">
+            <label for="subtitle">Subtitle</label>
+            <input type="text" id="subtitle" />
           </div>
 
-          <div class="login-actions">
-            <button class="btn-primary" id="loginBtn" type="button">Login</button>
-            <a class="btn-secondary" href="../">Cancel</a>
+          <div class="form-row two-col">
+            <div class="form-row">
+              <label for="startDate">Start Date</label>
+              <input type="date" id="startDate" />
+            </div>
+
+            <div class="form-row">
+              <label for="startTime">Start Time</label>
+              <input type="time" id="startTime" />
+            </div>
           </div>
 
-          <div class="status" id="loginStatus"></div>
-          <div class="small-note">Default login: <strong>admin</strong> / <strong>HullRed2026!</strong></div>
+          <div class="form-row two-col">
+            <div class="form-row">
+              <label for="endDate">End Date</label>
+              <input type="date" id="endDate" />
+            </div>
+
+            <div class="form-row">
+              <label for="endTime">End Time</label>
+              <input type="time" id="endTime" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label for="location">Location</label>
+            <input type="text" id="location" />
+          </div>
+
+          <div class="form-row">
+            <label for="description">Description</label>
+            <textarea id="description"></textarea>
+          </div>
         </div>
 
-        <section class="admin-panel hidden" id="adminPanel">
-          <div class="admin-head">
-            <div>
-              <h3 class="admin-title">Edit Live Event</h3>
-              <p class="admin-note">Changes are saved locally in this browser and reflected on the public page.</p>
-            </div>
-            <button class="btn-danger" id="logoutBtn" type="button">Logout</button>
-          </div>
+        <div class="admin-actions">
+          <button class="btn btn-primary" id="saveBtn">Save Event</button>
+          <button class="btn" id="resetBtn">Reset to Default</button>
+          <button class="btn" id="logoutBtn">Logout</button>
+        </div>
 
-          <div class="form-grid">
-            <div class="field full">
-              <label for="eventTitle">Event title</label>
-              <input type="text" id="eventTitle" placeholder="Event title">
-            </div>
-
-            <div class="field">
-              <label for="eventStartDate">Start date</label>
-              <input type="date" id="eventStartDate">
-            </div>
-
-            <div class="field">
-              <label for="eventEndDate">End date</label>
-              <input type="date" id="eventEndDate">
-            </div>
-
-            <div class="field">
-              <label for="eventStartTime">Start time</label>
-              <input type="time" id="eventStartTime">
-            </div>
-
-            <div class="field">
-              <label for="eventEndTime">End time</label>
-              <input type="time" id="eventEndTime">
-            </div>
-
-            <div class="field full">
-              <label for="eventLocation">Location</label>
-              <input type="text" id="eventLocation" placeholder="Event location">
-            </div>
-
-            <div class="field full">
-              <label for="eventDescription">Description</label>
-              <textarea id="eventDescription" placeholder="Event description"></textarea>
-            </div>
-          </div>
-
-          <div class="admin-actions">
-            <button class="btn-primary" id="saveBtn" type="button">Save Event</button>
-            <button class="btn-secondary" id="resetBtn" type="button">Reset to Default</button>
-          </div>
-
-          <div class="status" id="adminStatus"></div>
-        </section>
+        <div class="notice" id="saveNotice"></div>
       </div>
-    </section>
-
-    <div class="footer">
-      © 2026 Hull Red CIO • Admin Panel • Static Version
     </div>
   </main>
 
