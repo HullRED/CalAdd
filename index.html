@@ -86,23 +86,23 @@ fetch(basePath)
     document.getElementById('googleMapLink').href = `https://www.google.com/maps/search/?api=1&query=${loc}`;
     document.getElementById('appleMapLink').href = `https://maps.apple.com/?q=${loc}`;
 
-    const [startStr, endStr] = event.time.replace('–','-').split('-').map(t => t.trim());
-const startDate = new Date(`${event.date} ${startStr}`);
-const endDate = new Date(`${event.date} ${endStr}`);
+    // Time parsing fix
+    const [startStr, endStr] = event.time.replace(/[–—−]/g, '-').split('-').map(t => t.trim());
+    const startDate = new Date(`${event.date} ${startStr}`);
+    const endDate = new Date(`${event.date} ${endStr}`);
 
-if (isNaN(startDate) || isNaN(endDate)) {
-  console.error('Invalid date/time:', event.date, event.time);
-} else {
-  const start = startDate.toISOString().replace(/-|:|\.\d+/g,'');
-  const end = endDate.toISOString().replace(/-|:|\.\d+/g,'');
-  // ... continue setting calendar links
-}
+    if (isNaN(startDate) || isNaN(endDate)) {
+      console.error('Invalid date/time in JSON:', event.date, event.time);
+      return; // stop here
+    }
+
+    const start = startDate.toISOString().replace(/-|:|\.\d+/g,'');
+    const end = endDate.toISOString().replace(/-|:|\.\d+/g,'');
     
     const title = encodeURIComponent(event.title);
     const desc = encodeURIComponent(`${event.subtitle}\n${event.description}`);
     const location = encodeURIComponent(event.location);
 
-    // Apple ICS
     document.getElementById('appleLink').href = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
@@ -114,24 +114,19 @@ DTEND:${end}
 END:VEVENT
 END:VCALENDAR`;
 
-    // Google Calendar
     document.getElementById('googleLink').href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${desc}&location=${location}`;
 
-    // Outlook.com
     document.getElementById('outlookLink').href = `https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${start}&enddt=${end}&location=${location}&body=${desc}`;
 
-    // Office 365
     document.getElementById('officeLink').href = `https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${start}&enddt=${end}&location=${location}&body=${desc}`;
 
-    // Yahoo
     document.getElementById('yahooLink').href = `https://calendar.yahoo.com/?v=60&title=${title}&st=${start}&et=${end}&desc=${desc}&in_loc=${location}`;
 
-    // ICS download
     const icsLink = document.getElementById('icsLink');
     icsLink.href = document.getElementById('appleLink').href;
     icsLink.setAttribute('download', `${event.title}.ics`);
   })
-  .catch(err => console.error(err));
+  .catch(err => console.error(err)); // <- catch attached to fetch
 </script>
 
 </body>
