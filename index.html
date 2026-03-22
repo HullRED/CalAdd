@@ -1,1 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hull Red CIO Event</title>
+<link rel="stylesheet" href="public/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="nav-brand">
+      <div class="nav-logo">
+        <img src="public/HullRed2.png" alt="Hull Red CIO Logo">
+      </div>
+      <div class="nav-title">Hull Red CIO</div>
+    </div>
+    <nav class="nav-links">
+      <a href="admin/index.html" class="admin-btn">Admin</a>
+    </nav>
+  </div>
+</header>
 
+<main class="container">
+  <section class="hero">
+    <div class="panel">
+      <div class="brand">
+        <div class="logo">
+          <img src="public/HullRed2.png" alt="Hull Red CIO Logo">
+        </div>
+        <div class="brand-text">
+          <h1 id="eventTitle">Hull Red: Event Description</h1>
+          <p class="subtitle" id="eventSubtitle">Add this event to your calendar</p>
+        </div>
+      </div>
+
+      <div class="event-grid-map">
+        <div class="event-details">
+          <p><strong>Date:</strong> <span id="eventDate"></span></p>
+          <p><strong>Time:</strong> <span id="eventTime"></span></p>
+          <p><strong>Location:</strong> <span id="eventLocation"></span></p>
+          <p id="eventDescription"></p>
+          <p>
+            <a id="googleMapLink" class="map-btn" target="_blank">Show on Google Maps</a>
+            <a id="appleMapLink" class="map-btn" target="_blank">Show on Apple Maps</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="calendar-actions">
+        <a id="appleLink" class="calendar-btn" href="#"><img src="public/icons/apple.svg" alt="Apple"><span>Apple</span></a>
+        <a id="googleLink" class="calendar-btn" href="#"><img src="public/icons/google.svg" alt="Google"><span>Google</span></a>
+        <a id="officeLink" class="calendar-btn" href="#"><img src="public/icons/office365.svg" alt="Office 365"><span>Office 365</span></a>
+        <a id="outlookLink" class="calendar-btn" href="#"><img src="public/icons/outlook.svg" alt="Outlook"><span>Outlook</span></a>
+        <a id="yahooLink" class="calendar-btn" href="#"><img src="public/icons/yahoo.svg" alt="Yahoo"><span>Yahoo</span></a>
+        <a id="icsLink" class="calendar-btn" href="#"><img src="public/icons/ics.svg" alt="ICS"><span>ICS</span></a>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">
+    © 2026 Hull Red CIO • Event Calendar Page
+  </div>
+</main>
+
+<script src="public/script.js"></script>
+</body>
+</html>
