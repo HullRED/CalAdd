@@ -1,196 +1,207 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hull Red CIO Admin</title>
+<link rel="stylesheet" href="../style.css">
+<style>
+/* Login & admin panel styling */
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+.login-box {
+  background: #31303a;
+  padding: 24px;
+  border-radius: 18px;
+  border: 1px solid #3c3a45;
+  box-shadow: 0 14px 32px rgba(0,0,0,0.28);
+  max-width: 350px;
+  width: 100%;
+}
 
-  <title>Hull Red CIO Admin</title>
-  <link rel="stylesheet" href="../style.css" />
-  <style>
-    .admin-panel {
-      max-width: 500px;
-      margin: 40px auto;
-      padding: 24px;
-      background: linear-gradient(180deg, #31303a 0%, #2d2c35 100%);
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-    }
+.login-box h3 {
+  margin: 0 0 16px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+}
 
-    .admin-panel h2 {
-      margin: 0 0 16px;
-      font-size: 22px;
-      font-weight: 800;
-    }
+.login-box input {
+  width: 100%;
+  padding: 6px 10px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border: 1px solid #3c3a45;
+  background: #2a2931;
+  color: #fff;
+  font-size: 14px;
+}
 
-    .form-group {
-      margin-bottom: 12px;
-    }
+.login-box button {
+  width: 100%;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 12px;
+  background: #f15f0a;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
 
-    .form-group label {
-      display: block;
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 4px;
-      color: var(--muted);
-    }
+.login-box button:hover {
+  background: rgba(241,1,0,0.85);
+}
 
-    .form-group input,
-    .form-group textarea {
-      width: 100%;
-      padding: 6px 10px;
-      font-size: 14px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--panel-2);
-      color: var(--text);
-    }
+.admin-panel {
+  max-width: 500px;
+  margin: 40px auto;
+  padding: 24px;
+  background: linear-gradient(180deg, #31303a 0%, #2d2c35 100%);
+  border-radius: 18px;
+  border: 1px solid #3c3a45;
+  box-shadow: 0 14px 32px rgba(0,0,0,0.28);
+  display: none;
+}
 
-    .form-group textarea {
-      resize: vertical;
-      min-height: 60px;
-    }
+.admin-panel h2 {
+  margin: 0 0 16px;
+  font-size: 22px;
+  font-weight: 800;
+}
 
-    .btn-save {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 6px 14px;
-      background: var(--accent);
-      border: none;
-      border-radius: 12px;
-      color: #fff;
-      font-weight: 700;
-      cursor: pointer;
-      transition: 0.18s ease;
-    }
+.form-group {
+  margin-bottom: 12px;
+}
 
-    .btn-save:hover {
-      background: rgba(233,1,0,0.85);
-    }
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #cfcfcf;
+}
 
-    /* login overlay */
-    .login-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.75);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 50;
-    }
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #3c3a45;
+  background: #31303a;
+  color: #fff;
+}
 
-    .login-box {
-      background: var(--panel-2);
-      padding: 24px;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      max-width: 350px;
-      width: 100%;
-      text-align: center;
-    }
+.form-group textarea {
+  resize: vertical;
+  min-height: 60px;
+}
 
-    .login-box h3 {
-      margin: 0 0 16px;
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text);
-    }
+.btn-save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: #f15f0a;
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
 
-    .login-box input {
-      width: 100%;
-      padding: 6px 10px;
-      margin-bottom: 12px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--panel);
-      color: var(--text);
-      font-size: 14px;
-    }
+.btn-save:hover {
+  background: rgba(233,1,0,0.85);
+}
 
-    .login-box button {
-      width: 100%;
-      padding: 6px 14px;
-      border: none;
-      border-radius: 12px;
-      background: var(--accent);
-      color: #fff;
-      font-weight: 700;
-      cursor: pointer;
-    }
+/* Calendar styles */
+.calendar-container {
+  margin-top: 12px;
+}
 
-    .login-box button:hover {
-      background: rgba(233,1,0,0.85);
-    }
+.calendar-header {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+}
 
-    .return-home {
-      display: block;
-      text-align: center;
-      margin-bottom: 12px;
-      background: var(--panel);
-      color: var(--text);
-      text-decoration: none;
-      padding: 6px 12px;
-      border-radius: 12px;
-      font-weight: 600;
-    }
-  </style>
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-day {
+  padding: 6px;
+  text-align: center;
+  border-radius: 50%;
+  cursor: pointer;
+  background: #2a2931;
+  color: #cfcfcf;
+  transition: 0.2s ease;
+}
+
+.calendar-day.selected {
+  background: rgba(241,95,10,0.3);
+  color: #fff;
+  backdrop-filter: blur(4px);
+}
+
+.calendar-day:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(241,95,10,0.4);
+}
+</style>
 </head>
 <body>
-
-  <!-- Login overlay -->
-  <div class="login-overlay" id="loginOverlay">
-    <div class="login-box">
-      <h3>Admin Login</h3>
-      <input type="text" id="username" placeholder="Username">
-      <input type="password" id="password" placeholder="Password">
-      <button id="loginBtn">Login</button>
-    </div>
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <h3>Admin Login</h3>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button id="loginBtn">Login</button>
   </div>
+</div>
 
-  <div class="admin-panel" id="adminPanel" style="display:none;">
-    <a href="../index.html" class="return-home">← Return to Home</a>
-    <h2>Edit Event Details</h2>
-
-    <div class="form-group">
-      <label for="eventTitleInput">Event Title</label>
-      <input type="text" id="eventTitleInput">
-    </div>
-
-    <div class="form-group">
-      <label for="eventSubtitleInput">Event Subtitle</label>
-      <input type="text" id="eventSubtitleInput">
-    </div>
-
-    <div class="form-group">
-      <label for="eventDescriptionInput">Event Description</label>
-      <textarea id="eventDescriptionInput"></textarea>
-    </div>
-
-    <div class="form-group">
-      <label for="eventDateInput">Date</label>
-      <input type="text" id="eventDateInput">
-    </div>
-
-    <div class="form-group">
-      <label for="eventTimeInput">Time</label>
-      <input type="text" id="eventTimeInput">
-    </div>
-
-    <div class="form-group">
-      <label for="eventLocationInput">Location</label>
-      <input type="text" id="eventLocationInput">
-    </div>
-
-    <button class="btn-save" id="saveBtn">Save Event</button>
+<div class="admin-panel" id="adminPanel">
+  <h2>Edit Event Details</h2>
+  <div class="form-group">
+    <label for="eventTitleInput">Event Title</label>
+    <input type="text" id="eventTitleInput">
   </div>
+  <div class="form-group">
+    <label for="eventSubtitleInput">Event Subtitle</label>
+    <input type="text" id="eventSubtitleInput">
+  </div>
+  <div class="form-group">
+    <label for="eventDescriptionInput">Event Description</label>
+    <textarea id="eventDescriptionInput"></textarea>
+  </div>
+  <div class="form-group">
+    <label for="eventDateInput">Date</label>
+    <input type="text" id="eventDateInput" placeholder="e.g., Saturday, 30 May 2026">
+    <div class="calendar-container"></div>
+  </div>
+  <div class="form-group">
+    <label for="eventTimeInput">Time</label>
+    <input type="text" id="eventTimeInput" placeholder="e.g., 18:00 – 21:00">
+  </div>
+  <div class="form-group">
+    <label for="eventLocationInput">Location</label>
+    <input type="text" id="eventLocationInput" placeholder="e.g., Hull, UK">
+  </div>
+  <button class="btn-save" id="saveBtn">Save Event</button>
+</div>
 
-  <script src="admin.js"></script>
+<script src="admin.js"></script>
 </body>
 </html>
