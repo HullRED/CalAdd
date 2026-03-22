@@ -1,50 +1,59 @@
 // server.js
-require("dotenv").config();
-const express = require("express");
-const bodyParser = require("body-parser");
-const fs = require("fs");
-const path = require("path");
+require('dotenv').config();
+const express = require('express');
+const fs = require('fs');
+const fetch = require('node-fetch');
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-// Serve static files
-app.use(express.static("public"));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public')); // serve public assets
 
-const EVENT_PATH = path.join(__dirname, "data/event.json");
+const EVENT_FILE = 'event.json';
 
-// ===== LOGIN ENDPOINT =====
-app.post("/login", (req, res) => {
-  const { username, password } = req.body;
-  if (
-    username === process.env.ADMIN_USER &&
-    password === process.env.ADMIN_PASS
-  ) {
+app.get('/event', (req, res) => {
+  fs.readFile(EVENT_FILE, 'utf8', (err, data) => {
+    if (err) return res.status(500).send('Error reading event.json');
+    res.json(JSON.parse(data));
+  });
+});
+
+app.post('/event', async (req, res) => {
+  const eventData = req.body;
+  fs.writeFile(EVENT_FILE, JSON.stringify(eventData, null, 2), err => {
+    if (err) return res.status(500).send('Error saving locally');
+  });
+
+  // Push to GitHub
+  const githubUrl = `https://api.github.com/repos/${process.env.GITHUB_USER}/${process.env.GITHUB_REPO}/contents/${EVENT_FILE}`;
+  
+  // Get SHA of current file
+  const getResp = await fetch(githubUrl, {
+    headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` }
+  });
+  const getData = await getResp.json();
+  const sha = getData.sha;
+
+  const commitResp = await fetch(githubUrl, {
+    method: 'PUT',
+    headers: {
+      Authorization: `token ${process.env.GITHUB_TOKEN}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      message: `Update event.json via admin panel`,
+      content: Buffer.from(JSON.stringify(eventData, null, 2)).toString('base64'),
+      branch: process.env.GITHUB_BRANCH,
+      sha
+    })
+  });
+
+  if (commitResp.ok) {
     res.json({ success: true });
   } else {
-    res.json({ success: false });
+    const errData = await commitResp.json();
+    res.status(500).json({ success: false, error: errData });
   }
 });
 
-// ===== EVENT ENDPOINTS =====
-app.get("/event", (req, res) => {
-  try {
-    const data = fs.readFileSync(EVENT_PATH);
-    res.json(JSON.parse(data));
-  } catch (err) {
-    res.status(500).json({ error: "Could not load event.json" });
-  }
-});
-
-app.post("/event", (req, res) => {
-  try {
-    fs.writeFileSync(EVENT_PATH, JSON.stringify(req.body, null, 2));
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: "Could not save event.json" });
-  }
-});
-
-// ===== START SERVER =====
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
