@@ -17,7 +17,7 @@
     </div>
 
     <nav class="nav-links">
-      <a href="admin/index.html">Admin</a>
+      <a href="admin/index.html" class="admin-btn">Admin</a>
     </nav>
   </div>
 </header>
@@ -37,21 +37,21 @@
 
       <div class="event-grid-map">
         <div class="event-details">
-          <p><strong>Date:</strong> <span id="eventDate">Saturday, 30 May 2026</span></p>
-          <p><strong>Time:</strong> <span id="eventTime">18:00 – 21:00</span></p>
-          <p><strong>Location:</strong> <span id="eventLocation">Hull, United Kingdom</span></p>
-          <p id="eventDescription">Hull Red CIO event details can be updated manually in event.json</p>
-          <p><a id="mapLink" href="https://www.google.com/maps/search/?api=1&query=Hull,+United+Kingdom" target="_blank">View on Google Maps</a></p>
+          <p><strong>Date:</strong> <span id="eventDate">Friday, 8th May 2026</span></p>
+          <p><strong>Time:</strong> <span id="eventTime">19:30 – 23:00</span></p>
+          <p><strong>Location:</strong> <span id="eventLocation">The Student’s Union, University of Hull, Cottingham Road, HULL, HU6 7RX</span></p>
+          <p id="eventDescription">A Night With ABBA</p>
+          <p><a id="mapLink" href="https://www.google.com/maps/search/?api=1&query=Hull,+UK" target="_blank" class="map-link">View on Google Maps</a></p>
         </div>
       </div>
 
       <div class="calendar-actions">
-        <a class="calendar-btn" id="appleLink" href="#"><img src="public/icons/apple.svg" alt="Apple"><span>Apple</span></a>
-        <a class="calendar-btn" id="googleLink" href="#"><img src="public/icons/google.svg" alt="Google"><span>Google</span></a>
-        <a class="calendar-btn" id="officeLink" href="#"><img src="public/icons/office365.svg" alt="Office 365"><span>Office 365</span></a>
-        <a class="calendar-btn" id="outlookLink" href="#"><img src="public/icons/outlook.svg" alt="Outlook"><span>Outlook</span></a>
-        <a class="calendar-btn" id="yahooLink" href="#"><img src="public/icons/yahoo.svg" alt="Yahoo"><span>Yahoo</span></a>
-        <a class="calendar-btn" id="icsLink" href="#"><img src="public/icons/ics.svg" alt="ICS"><span>ICS</span></a>
+        <a class="calendar-btn" href="#" id="appleBtn"><img src="public/icons/apple.svg" alt="Apple"><span>Apple</span></a>
+        <a class="calendar-btn" href="#" id="googleBtn"><img src="public/icons/google.svg" alt="Google"><span>Google</span></a>
+        <a class="calendar-btn" href="#" id="officeBtn"><img src="public/icons/office365.svg" alt="Office 365"><span>Office 365</span></a>
+        <a class="calendar-btn" href="#" id="outlookBtn"><img src="public/icons/outlook.svg" alt="Outlook"><span>Outlook</span></a>
+        <a class="calendar-btn" href="#" id="yahooBtn"><img src="public/icons/yahoo.svg" alt="Yahoo"><span>Yahoo</span></a>
+        <a class="calendar-btn" href="#" id="icsBtn"><img src="public/icons/ics.svg" alt="ICS"><span>ICS</span></a>
       </div>
     </div>
   </section>
@@ -61,6 +61,30 @@
   </div>
 </main>
 
-<script src="public/script.js"></script>
+<script>
+  // Load event.json
+  fetch('public/event.json')
+    .then(res => res.json())
+    .then(event => {
+      document.getElementById('eventTitle').innerText = event.title;
+      document.getElementById('eventSubtitle').innerText = event.subtitle;
+      document.getElementById('eventDescription').innerText = event.description;
+      document.getElementById('eventDate').innerText = event.date;
+      document.getElementById('eventTime').innerText = event.time;
+      document.getElementById('eventLocation').innerText = event.location;
+
+      const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`;
+      document.getElementById('mapLink').href = mapUrl;
+
+      // Fill calendar buttons with example links (replace with real ICS URLs)
+      document.getElementById('appleBtn').href = 'public/apple.ics';
+      document.getElementById('googleBtn').href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=20260508T193000/20260508T230000&details=${encodeURIComponent(event.description)}&location=${encodeURIComponent(event.location)}`;
+      document.getElementById('officeBtn').href = 'public/office365.ics';
+      document.getElementById('outlookBtn').href = 'public/outlook.ics';
+      document.getElementById('yahooBtn').href = 'public/yahoo.ics';
+      document.getElementById('icsBtn').href = 'public/event.ics';
+    })
+    .catch(err => console.log('Could not load event.json:', err));
+</script>
 </body>
 </html>
