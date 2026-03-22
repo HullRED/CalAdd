@@ -15,23 +15,19 @@
       </div>
       <div class="nav-title">Hull Red CIO</div>
     </div>
-    <nav class="nav-links">
-      <a href="./">Home</a>
-      <a href="../admin/">Admin</a>
-    </nav>
   </div>
 </header>
 
 <main class="container">
   <section class="hero">
     <div class="panel">
-      <div class="brand" style="margin-bottom:16px;">
-        <div class="logo" style="width:60px; height:60px;">
+      <div class="brand">
+        <div class="logo">
           <img src="HullRed2.png" alt="Hull Red CIO Logo">
         </div>
         <div class="brand-text">
-          <h1 id="eventTitle" style="font-size:24px;"></h1>
-          <p class="subtitle" id="eventSubtitle" style="font-size:14px;"></p>
+          <h1 id="eventTitle"></h1>
+          <p class="subtitle" id="eventSubtitle"></p>
         </div>
       </div>
 
@@ -46,15 +42,16 @@
       </div>
 
       <div class="calendar-actions">
-        <a id="btnApple" class="calendar-btn" href="#"><img src="icons/apple.svg" alt="Apple"><span>Apple</span></a>
-        <a id="btnGoogle" class="calendar-btn" href="#"><img src="icons/google.svg" alt="Google"><span>Google</span></a>
-        <a id="btnOffice365" class="calendar-btn" href="#"><img src="icons/office365.svg" alt="Office 365"><span>Office 365</span></a>
-        <a id="btnOutlook" class="calendar-btn" href="#"><img src="icons/outlook.svg" alt="Outlook"><span>Outlook</span></a>
-        <a id="btnYahoo" class="calendar-btn" href="#"><img src="icons/yahoo.svg" alt="Yahoo"><span>Yahoo</span></a>
-        <a id="btnICS" class="calendar-btn" href="#" download="hull-red-cio-event.ics"><img src="icons/ics.svg" alt="ICS"><span>ICS</span></a>
+        <a class="calendar-btn" href="#"><img src="icons/apple.svg" alt="Apple"><span>Apple</span></a>
+        <a class="calendar-btn" href="#"><img src="icons/google.svg" alt="Google"><span>Google</span></a>
+        <a class="calendar-btn" href="#"><img src="icons/office365.svg" alt="Office 365"><span>Office 365</span></a>
+        <a class="calendar-btn" href="#"><img src="icons/outlook.svg" alt="Outlook"><span>Outlook</span></a>
+        <a class="calendar-btn" href="#"><img src="icons/yahoo.svg" alt="Yahoo"><span>Yahoo</span></a>
+        <a class="calendar-btn" href="#"><img src="icons/ics.svg" alt="ICS"><span>ICS</span></a>
       </div>
     </div>
   </section>
+
   <div class="footer">
     © 2026 Hull Red CIO • Event Calendar Page
   </div>
@@ -63,33 +60,33 @@
 <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY"></script>
 <script>
 fetch('../data/event.json')
-.then(res => res.json())
-.then(event => {
-  document.getElementById('eventTitle').innerText = event.title;
-  document.getElementById('eventSubtitle').innerText = event.subtitle;
-  document.getElementById('eventDescription').innerText = event.description;
-  document.getElementById('eventDate').innerText = event.date;
-  document.getElementById('eventTime').innerText = event.time;
-  document.getElementById('eventLocation').innerText = event.location;
+  .then(res => res.json())
+  .then(event => {
+    document.getElementById('eventTitle').innerText = event.title;
+    document.getElementById('eventSubtitle').innerText = event.subtitle;
+    document.getElementById('eventDescription').innerText = event.description;
+    document.getElementById('eventDate').innerText = event.date;
+    document.getElementById('eventTime').innerText = event.time;
+    document.getElementById('eventLocation').innerText = event.location;
 
-  const loc = {lat: event.lat, lng: event.lng};
-  const map = new google.maps.Map(document.getElementById("map"), {
-    center: loc,
-    zoom: 15,
-    styles:[
-      {elementType:"geometry",stylers:[{color:"#212026"}]},
-      {elementType:"labels.text.fill",stylers:[{color:"#cfcfcf"}]},
-      {elementType:"labels.text.stroke",stylers:[{color:"#212026"}]},
-      {featureType:"poi",elementType:"geometry",stylers:[{color:"#2a2931"}]},
-      {featureType:"road",elementType:"geometry",stylers:[{color:"#2d2c35"}]},
-      {featureType:"transit",elementType:"geometry",stylers:[{color:"#2a2931"}]},
-      {featureType:"water",elementType:"geometry",stylers:[{color:"#1c1b21"}]}
-    ],
-    disableDefaultUI:true,
-    zoomControl:true
+    const loc = {lat: event.lat, lng: event.lng};
+    const map = new google.maps.Map(document.getElementById("map"), {
+      center: loc,
+      zoom: 15,
+      styles:[
+        {elementType:"geometry",stylers:[{color:"#212026"}]},
+        {elementType:"labels.text.fill",stylers:[{color:"#cfcfcf"}]},
+        {elementType:"labels.text.stroke",stylers:[{color:"#212026"}]},
+        {featureType:"poi",elementType:"geometry",stylers:[{color:"#2a2931"}]},
+        {featureType:"road",elementType:"geometry",stylers:[{color:"#2d2c35"}]},
+        {featureType:"transit",elementType:"geometry",stylers:[{color:"#2a2931"}]},
+        {featureType:"water",elementType:"geometry",stylers:[{color:"#1c1b21"}]}
+      ],
+      disableDefaultUI:true,
+      zoomControl:true
+    });
+    new google.maps.Marker({position: loc, map: map, title: event.title});
   });
-  new google.maps.Marker({position: loc, map: map, title: event.title});
-});
 </script>
 </body>
 </html>
