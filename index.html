@@ -3,23 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <title>Hull Red CIO | Add to Calendar</title>
+
+  <title>Hull Red CIO Event</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-<body data-page="public">
+<body>
   <header class="topbar">
     <div class="topbar-inner">
       <div class="nav-brand">
         <div class="nav-logo">
-          <img src="HullRed2.png" alt="Hull Red CIO Logo">
+          <img src="HullRed.png" alt="Hull Red CIO Logo">
         </div>
         <div class="nav-title">Hull Red CIO</div>
       </div>
 
       <nav class="nav-links">
+        <a href="./">Home</a>
         <a href="admin/">Admin</a>
       </nav>
     </div>
@@ -33,90 +36,70 @@
         </div>
 
         <div class="brand-text">
-          <h1>Hull Red CIO Event Calendar</h1>
-          <p class="subtitle">Save our latest event to your preferred calendar in one click.</p>
+          <h1 id="eventTitle">Hull Red CIO Event</h1>
+          <p class="subtitle" id="eventSubtitle">Add this event to your calendar.</p>
         </div>
       </div>
 
-      <div class="panel">
+      <div class="panel event-panel">
         <div class="event-grid">
-          <div class="event-card">
-            <span class="eyebrow">Upcoming Event</span>
-            <h2 class="event-title" id="displayTitle">Hull Red CIO Community Event</h2>
-
-            <div class="event-meta">
-              <div class="meta-item">
-                <div class="meta-icon">📅</div>
-                <div class="meta-content">
-                  <span class="meta-label">Date</span>
-                  <span class="meta-value" id="displayDate">Saturday, 25 April 2026</span>
-                </div>
-              </div>
-
-              <div class="meta-item">
-                <div class="meta-icon">⏰</div>
-                <div class="meta-content">
-                  <span class="meta-label">Time</span>
-                  <span class="meta-value" id="displayTime">18:30 - 21:00</span>
-                </div>
-              </div>
-
-              <div class="meta-item">
-                <div class="meta-icon">📍</div>
-                <div class="meta-content">
-                  <span class="meta-label">Location</span>
-                  <span class="meta-value" id="displayLocation">Hull, United Kingdom</span>
-                </div>
-              </div>
-            </div>
-
-            <p class="event-description" id="displayDescription">
-              Join us for our latest Hull Red Nightclub! Add this event to your calendar so you never miss an unforgettable night.
-            </p>
+          <div class="event-row">
+            <span class="label">Date</span>
+            <span class="value" id="eventDate">Saturday, 30 May 2026</span>
           </div>
 
-          <div class="actions-card">
-            <h3 class="actions-title">Add to your calendar</h3>
-            <p class="actions-copy">Choose your preferred calendar service below. Apple Calendar works best using the ICS option.</p>
-
-            <div class="calendar-buttons">
-              <a class="calendar-btn" id="googleBtn" href="#" target="_blank" rel="noopener noreferrer">
-                <span>Google Calendar</span>
-                <span>Open</span>
-              </a>
-
-              <a class="calendar-btn" id="office365Btn" href="#" target="_blank" rel="noopener noreferrer">
-                <span>Office 365</span>
-                <span>Open</span>
-              </a>
-
-              <a class="calendar-btn" id="outlookBtn" href="#" target="_blank" rel="noopener noreferrer">
-                <span>Outlook</span>
-                <span>Open</span>
-              </a>
-
-              <a class="calendar-btn" id="yahooBtn" href="#" target="_blank" rel="noopener noreferrer">
-                <span>Yahoo Calendar</span>
-                <span>Open</span>
-              </a>
-
-              <button class="calendar-btn" id="appleBtn" type="button">
-                <span>Apple Calendar</span>
-                <span>ICS</span>
-              </button>
-
-              <button class="calendar-btn" id="icsBtn" type="button">
-                <span>Download ICS</span>
-                <span>.ics</span>
-              </button>
-            </div>
+          <div class="event-row">
+            <span class="label">Time</span>
+            <span class="value" id="eventTime">18:00 – 21:00</span>
           </div>
+
+          <div class="event-row">
+            <span class="label">Location</span>
+            <span class="value" id="eventLocation">Hull, United Kingdom</span>
+          </div>
+
+          <div class="event-row event-row-description">
+            <span class="label">Details</span>
+            <span class="value" id="eventDescription">Join us for our upcoming Hull Red CIO event.</span>
+          </div>
+        </div>
+
+        <div class="calendar-actions">
+          <a id="btnApple" class="calendar-btn" href="#" target="_blank" rel="noopener">
+            <img src="icons/apple.svg" alt="Apple icon">
+            <span>Apple</span>
+          </a>
+
+          <a id="btnGoogle" class="calendar-btn" href="#" target="_blank" rel="noopener">
+            <img src="icons/google.svg" alt="Google icon">
+            <span>Google</span>
+          </a>
+
+          <a id="btnOffice365" class="calendar-btn" href="#" target="_blank" rel="noopener">
+            <img src="icons/office365.svg" alt="Office 365 icon">
+            <span>Office 365</span>
+          </a>
+
+          <a id="btnOutlook" class="calendar-btn" href="#" target="_blank" rel="noopener">
+            <img src="icons/outlook.svg" alt="Outlook icon">
+            <span>Outlook</span>
+          </a>
+
+          <a id="btnYahoo" class="calendar-btn" href="#" target="_blank" rel="noopener">
+            <img src="icons/yahoo.svg" alt="Yahoo icon">
+            <span>Yahoo</span>
+          </a>
+
+          <a id="btnICS" class="calendar-btn" href="#" download="hull-red-cio-event.ics">
+            <img src="icons/ics.svg" alt="ICS icon">
+            <span>ICS</span>
+          </a>
         </div>
       </div>
     </section>
 
     <div class="footer">
-      © 2026 Hull Red CIO
+      © 2026 Hull Red CIO • Event Calendar Page
     </div>
   </main>
 
