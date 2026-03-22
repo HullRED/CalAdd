@@ -1,49 +1,58 @@
-// admin/admin.js
-
-// Hard-coded local admin credentials
-const ADMIN_USER = 'admin';
-const ADMIN_PASS = 'password';
+const runningOnServer = true; // Change to false for GitHub Pages detection if fetch/write fails
 
 const loginOverlay = document.getElementById('loginOverlay');
 const adminPanel = document.getElementById('adminPanel');
-const loginBtn = document.getElementById('loginBtn');
-const loginError = document.getElementById('loginError');
-const saveStatus = document.getElementById('saveStatus');
+const restrictedMessage = document.getElementById('restrictedMessage');
 
-// Login event
-loginBtn.addEventListener('click', () => {
-  const username = document.getElementById('username').value;
-  const password = document.getElementById('password').value;
+const USERNAME = 'admin';
+const PASSWORD = 'password123'; // replace with your secure credentials
 
-  if (username === ADMIN_USER && password === ADMIN_PASS) {
-    loginOverlay.style.display = 'none';
-    adminPanel.style.display = 'block';
-    loadEvent();
-  } else {
-    loginError.style.display = 'block';
-  }
-});
-
-// Load event.json into form
-function loadEvent() {
+function initAdmin() {
+  // Check if running on server
   fetch('../data/event.json')
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById('eventTitleInput').value = data.title;
-      document.getElementById('eventSubtitleInput').value = data.subtitle;
-      document.getElementById('eventDescriptionInput').value = data.description;
-      document.getElementById('eventDateInput').value = data.date;
-      document.getElementById('eventTimeInput').value = data.time;
-      document.getElementById('eventLocationInput').value = data.location;
+    .then(() => {
+      loginOverlay.style.display = 'flex';
     })
-    .catch(err => {
-      saveStatus.innerText = 'Failed to load event.';
+    .catch(() => {
+      loginOverlay.style.display = 'none';
+      restrictedMessage.style.display = 'block';
     });
 }
 
-// Save event locally (requires Node.js server)
+initAdmin();
+
+// Handle login
+document.getElementById('loginBtn').addEventListener('click', () => {
+  const user = document.getElementById('username').value;
+  const pass = document.getElementById('password').value;
+
+  if (user === USERNAME && pass === PASSWORD) {
+    loginOverlay.style.display = 'none';
+    adminPanel.style.display = 'block';
+    loadEventData();
+  } else {
+    alert('Incorrect credentials!');
+  }
+});
+
+// Load current event.json
+function loadEventData() {
+  fetch('../data/event.json')
+    .then(res => res.json())
+    .then(event => {
+      document.getElementById('eventTitleInput').value = event.title;
+      document.getElementById('eventSubtitleInput').value = event.subtitle;
+      document.getElementById('eventDescriptionInput').value = event.description;
+      document.getElementById('eventDateInput').value = event.date;
+      document.getElementById('eventTimeInput').value = event.time;
+      document.getElementById('eventLocationInput').value = event.location;
+    })
+    .catch(err => console.log('Error loading event.json:', err));
+}
+
+// Save updated event.json
 document.getElementById('saveBtn').addEventListener('click', () => {
-  const eventData = {
+  const updatedEvent = {
     title: document.getElementById('eventTitleInput').value,
     subtitle: document.getElementById('eventSubtitleInput').value,
     description: document.getElementById('eventDescriptionInput').value,
@@ -52,16 +61,11 @@ document.getElementById('saveBtn').addEventListener('click', () => {
     location: document.getElementById('eventLocationInput').value
   };
 
-  fetch('/admin/save-event', {
+  fetch('../data/event.json', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(eventData)
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(updatedEvent, null, 2)
   })
-    .then(res => res.json())
-    .then(resp => {
-      saveStatus.innerText = resp.message;
-    })
-    .catch(err => {
-      saveStatus.innerText = 'Failed to save event locally.';
-    });
+  .then(() => alert('Event updated successfully!'))
+  .catch(err => alert('Error saving event.json: ' + err));
 });
