@@ -88,17 +88,14 @@ fetch(basePath)
 
     // Time parsing fix
     const [startStr, endStr] = event.time.replace(/[–—−]/g, '-').split('-').map(t => t.trim());
-    const startDate = new Date(`${event.date} ${startStr}`);
-    const endDate = new Date(`${event.date} ${endStr}`);
-    
-    // Format for calendar links
-    const start = startDate.toISOString().replace(/-|:|\.\d+/g,'');
-    const end = endDate.toISOString().replace(/-|:|\.\d+/g,'');
+    const startDate = new Date(`${event.date}T${startStr}`);
+    const endDate = new Date(`${event.date}T${endStr}`);
 
     if (isNaN(startDate) || isNaN(endDate)) {
       console.error('Invalid date/time in JSON:', event.date, event.time);
-      return; // stop here
-    }
+    } else {
+      const start = startDate.toISOString().replace(/-|:|\.\d+/g,'');
+      const end = endDate.toISOString().replace(/-|:|\.\d+/g,'');
     
     const title = encodeURIComponent(event.title);
     const desc = encodeURIComponent(`${event.subtitle}\n${event.description}`);
