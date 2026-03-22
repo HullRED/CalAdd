@@ -1,112 +1,60 @@
-const STORAGE_KEY = "hullRedCioEventData";
-const LOGIN_KEY = "hullRedCioAdminLoggedIn";
+const loginOverlay = document.getElementById("loginOverlay");
+const adminPanel = document.getElementById("adminPanel");
+const loginBtn = document.getElementById("loginBtn");
 
-const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "HullRed2026!";
+const USERNAME = "admin"; // you can move to server-side/env
+const PASSWORD = "password123";
 
-const defaultEvent = {
-  title: "Hull Red CIO Event",
-  subtitle: "Add this event to your calendar.",
-  description: "Join us for our upcoming Hull Red CIO event.",
-  location: "Hull, United Kingdom",
-  startDate: "2026-05-30",
-  startTime: "18:00",
-  endDate: "2026-05-30",
-  endTime: "21:00"
-};
-
-function loadEventData() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return defaultEvent;
-
-    const parsed = JSON.parse(saved);
-    return { ...defaultEvent, ...parsed };
-  } catch (error) {
-    return defaultEvent;
-  }
-}
-
-function saveEventData(data) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
-
-function populateForm(data) {
-  document.getElementById("title").value = data.title;
-  document.getElementById("subtitle").value = data.subtitle;
-  document.getElementById("startDate").value = data.startDate;
-  document.getElementById("startTime").value = data.startTime;
-  document.getElementById("endDate").value = data.endDate;
-  document.getElementById("endTime").value = data.endTime;
-  document.getElementById("location").value = data.location;
-  document.getElementById("description").value = data.description;
-}
-
-function collectFormData() {
-  return {
-    title: document.getElementById("title").value.trim() || defaultEvent.title,
-    subtitle: document.getElementById("subtitle").value.trim() || defaultEvent.subtitle,
-    startDate: document.getElementById("startDate").value || defaultEvent.startDate,
-    startTime: document.getElementById("startTime").value || defaultEvent.startTime,
-    endDate: document.getElementById("endDate").value || defaultEvent.endDate,
-    endTime: document.getElementById("endTime").value || defaultEvent.endTime,
-    location: document.getElementById("location").value.trim() || defaultEvent.location,
-    description: document.getElementById("description").value.trim() || defaultEvent.description
-  };
-}
-
-function showAdmin() {
-  document.getElementById("loginBox").classList.add("hidden");
-  document.getElementById("adminShell").classList.remove("hidden");
-  populateForm(loadEventData());
-}
-
-function showLogin() {
-  document.getElementById("adminShell").classList.add("hidden");
-  document.getElementById("loginBox").classList.remove("hidden");
-}
-
-function setNotice(id, message) {
-  document.getElementById(id).textContent = message;
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  const isLoggedIn = localStorage.getItem(LOGIN_KEY) === "true";
-
-  if (isLoggedIn) {
-    showAdmin();
+// Login logic
+loginBtn.addEventListener("click", () => {
+  const u = document.getElementById("username").value;
+  const p = document.getElementById("password").value;
+  if (u === USERNAME && p === PASSWORD) {
+    loginOverlay.style.display = "none";
+    adminPanel.style.display = "block";
+    loadEvent();
   } else {
-    showLogin();
+    alert("Incorrect username or password");
   }
+});
 
-  document.getElementById("loginBtn").addEventListener("click", () => {
-    const username = document.getElementById("username").value.trim();
-    const password = document.getElementById("password").value;
+// Load event from server (mocked with fetch to event.json)
+function loadEvent() {
+  fetch("../data/event.json")
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("eventTitleInput").value = data.title;
+      document.getElementById("eventSubtitleInput").value = data.subtitle;
+      document.getElementById("eventDescriptionInput").value = data.description;
+      document.getElementById("eventDateInput").value = data.date;
+      document.getElementById("eventTimeInput").value = data.time;
+      document.getElementById("eventLocationInput").value = data.location;
+      document.getElementById("eventLatInput").value = data.lat;
+      document.getElementById("eventLngInput").value = data.lng;
+    });
+}
 
-    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-      localStorage.setItem(LOGIN_KEY, "true");
-      setNotice("loginNotice", "");
-      showAdmin();
-    } else {
-      setNotice("loginNotice", "Invalid username or password.");
-    }
-  });
+// Save event (requires Node.js backend)
+document.getElementById("saveBtn").addEventListener("click", () => {
+  const event = {
+    title: document.getElementById("eventTitleInput").value,
+    subtitle: document.getElementById("eventSubtitleInput").value,
+    description: document.getElementById("eventDescriptionInput").value,
+    date: document.getElementById("eventDateInput").value,
+    time: document.getElementById("eventTimeInput").value,
+    location: document.getElementById("eventLocationInput").value,
+    lat: parseFloat(document.getElementById("eventLatInput").value),
+    lng: parseFloat(document.getElementById("eventLngInput").value)
+  };
 
-  document.getElementById("saveBtn").addEventListener("click", () => {
-    const data = collectFormData();
-    saveEventData(data);
-    setNotice("saveNotice", "Event saved successfully. Refresh the main page if it's already open.");
-  });
-
-  document.getElementById("resetBtn").addEventListener("click", () => {
-    saveEventData(defaultEvent);
-    populateForm(defaultEvent);
-    setNotice("saveNotice", "Event reset to default values.");
-  });
-
-  document.getElementById("logoutBtn").addEventListener("click", () => {
-    localStorage.removeItem(LOGIN_KEY);
-    setNotice("saveNotice", "");
-    showLogin();
+  fetch("../save-event", { // POST endpoint in server.js
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(event)
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.success) alert("Event saved successfully!");
+    else alert("Error saving event");
   });
 });
