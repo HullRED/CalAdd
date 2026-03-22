@@ -69,12 +69,17 @@ body {
 
 .admin-btn {
   font-weight: 700;
-  background: linear-gradient(90deg, #e90100 0%, #212026 100%);
-  color: #fff; border-radius: 16px; padding: 8px 16px;
+  background: var(--panel);
+  color: #fff;
+  border-radius: 16px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
   transition: 0.2s ease;
 }
+
 .admin-btn:hover {
-  background: linear-gradient(90deg, #212026 0%, #e90100 100%);
+  background: linear-gradient(90deg, #e90100 0%, #212026 100%);
+  border-color: rgba(233, 1, 0, 0.5);
 }
 
 .hero {
