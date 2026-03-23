@@ -134,56 +134,100 @@ body {
   background: rgba(233,1,0,0.85);
 }
 
-/* iOS-style calendar buttons */
-.calendar-actions {
+/* Calendar container */
+.calendar-container {
+  margin-top: 12px;
+  padding: 14px;
+  background: #2a2931;
+  border: 1px solid #3c3a45;
+  border-radius: 16px;
+}
+
+/* Month + year selectors row */
+.calendar-header {
   display: flex;
-  flex-wrap: wrap;
   gap: 12px;
-  justify-content: center;
-  margin-top: 16px;
-}
-
-.calendar-btn {
-  display: inline-flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: #2a2931; /* dark panel background */
+  margin-bottom: 12px;
+}
+
+.calendar-wheel {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid #3c3a45;
+  background: #31303a;
   color: #fff;
-  border-radius: 16px; /* iOS rounded pill style */
-  border: 1px solid rgba(255,255,255,0.1);
-  font-weight: 600;
   font-size: 14px;
-  text-decoration: none;
-  cursor: pointer;
-  transition: 0.2s ease, transform 0.1s ease;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  font-weight: 600;
 }
 
-.calendar-btn img {
-  width: 20px;
-  height: 20px;
-  display: block;
+/* Weekday labels row */
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+  text-align: center;
 }
 
-.calendar-btn span {
-  display: inline-block;
-}
-
-/* Hover + active effect */
-.calendar-btn:hover {
-  background: rgba(241, 95, 10, 0.18); /* accent soft */
-  border-color: rgba(241, 95, 10, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(241,95,10,0.3);
-}
-
-.calendar-btn.selected {
-  background: rgba(241, 95, 10, 0.3);
-  border-color: rgba(241, 95, 10, 0.5);
-  color: #fff;
+.calendar-weekday {
+  font-size: 12px;
   font-weight: 700;
-  box-shadow: 0 6px 18px rgba(241,95,10,0.4);
+  color: #cfcfcf;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Date grid */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  justify-items: center;
+}
+
+/* Empty spacer cells */
+.calendar-empty {
+  width: 40px;
+  height: 40px;
+}
+
+/* Circular date buttons */
+.calendar-day {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid #3c3a45;
+  background: #31303a;
+  color: #cfcfcf;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+  user-select: none;
+}
+
+/* Hover */
+.calendar-day:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(0deg, #e90100 0%, #212026 100%);
+  border-color: #e90100;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(233, 1, 0, 0.35);
+}
+
+/* Selected */
+.calendar-day.selected {
+  background: linear-gradient(0deg, #e90100 0%, #212026 100%);
+  border-color: #e90100;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(233, 1, 0, 0.35);
 }
 
 /* Return Home button wrapper */
