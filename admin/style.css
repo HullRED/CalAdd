@@ -147,21 +147,27 @@ body {
   font-weight: 600;
 }
 
-/* Circular dropdown styling (same as calendar days) */
+/* Rounded rectangle dropdowns */
 .time-dropdown {
-  display: inline-block;
-  width: 100%;
-  padding: 6px 0;
-  border-radius: 50%;
-  background: #2a2931;
+  flex: 1;
+  padding: 6px 12px;
+  border-radius: 12px;           /* Rounded corners */
+  background: #2a2931;           /* Panel background */
   color: #cfcfcf;
-  text-align: center;
   font-size: 14px;
   font-weight: 600;
-  border: none;
+  border: 1px solid rgba(255,255,255,0.1);
   cursor: pointer;
   appearance: none;
-  transition: 0.2s ease, transform 0.1s ease;
+  transition: 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  text-align: center;
+}
+
+.time-dropdown:hover {
+  background: rgba(241,95,10,0.18);
+  box-shadow: 0 4px 10px rgba(241,95,10,0.4);
+  transform: translateY(-2px);
+  color: #fff;
 }
 
 .time-dropdown option {
@@ -170,10 +176,8 @@ body {
   color: #cfcfcf;
 }
 
-.time-dropdown:hover {
-  background: rgba(241,95,10,0.18);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(241,95,10,0.4);
+.time-dropdown option:checked {
+  background: rgba(241,95,10,0.3);
   color: #fff;
 }
 
