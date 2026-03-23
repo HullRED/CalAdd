@@ -134,6 +134,36 @@ body {
   background: rgba(233,1,0,0.85);
 }
 
+.time-selectors {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.calendar-day-dropdown {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding: 6px 10px;
+  border-radius: 50%;
+  background: #2a2931;
+  color: #cfcfcf;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  border: 1px solid #3c3a45;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.calendar-day-dropdown:hover,
+.calendar-day-dropdown:focus {
+  background: rgba(241,95,10,0.3);
+  color: #fff;
+  outline: none;
+  box-shadow: 0 4px 10px rgba(241,95,10,0.4);
+}
+
 /* Calendar container */
 .calendar-container {
   margin-top: 12px;
