@@ -66,7 +66,6 @@
 
 <script>
 const basePath = 'data/event.json';
-const icsPath = 'data/event.ics'; // Hosted ICS file
 
 fetch(basePath)
   .then(res => {
@@ -85,11 +84,9 @@ fetch(basePath)
     let endDate = new Date(`${event.date}T${event.endTime}`);
 
     if (isNaN(startDate) || isNaN(endDate)) {
-      console.error('Invalid date/time in JSON:', event.date, event.startTime, event.endTime);
       document.getElementById('eventDate').innerText = event.date;
       document.getElementById('eventTime').innerText = `${event.startTime} – ${event.endTime}`;
     } else {
-      // Display DD-MM-YYYY
       const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
       document.getElementById('eventDate').innerText = startDate.toLocaleDateString('en-GB', options);
       document.getElementById('eventTime').innerText = `${event.startTime} – ${event.endTime}`;
@@ -107,22 +104,37 @@ fetch(basePath)
     const desc = encodeURIComponent(`${event.subtitle}\n${event.description}`);
     const location = encodeURIComponent(event.location);
 
-    // Google, Outlook, Office, Yahoo remain unchanged
+    // Google, Outlook, Office, Yahoo
     document.getElementById('googleLink').href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${desc}&location=${location}`;
     document.getElementById('outlookLink').href = `https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${start}&enddt=${end}&location=${location}&body=${desc}`;
     document.getElementById('officeLink').href = `https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${start}&enddt=${end}&location=${location}&body=${desc}`;
     document.getElementById('yahooLink').href = `https://calendar.yahoo.com/?v=60&title=${title}&st=${start}&et=${end}&desc=${desc}&in_loc=${location}`;
 
-    // Apple Calendar link (open hosted ICS file)
+    // === Apple / ICS Download ===
     const appleLink = document.getElementById('appleLink');
-    appleLink.href = icsPath;
-    appleLink.setAttribute('download', 'A_Night_With_ABBA.ics');
-    appleLink.target = '_blank';
-
-    // ICS download button
     const icsLink = document.getElementById('icsLink');
-    icsLink.href = icsPath;
-    icsLink.setAttribute('download', 'A_Night_With_ABBA.ics');
+
+    const icsContent = `
+BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+SUMMARY:${event.title}
+DESCRIPTION:${event.subtitle}\\n${event.description}
+LOCATION:${event.location}
+DTSTART:${start}
+DTEND:${end}
+END:VEVENT
+END:VCALENDAR
+`.trim();
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const blobUrl = URL.createObjectURL(blob);
+
+    appleLink.href = blobUrl;
+    appleLink.setAttribute('download', `${event.title.replace(/\s+/g,'_')}.ics`);
+
+    icsLink.href = blobUrl;
+    icsLink.setAttribute('download', `${event.title.replace(/\s+/g,'_')}.ics`);
   })
   .catch(err => console.error(err));
 </script>
