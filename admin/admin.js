@@ -181,6 +181,7 @@ if (!isLocalhost) {
     weekdayRow.className = "calendar-weekdays";
     ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].forEach(day => {
       const d = document.createElement("div");
+      d.className = "calendar-weekday";
       d.textContent = day;
       weekdayRow.appendChild(d);
     });
