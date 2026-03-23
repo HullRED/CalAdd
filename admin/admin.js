@@ -299,6 +299,5 @@ if (!isLocalhost) {
 
     renderCalendar(parseInt(monthWheel.value, 10), parseInt(yearWheel.value, 10));
   }
-}e, 10), parseInt(yearWheel.value, 10));
   }
 });
