@@ -181,11 +181,6 @@ body {
   color: #fff;
 }
 
-.time-dropdown option:checked {
-  background: rgba(241,95,10,0.3);
-  color: #fff;
-}
-
 .calendar-day-dropdown {
   appearance: none;
   -webkit-appearance: none;
