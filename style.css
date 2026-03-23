@@ -100,19 +100,19 @@ h1 { margin:0; font-size:34px; line-height:1.15; font-weight:800; letter-spacing
   display: inline-block;
   padding: 8px 14px;
   border-radius: 12px;
-  background: #fff;
-  color: #212026;
+  background: linear-gradient(180deg, #2a2931 0%, #27262d 100%);
+  color: #fff;
   text-decoration: none;
   font-weight: 600;
   margin-right: 8px;
-  border: 1px solid transparent;
+  border: 1px solid var(--border);
   transition: 0.2s ease;
 }
 
 .event-details p a.map-btn:hover {
-  background: linear-gradient(90deg, #ffffff 0%, #f3f3f3 100%);
-  border-color: rgba(233, 1, 0, 0.35);
-  box-shadow: 0 6px 14px rgba(233, 1, 0, 0.18);
+  background: linear-gradient(90deg, #e90100 0%, #212026 100%);
+  border-color: rgba(233, 1, 0, 0.45);
+  box-shadow: 0 6px 14px rgba(233, 1, 0, 0.25);
   transform: translateY(-1px);
 }
 
