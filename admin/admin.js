@@ -11,7 +11,8 @@ const eventTitleInput = document.getElementById("eventTitleInput");
 const eventSubtitleInput = document.getElementById("eventSubtitleInput");
 const eventDescriptionInput = document.getElementById("eventDescriptionInput");
 const eventDateInput = document.getElementById("eventDateInput");
-const eventTimeInput = document.getElementById("eventTimeInput");
+const eventStartTimeInput = document.getElementById("eventStartTimeInput");
+const eventEndTimeInput = document.getElementById("eventEndTimeInput");
 const eventLocationInput = document.getElementById("eventLocationInput");
 const saveBtn = document.getElementById("saveBtn");
 
@@ -83,7 +84,8 @@ if (!isLocalhost) {
       eventSubtitleInput.value = event.subtitle || "";
       eventDescriptionInput.value = event.description || "";
       eventDateInput.value = event.date || "";
-      eventTimeInput.value = event.time || "";
+      eventStartTimeInput.value = event.startTime || "19:30";
+      eventEndTimeInput.value = event.endTime || "23:00";
       eventLocationInput.value = event.location || "";
     } catch (err) {
       console.error("Could not load event.json:", err);
@@ -101,7 +103,9 @@ if (!isLocalhost) {
         subtitle: eventSubtitleInput.value.trim(),
         description: eventDescriptionInput.value.trim(),
         date: eventDateInput.value.trim(),
-        time: eventTimeInput.value.trim(),
+        startTime: eventStartTimeInput.value,
+        endTime: eventEndTimeInput.value,
+        time: `${eventStartTimeInput.value} – ${eventEndTimeInput.value}`, // optional backward compatibility
         location: eventLocationInput.value.trim()
       };
 
@@ -132,6 +136,31 @@ if (!isLocalhost) {
       }
     });
   }
+
+  // =========================
+// TIME DROPDOWNS
+// =========================
+function populateTimeDropdown(selectEl) {
+  if (!selectEl) return;
+
+  selectEl.innerHTML = "";
+
+  for (let hour = 0; hour < 24; hour++) {
+    for (let minute = 0; minute < 60; minute += 30) {
+      const hh = String(hour).padStart(2, "0");
+      const mm = String(minute).padStart(2, "0");
+      const time = `${hh}:${mm}`;
+
+      const option = document.createElement("option");
+      option.value = time;
+      option.textContent = time;
+      selectEl.appendChild(option);
+    }
+  }
+}
+
+populateTimeDropdown(eventStartTimeInput);
+populateTimeDropdown(eventEndTimeInput);
 
   // =========================
   // CALENDAR PICKER
