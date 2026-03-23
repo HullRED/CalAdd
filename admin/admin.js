@@ -148,43 +148,43 @@ if (!isLocalhost) {
     }
   }
 
-  // =========================
-  // SAVE EVENT
-  // =========================
-  if (saveBtn) {
-    saveBtn.addEventListener("click", async () => {
-      const updatedEvent = {
-        title: eventTitleInput.value.trim(),
-        subtitle: eventSubtitleInput.value.trim(),
-        description: eventDescriptionInput.value.trim(),
-        date: eventDateInput.value.trim(),
-        startTime: startTimeDropdown.value,
-        endTime: endTimeDropdown.value,
-        location: eventLocationInput.value.trim(),
-      };
-      try {
-        const res = await fetch("/api/save-event", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedEvent),
-        });
-        const data = await res.json();
-        if (data.success) {
-          alert(
-            data.pushed
-              ? "Event saved locally and pushed to GitHub Pages successfully."
-              : "Event saved locally only."
-          );
-        } else {
-          alert(data.message || "Failed to save event.");
-          console.error(data.details || data);
-        }
-      } catch (err) {
-        console.error("Save error:", err);
-        alert("Could not save event. Is server.js running?");
+// =========================
+// SAVE EVENT
+// =========================
+if (saveBtn) {
+  saveBtn.addEventListener("click", async () => {
+    const updatedEvent = {
+      title: eventTitleInput.value.trim(),
+      subtitle: eventSubtitleInput.value.trim(),
+      description: eventDescriptionInput.value.trim(),
+      date: eventDateInput.value.trim(),
+      startTime: eventStartTimeInput.value, // use the actual select element
+      endTime: eventEndTimeInput.value,     // use the actual select element
+      location: eventLocationInput.value.trim(),
+    };
+    try {
+      const res = await fetch("/api/save-event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedEvent),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(
+          data.pushed
+            ? "Event saved locally and pushed to GitHub Pages successfully."
+            : "Event saved locally only."
+        );
+      } else {
+        alert(data.message || "Failed to save event.");
+        console.error(data.details || data);
       }
-    });
-  }
+    } catch (err) {
+      console.error("Save error:", err);
+      alert("Could not save event. Is server.js running?");
+    }
+  });
+}
 
   // =========================
   // CALENDAR PICKER
@@ -299,5 +299,5 @@ if (!isLocalhost) {
 
     renderCalendar(parseInt(monthWheel.value, 10), parseInt(yearWheel.value, 10));
   }
-  }
+}
 });
