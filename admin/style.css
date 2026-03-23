@@ -151,22 +151,16 @@ body {
 .time-dropdown {
   flex: 1;
   padding: 6px 12px;
-  border-radius: 50%;
-  background: #2a2931;
+  border-radius: 12px;           /* Rounded corners */
+  background: #2a2931;           /* Panel background */
   color: #cfcfcf;
   font-size: 14px;
   font-weight: 600;
-  border: 1px solid #3c3a45;
+  border: 1px solid rgba(255,255,255,0.1);
   cursor: pointer;
   appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
   transition: 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
   text-align: center;
-  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0L5 6L10 0H0Z' fill='%23cfcfcf'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 10px 6px;
 }
 
 .time-dropdown:hover {
@@ -187,7 +181,6 @@ body {
   color: #fff;
 }
 
-/* Calendar day-style dropdowns */
 .calendar-day-dropdown {
   appearance: none;
   -webkit-appearance: none;
@@ -233,14 +226,12 @@ body {
 .calendar-wheel {
   flex: 1;
   padding: 8px 10px;
-  border-radius: 50%;
+  border-radius: 10px;
   border: 1px solid #3c3a45;
   background: #31303a;
   color: #fff;
   font-size: 14px;
   font-weight: 600;
-  text-align: center;
-  cursor: pointer;
 }
 
 /* Weekday labels row */
@@ -316,6 +307,7 @@ body {
   text-align: center;
 }
 
+/* Return Home button */
 .return-home-btn {
   display: inline-block;
   padding: 10px 16px;
