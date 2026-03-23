@@ -11,12 +11,14 @@ const eventTitleInput = document.getElementById("eventTitleInput");
 const eventSubtitleInput = document.getElementById("eventSubtitleInput");
 const eventDescriptionInput = document.getElementById("eventDescriptionInput");
 const eventDateInput = document.getElementById("eventDateInput");
-const eventStartTimeInput = document.getElementById("eventStartTimeInput");
-const eventEndTimeInput = document.getElementById("eventEndTimeInput");
 const eventLocationInput = document.getElementById("eventLocationInput");
+const startTimeDropdown = document.getElementById("startTimeDropdown");
+const endTimeDropdown = document.getElementById("endTimeDropdown");
 const saveBtn = document.getElementById("saveBtn");
 
-// Detect if running locally
+// =========================
+// DETECT LOCALHOST
+// =========================
 const isLocalhost =
   window.location.hostname === "localhost" ||
   window.location.hostname === "127.0.0.1";
@@ -34,30 +36,22 @@ if (!isLocalhost) {
       </div>
     `;
   }
-
-  if (adminPanel) {
-    adminPanel.style.display = "none";
-  }
+  if (adminPanel) adminPanel.style.display = "none";
 } else {
   // =========================
-  // LOGIN LOGIC (LOCAL ONLY)
+  // LOGIN LOGIC
   // =========================
   if (loginBtn) {
     loginBtn.addEventListener("click", async () => {
       const username = usernameInput.value.trim();
       const password = passwordInput.value.trim();
-
       try {
         const res = await fetch("/login", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username, password })
         });
-
         const data = await res.json();
-
         if (data.success) {
           loginOverlay.style.display = "none";
           adminPanel.style.display = "block";
@@ -73,6 +67,27 @@ if (!isLocalhost) {
   }
 
   // =========================
+  // POPULATE TIME DROPDOWNS
+  // =========================
+  function populateTimeDropdown(selectEl) {
+    if (!selectEl) return;
+    selectEl.innerHTML = "";
+    for (let hour = 0; hour < 24; hour++) {
+      ["00", "30"].forEach(minute => {
+        const hh = String(hour).padStart(2, "0");
+        const time = `${hh}:${minute}`;
+        const option = document.createElement("option");
+        option.value = time;
+        option.textContent = time;
+        selectEl.appendChild(option);
+      });
+    }
+  }
+
+  populateTimeDropdown(startTimeDropdown);
+  populateTimeDropdown(endTimeDropdown);
+
+  // =========================
   // LOAD EVENT
   // =========================
   async function loadEvent() {
@@ -84,8 +99,8 @@ if (!isLocalhost) {
       eventSubtitleInput.value = event.subtitle || "";
       eventDescriptionInput.value = event.description || "";
       eventDateInput.value = event.date || "";
-      eventStartTimeInput.value = event.startTime || "19:30";
-      eventEndTimeInput.value = event.endTime || "23:00";
+      startTimeDropdown.value = event.startTime || "19:30";
+      endTimeDropdown.value = event.endTime || "23:00";
       eventLocationInput.value = event.location || "";
     } catch (err) {
       console.error("Could not load event.json:", err);
@@ -103,23 +118,18 @@ if (!isLocalhost) {
         subtitle: eventSubtitleInput.value.trim(),
         description: eventDescriptionInput.value.trim(),
         date: eventDateInput.value.trim(),
-        startTime: eventStartTimeInput.value,
-        endTime: eventEndTimeInput.value,
-        time: `${eventStartTimeInput.value} – ${eventEndTimeInput.value}`, // optional backward compatibility
+        startTime: startTimeDropdown.value,
+        endTime: endTimeDropdown.value,
         location: eventLocationInput.value.trim()
       };
 
       try {
         const res = await fetch("/api/save-event", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(updatedEvent)
         });
-
         const data = await res.json();
-
         if (data.success) {
           if (data.pushed) {
             alert("Event saved locally and pushed to GitHub Pages successfully.");
@@ -138,31 +148,6 @@ if (!isLocalhost) {
   }
 
   // =========================
-// TIME DROPDOWNS
-// =========================
-function populateTimeDropdown(selectEl) {
-  if (!selectEl) return;
-
-  selectEl.innerHTML = "";
-
-  for (let hour = 0; hour < 24; hour++) {
-    for (let minute = 0; minute < 60; minute += 30) {
-      const hh = String(hour).padStart(2, "0");
-      const mm = String(minute).padStart(2, "0");
-      const time = `${hh}:${mm}`;
-
-      const option = document.createElement("option");
-      option.value = time;
-      option.textContent = time;
-      selectEl.appendChild(option);
-    }
-  }
-}
-
-populateTimeDropdown(eventStartTimeInput);
-populateTimeDropdown(eventEndTimeInput);
-
-  // =========================
   // CALENDAR PICKER
   // =========================
   if (eventDateInput && eventDateInput.parentNode) {
@@ -170,35 +155,27 @@ populateTimeDropdown(eventEndTimeInput);
     calendarContainer.className = "calendar-container";
     eventDateInput.parentNode.appendChild(calendarContainer);
 
+    // Month & Year
     const calendarHeader = document.createElement("div");
     calendarHeader.className = "calendar-header";
-
     const monthWheel = document.createElement("select");
     monthWheel.className = "calendar-wheel month-wheel";
-
     const yearWheel = document.createElement("select");
     yearWheel.className = "calendar-wheel year-wheel";
 
-    const months = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
-    ];
-
-    months.forEach((month, i) => {
+    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    months.forEach((month,i) => {
       const opt = document.createElement("option");
-      opt.value = i;
-      opt.textContent = month;
+      opt.value = i; opt.textContent = month;
       monthWheel.appendChild(opt);
     });
 
     const currentYear = new Date().getFullYear();
     for (let y = currentYear - 5; y <= currentYear + 8; y++) {
       const opt = document.createElement("option");
-      opt.value = y;
-      opt.textContent = y;
+      opt.value = y; opt.textContent = y;
       yearWheel.appendChild(opt);
     }
-
     monthWheel.value = new Date().getMonth();
     yearWheel.value = new Date().getFullYear();
 
@@ -206,9 +183,10 @@ populateTimeDropdown(eventEndTimeInput);
     calendarHeader.appendChild(yearWheel);
     calendarContainer.appendChild(calendarHeader);
 
+    // Weekdays row
     const weekdayRow = document.createElement("div");
     weekdayRow.className = "calendar-weekdays";
-    ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].forEach(day => {
+    ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(day => {
       const d = document.createElement("div");
       d.className = "calendar-weekday";
       d.textContent = day;
@@ -216,6 +194,7 @@ populateTimeDropdown(eventEndTimeInput);
     });
     calendarContainer.appendChild(weekdayRow);
 
+    // Calendar grid
     const calendarGrid = document.createElement("div");
     calendarGrid.className = "calendar-grid";
     calendarContainer.appendChild(calendarGrid);
@@ -224,10 +203,10 @@ populateTimeDropdown(eventEndTimeInput);
 
     function renderCalendar(month, year) {
       calendarGrid.innerHTML = "";
-
       const firstDay = new Date(year, month, 1).getDay();
       const daysInMonth = new Date(year, month + 1, 0).getDate();
 
+      // empty days before month start
       for (let i = 0; i < firstDay; i++) {
         const empty = document.createElement("div");
         empty.className = "calendar-empty";
@@ -240,18 +219,15 @@ populateTimeDropdown(eventEndTimeInput);
         day.className = "calendar-day";
         day.textContent = d;
 
-        if (selectedDay === d) {
-          day.classList.add("selected");
-        }
+        if (selectedDay === d) day.classList.add("selected");
 
         day.addEventListener("click", () => {
           selectedDay = d;
           document.querySelectorAll(".calendar-day").forEach(el => el.classList.remove("selected"));
           day.classList.add("selected");
 
-          // Format: Friday, 8th of May 2026
           const fullDate = new Date(year, month, d);
-          const weekday = fullDate.toLocaleDateString("en-GB", { weekday: "long" });
+          const weekday = fullDate.toLocaleDateString("en-GB",{ weekday:"long" });
           const monthName = months[month];
           const ordinal = getOrdinal(d);
 
