@@ -225,6 +225,14 @@
 <div class="admin-panel" id="adminPanel">
   <h2>Edit Event Details</h2>
   <div class="form-group">
+  <label for="eventStartTimeInput">Start Time</label>
+  <select id="eventStartTimeInput"></select>
+</div>
+<div class="form-group">
+  <label for="eventEndTimeInput">Finish Time</label>
+  <select id="eventEndTimeInput"></select>
+</div>
+  <div class="form-group">
     <label for="eventSubtitleInput">Event Subtitle</label>
     <input type="text" id="eventSubtitleInput">
   </div>
@@ -237,16 +245,10 @@
     <input type="text" id="eventDateInput" placeholder="e.g., Saturday, 30 May 2026">
     <div class="calendar-container"></div>
   </div>
-<div class="form-group">
-  <label>Time</label>
-  <div class="form-group time-selector">
-  <label for="startTimeDropdown">Time</label>
-  <div class="time-dropdown-wrapper">
-    <select id="startTimeDropdown" class="time-dropdown"></select>
-    <span class="time-separator">–</span>
-    <select id="endTimeDropdown" class="time-dropdown"></select>
+  <div class="form-group">
+    <label for="eventTimeInput">Time</label>
+    <input type="text" id="eventTimeInput" placeholder="e.g., 18:00 – 21:00">
   </div>
-</div>
   <div class="form-group">
     <label for="eventLocationInput">Location</label>
     <input type="text" id="eventLocationInput" placeholder="e.g., Hull, UK">
