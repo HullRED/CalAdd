@@ -63,8 +63,9 @@ body {
   padding: 10px 14px; border-radius: 12px; border: 1px solid transparent;
   transition: 0.18s ease; 
 }
-.nav-links a:hover { 
-  border-color: rgba(241,95,10,0.5); background: rgba(241,95,10,0.08); 
+.nav-links a:not(.admin-btn):hover { 
+  border-color: rgba(241,95,10,0.5);
+  background: rgba(241,95,10,0.08); 
 }
 
 .admin-btn {
@@ -110,30 +111,36 @@ h1 { margin:0; font-size:34px; line-height:1.15; font-weight:800; letter-spacing
 }
 
 .event-details p a.map-btn:hover {
-  background: linear-gradient(90deg, #e90100 0%, #212026 100%);
-  border-color: rgba(233, 1, 0, 0.45);
+  background: linear-gradient(0deg, #e90100 0%, #212026 100%);
+  border-color: #e90100;
   box-shadow: 0 6px 14px rgba(233, 1, 0, 0.25);
-  transform: translateY(-1px);
 }
 
 .calendar-actions { margin-top:24px; display:flex; flex-wrap:wrap; gap:12px; }
 .calendar-btn {
-  display:flex; align-items:center; gap:6px;
-  padding:6px 12px; border-radius:16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 16px;
   background: linear-gradient(180deg, #2a2931 0%, #27262d 100%);
-  color: #fff; font-weight:600; text-decoration:none;
-  transition: 0.2s ease; backdrop-filter: blur(0);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  transition: 0.2s ease;
+  backdrop-filter: blur(0);
 }
-.calendar-btn img { width:25px; height:25px; }
+
+.calendar-btn img {
+  width: 25px;
+  height: 25px;
+}
+
 .calendar-btn:hover {
   background: linear-gradient(0deg, #e90100 0%, #212026 100%);
-  box-shadow:0 6px 14px rgba(233,1,0,0.32);
-}
-.calendar-btn.selected {
-  background: rgba(233,1,0,0.15);
-  backdrop-filter: blur(6px);
-  border: 1px solid #e90100;
-  box-shadow:0 6px 16px rgba(233,1,0,0.25);
+  border-color: #e90100;
+  box-shadow: 0 6px 14px rgba(233, 1, 0, 0.32);
 }
 
 .footer { margin-top:24px; text-align:center; color:var(--muted); font-size:14px; padding:8px 0; }
