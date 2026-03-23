@@ -96,9 +96,25 @@ h1 { margin:0; font-size:34px; line-height:1.15; font-weight:800; letter-spacing
 
 .panel { background: var(--panel-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
 
-.event-grid-map { display: flex; flex-wrap: wrap; gap: 20px; }
-.event-details { flex:1; min-width:260px; background: var(--panel); padding:16px; border-radius:16px; }
-.event-details p a.map-btn { display:inline-block; padding:6px 12px; border-radius:12px; background:#fff; color:#212026; text-decoration:none; font-weight:600; margin-right:6px; }
+.event-details p a.map-btn {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: #fff;
+  color: #212026;
+  text-decoration: none;
+  font-weight: 600;
+  margin-right: 8px;
+  border: 1px solid transparent;
+  transition: 0.2s ease;
+}
+
+.event-details p a.map-btn:hover {
+  background: linear-gradient(90deg, #ffffff 0%, #f3f3f3 100%);
+  border-color: rgba(233, 1, 0, 0.35);
+  box-shadow: 0 6px 14px rgba(233, 1, 0, 0.18);
+  transform: translateY(-1px);
+}
 
 .calendar-actions { margin-top:24px; display:flex; flex-wrap:wrap; gap:12px; }
 .calendar-btn {
