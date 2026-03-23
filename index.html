@@ -99,47 +99,33 @@ fetch(basePath)
     document.getElementById('googleMapLink').href = `https://www.google.com/maps/search/?api=1&query=${loc}`;
     document.getElementById('appleMapLink').href = `https://maps.apple.com/?q=${loc}`;
 
-    // === Calendar links ===
-const start = startDate.toISOString().replace(/-|:|\.\d+/g,'');
-const end = endDate.toISOString().replace(/-|:|\.\d+/g,'');
-const title = encodeURIComponent(event.title);
-const desc = encodeURIComponent(`${event.subtitle}\n${event.description}`);
-const location = encodeURIComponent(event.location);
+    // Calendar links
+    const start = startDate.toISOString().replace(/-|:|\.\d+/g,'');
+    const end = endDate.toISOString().replace(/-|:|\.\d+/g,'');
+    const title = encodeURIComponent(event.title);
+    const desc = encodeURIComponent(`${event.subtitle}\n${event.description}`);
+    const location = encodeURIComponent(event.location);
 
-// Google, Outlook, Office, Yahoo remain unchanged
-document.getElementById('googleLink').href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${desc}&location=${location}`;
-document.getElementById('outlookLink').href = `https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${start}&enddt=${end}&location=${location}&body=${desc}`;
-document.getElementById('officeLink').href = `https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${start}&enddt=${end}&location=${location}&body=${desc}`;
-document.getElementById('yahooLink').href = `https://calendar.yahoo.com/?v=60&title=${title}&st=${start}&et=${end}&desc=${desc}&in_loc=${location}`;
-
-// === Apple Calendar link using webcal:// for Mac/iOS ===
-const appleLink = document.getElementById('appleLink');
-const icsFileName = `event.ics`;
-const icsContent = `
-BEGIN:VCALENDAR
+    const appleLink = document.getElementById('appleLink');
+    appleLink.href = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR
 VERSION:2.0
 BEGIN:VEVENT
-SUMMARY:${event.title}
-DESCRIPTION:${event.subtitle}\n${event.description}
-LOCATION:${event.location}
+SUMMARY:${title}
+DESCRIPTION:${desc}
+LOCATION:${location}
 DTSTART:${start}
 DTEND:${end}
 END:VEVENT
-END:VCALENDAR
-`.trim();
+END:VCALENDAR`;
 
-// Create a Blob and host it temporarily in-memory
-const blob = new Blob([icsContent], { type: 'text/calendar' });
-const blobUrl = URL.createObjectURL(blob);
+    document.getElementById('googleLink').href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${desc}&location=${location}`;
+    document.getElementById('outlookLink').href = `https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${start}&enddt=${end}&location=${location}&body=${desc}`;
+    document.getElementById('officeLink').href = `https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${start}&enddt=${end}&location=${location}&body=${desc}`;
+    document.getElementById('yahooLink').href = `https://calendar.yahoo.com/?v=60&title=${title}&st=${start}&et=${end}&desc=${desc}&in_loc=${location}`;
 
-// Use webcal:// to trigger Apple Calendar on Apple devices
-appleLink.href = blobUrl.replace('http://', 'webcal://').replace('https://', 'webcal://');
-appleLink.setAttribute('target', '_blank');
-
-// Keep the ICS download button functional
-const icsLink = document.getElementById('icsLink');
-icsLink.href = blobUrl;
-icsLink.setAttribute('download', `${event.title}.ics`);
+    const icsLink = document.getElementById('icsLink');
+    icsLink.href = appleLink.href;
+    icsLink.setAttribute('download', `${event.title}.ics`);
   })
   .catch(err => console.error(err));
 </script>
