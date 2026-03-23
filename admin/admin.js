@@ -1,50 +1,54 @@
 // =========================
-// ELEMENTS
+// ADMIN JS
 // =========================
-const loginOverlay = document.getElementById("loginOverlay");
-const loginBtn = document.getElementById("loginBtn");
-const usernameInput = document.getElementById("username");
-const passwordInput = document.getElementById("password");
-const adminPanel = document.getElementById("adminPanel");
-
-const eventTitleInput = document.getElementById("eventTitleInput");
-const eventSubtitleInput = document.getElementById("eventSubtitleInput");
-const eventDescriptionInput = document.getElementById("eventDescriptionInput");
-const eventDateInput = document.getElementById("eventDateInput");
-const eventLocationInput = document.getElementById("eventLocationInput");
-const startTimeDropdown = document.getElementById("startTimeDropdown");
-const endTimeDropdown = document.getElementById("endTimeDropdown");
-const saveBtn = document.getElementById("saveBtn");
-
-// =========================
-// DETECT LOCALHOST
-// =========================
-const isLocalhost =
-  window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1";
-
-// =========================
-// GITHUB PAGES PROTECTION
-// =========================
-if (!isLocalhost) {
-  if (loginOverlay) {
-    loginOverlay.innerHTML = `
-      <div class="restricted-card">
-        <h2>Restricted Access</h2>
-        <p>Sorry, this page is restricted to Admins of Hull Red CIO ONLY.</p>
-        <a href="../index.html" class="return-home-btn">Return to Home</a>
-      </div>
-    `;
-  }
-  if (adminPanel) adminPanel.style.display = "none";
-} else {
+document.addEventListener("DOMContentLoaded", () => {
   // =========================
-  // LOGIN LOGIC
+  // ELEMENTS
+  // =========================
+  const loginOverlay = document.getElementById("loginOverlay");
+  const loginBtn = document.getElementById("loginBtn");
+  const usernameInput = document.getElementById("username");
+  const passwordInput = document.getElementById("password");
+  const adminPanel = document.getElementById("adminPanel");
+
+  const eventTitleInput = document.getElementById("eventTitleInput");
+  const eventSubtitleInput = document.getElementById("eventSubtitleInput");
+  const eventDescriptionInput = document.getElementById("eventDescriptionInput");
+  const eventDateInput = document.getElementById("eventDateInput");
+  const eventStartTimeInput = document.getElementById("eventStartTimeInput");
+  const eventEndTimeInput = document.getElementById("eventEndTimeInput");
+  const eventLocationInput = document.getElementById("eventLocationInput");
+  const saveBtn = document.getElementById("saveBtn");
+
+  const isLocalhost =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1";
+
+  // =========================
+  // GITHUB PAGES PROTECTION
+  // =========================
+  if (!isLocalhost) {
+    if (loginOverlay) {
+      loginOverlay.innerHTML = `
+        <div class="restricted-card">
+          <h2>Restricted Access</h2>
+          <p>Sorry, this page is restricted to Admins of Hull Red CIO ONLY.</p>
+          <a href="../index.html" class="return-home-btn">Return to Home</a>
+        </div>
+      `;
+    }
+    if (adminPanel) adminPanel.style.display = "none";
+    return; // stop running JS on non-localhost
+  }
+
+  // =========================
+  // LOGIN LOGIC (LOCAL ONLY)
   // =========================
   if (loginBtn) {
     loginBtn.addEventListener("click", async () => {
       const username = usernameInput.value.trim();
       const password = passwordInput.value.trim();
+
       try {
         const res = await fetch("/login", {
           method: "POST",
@@ -52,6 +56,7 @@ if (!isLocalhost) {
           body: JSON.stringify({ username, password })
         });
         const data = await res.json();
+
         if (data.success) {
           loginOverlay.style.display = "none";
           adminPanel.style.display = "block";
@@ -67,45 +72,78 @@ if (!isLocalhost) {
   }
 
   // =========================
-  // POPULATE TIME DROPDOWNS
+  // TIME DROPDOWNS
   // =========================
-  function populateTimeDropdown(selectEl) {
-    if (!selectEl) return;
-    selectEl.innerHTML = "";
-    for (let hour = 0; hour < 24; hour++) {
-      ["00", "30"].forEach(minute => {
-        const hh = String(hour).padStart(2, "0");
-        const time = `${hh}:${minute}`;
-        const option = document.createElement("option");
-        option.value = time;
-        option.textContent = time;
-        selectEl.appendChild(option);
+  function generateTimes() {
+    const times = [];
+    for (let h = 0; h < 24; h++) {
+      ["00", "30"].forEach(m => {
+        times.push(`${String(h).padStart(2, "0")}:${m}`);
       });
     }
+    return times;
   }
 
-  populateTimeDropdown(startTimeDropdown);
-  populateTimeDropdown(endTimeDropdown);
+  const allTimes = generateTimes();
+
+  function populateDropdown(drop, options) {
+    if (!drop) return;
+    drop.innerHTML = "";
+    options.forEach(time => {
+      const opt = document.createElement("option");
+      opt.value = time;
+      opt.textContent = time;
+      drop.appendChild(opt);
+    });
+  }
+
+  function adjustEndTimes() {
+    const startIndex = allTimes.indexOf(eventStartTimeInput.value);
+    const allowedEndTimes = allTimes.slice(startIndex + 1);
+    populateDropdown(eventEndTimeInput, allowedEndTimes);
+    eventEndTimeInput.value = allowedEndTimes.includes(eventEndTimeInput.value)
+      ? eventEndTimeInput.value
+      : allowedEndTimes[0];
+  }
+
+  if (eventStartTimeInput) {
+    eventStartTimeInput.addEventListener("change", adjustEndTimes);
+  }
 
   // =========================
   // LOAD EVENT
   // =========================
   async function loadEvent() {
+    let event;
     try {
       const res = await fetch("/api/event");
-      const event = await res.json();
-
-      eventTitleInput.value = event.title || "";
-      eventSubtitleInput.value = event.subtitle || "";
-      eventDescriptionInput.value = event.description || "";
-      eventDateInput.value = event.date || "";
-      startTimeDropdown.value = event.startTime || "19:30";
-      endTimeDropdown.value = event.endTime || "23:00";
-      eventLocationInput.value = event.location || "";
+      if (!res.ok) throw new Error("Server returned error");
+      event = await res.json();
     } catch (err) {
       console.error("Could not load event.json:", err);
-      alert("Could not load event data.");
+      // fallback test data
+      event = {
+        title: "Test Event",
+        subtitle: "Subtitle",
+        description: "Event Description",
+        date: "Monday, 1st of January 2026",
+        startTime: "19:30",
+        endTime: "23:00",
+        location: "Hull Red CIO Hall"
+      };
     }
+
+    if (eventTitleInput) eventTitleInput.value = event.title || "";
+    if (eventSubtitleInput) eventSubtitleInput.value = event.subtitle || "";
+    if (eventDescriptionInput) eventDescriptionInput.value = event.description || "";
+    if (eventDateInput) eventDateInput.value = event.date || "";
+    if (eventLocationInput) eventLocationInput.value = event.location || "";
+
+    // populate start/end dropdowns
+    populateDropdown(eventStartTimeInput, allTimes);
+    eventStartTimeInput.value = event.startTime || "19:30";
+    adjustEndTimes();
+    eventEndTimeInput.value = event.endTime || "23:00";
   }
 
   // =========================
@@ -114,13 +152,13 @@ if (!isLocalhost) {
   if (saveBtn) {
     saveBtn.addEventListener("click", async () => {
       const updatedEvent = {
-        title: eventTitleInput.value.trim(),
-        subtitle: eventSubtitleInput.value.trim(),
-        description: eventDescriptionInput.value.trim(),
-        date: eventDateInput.value.trim(),
-        startTime: startTimeDropdown.value,
-        endTime: endTimeDropdown.value,
-        location: eventLocationInput.value.trim()
+        title: eventTitleInput?.value.trim() || "",
+        subtitle: eventSubtitleInput?.value.trim() || "",
+        description: eventDescriptionInput?.value.trim() || "",
+        date: eventDateInput?.value.trim() || "",
+        startTime: eventStartTimeInput?.value || "",
+        endTime: eventEndTimeInput?.value || "",
+        location: eventLocationInput?.value.trim() || ""
       };
 
       try {
@@ -131,11 +169,9 @@ if (!isLocalhost) {
         });
         const data = await res.json();
         if (data.success) {
-          if (data.pushed) {
-            alert("Event saved locally and pushed to GitHub Pages successfully.");
-          } else {
-            alert(data.message || "Event saved locally only.");
-          }
+          alert(data.pushed
+            ? "Event saved locally and pushed to GitHub Pages successfully."
+            : "Event saved locally only.");
         } else {
           alert(data.message || "Failed to save event.");
           console.error(data.details || data);
@@ -155,35 +191,42 @@ if (!isLocalhost) {
     calendarContainer.className = "calendar-container";
     eventDateInput.parentNode.appendChild(calendarContainer);
 
-    // Month & Year
     const calendarHeader = document.createElement("div");
     calendarHeader.className = "calendar-header";
+
     const monthWheel = document.createElement("select");
     monthWheel.className = "calendar-wheel month-wheel";
+
     const yearWheel = document.createElement("select");
     yearWheel.className = "calendar-wheel year-wheel";
 
-    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-    months.forEach((month,i) => {
+    const months = [
+      "January","February","March","April","May","June",
+      "July","August","September","October","November","December"
+    ];
+
+    months.forEach((month, i) => {
       const opt = document.createElement("option");
-      opt.value = i; opt.textContent = month;
+      opt.value = i;
+      opt.textContent = month;
       monthWheel.appendChild(opt);
     });
 
     const currentYear = new Date().getFullYear();
     for (let y = currentYear - 5; y <= currentYear + 8; y++) {
       const opt = document.createElement("option");
-      opt.value = y; opt.textContent = y;
+      opt.value = y;
+      opt.textContent = y;
       yearWheel.appendChild(opt);
     }
+
     monthWheel.value = new Date().getMonth();
-    yearWheel.value = new Date().getFullYear();
+    yearWheel.value = currentYear;
 
     calendarHeader.appendChild(monthWheel);
     calendarHeader.appendChild(yearWheel);
     calendarContainer.appendChild(calendarHeader);
 
-    // Weekdays row
     const weekdayRow = document.createElement("div");
     weekdayRow.className = "calendar-weekdays";
     ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(day => {
@@ -194,7 +237,6 @@ if (!isLocalhost) {
     });
     calendarContainer.appendChild(weekdayRow);
 
-    // Calendar grid
     const calendarGrid = document.createElement("div");
     calendarGrid.className = "calendar-grid";
     calendarContainer.appendChild(calendarGrid);
@@ -206,7 +248,6 @@ if (!isLocalhost) {
       const firstDay = new Date(year, month, 1).getDay();
       const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-      // empty days before month start
       for (let i = 0; i < firstDay; i++) {
         const empty = document.createElement("div");
         empty.className = "calendar-empty";
@@ -216,22 +257,18 @@ if (!isLocalhost) {
       for (let d = 1; d <= daysInMonth; d++) {
         const day = document.createElement("button");
         day.type = "button";
-        day.className = "calendar-day";
+        day.className = "calendar-day rounded-cell"; // rounded cells
         day.textContent = d;
-
         if (selectedDay === d) day.classList.add("selected");
 
         day.addEventListener("click", () => {
           selectedDay = d;
           document.querySelectorAll(".calendar-day").forEach(el => el.classList.remove("selected"));
           day.classList.add("selected");
-
           const fullDate = new Date(year, month, d);
-          const weekday = fullDate.toLocaleDateString("en-GB",{ weekday:"long" });
-          const monthName = months[month];
+          const weekday = fullDate.toLocaleDateString("en-GB", { weekday: "long" });
           const ordinal = getOrdinal(d);
-
-          eventDateInput.value = `${weekday}, ${d}${ordinal} of ${monthName} ${year}`;
+          eventDateInput.value = `${weekday}, ${d}${ordinal} of ${months[month]} ${year}`;
         });
 
         calendarGrid.appendChild(day);
@@ -252,7 +289,6 @@ if (!isLocalhost) {
       selectedDay = null;
       renderCalendar(parseInt(monthWheel.value, 10), parseInt(yearWheel.value, 10));
     });
-
     yearWheel.addEventListener("change", () => {
       selectedDay = null;
       renderCalendar(parseInt(monthWheel.value, 10), parseInt(yearWheel.value, 10));
@@ -260,4 +296,4 @@ if (!isLocalhost) {
 
     renderCalendar(parseInt(monthWheel.value, 10), parseInt(yearWheel.value, 10));
   }
-}
+});
