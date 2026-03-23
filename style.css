@@ -63,9 +63,8 @@ body {
   padding: 10px 14px; border-radius: 12px; border: 1px solid transparent;
   transition: 0.18s ease; 
 }
-.nav-links a:not(.admin-btn):hover { 
-  border-color: rgba(241,95,10,0.5);
-  background: rgba(241,95,10,0.08); 
+.nav-links a:hover { 
+  border-color: rgba(241,95,10,0.5); background: rgba(241,95,10,0.08); 
 }
 
 .admin-btn {
