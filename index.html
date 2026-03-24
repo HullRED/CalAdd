@@ -66,6 +66,7 @@
 
 <script>
 const basePath = 'data/event.json';
+const hostedIcsPath = 'data/event.ics'; // Optional: create this file if you want direct Apple Calendar opening
 
 fetch(basePath)
   .then(res => {
@@ -74,18 +75,21 @@ fetch(basePath)
   })
   .then(event => {
     // Fill event details
-    document.getElementById('eventTitle').innerText = event.title;
-    document.getElementById('eventSubtitle').innerText = event.subtitle;
-    document.getElementById('eventDescription').innerText = event.description;
-    document.getElementById('eventLocation').innerText = event.location;
+    document.getElementById('eventTitle').innerText = event.title || '';
+    document.getElementById('eventSubtitle').innerText = event.subtitle || '';
+    document.getElementById('eventDescription').innerText = event.description || '';
+    document.getElementById('eventLocation').innerText = event.location || '';
 
     // Parse start/end dates
-    let startDate = new Date(`${event.date}T${event.startTime}`);
-    let endDate = new Date(`${event.date}T${event.endTime}`);
+    const startDate = new Date(`${event.date}T${event.startTime}`);
+    const endDate = new Date(`${event.date}T${event.endTime}`);
 
-    if (isNaN(startDate) || isNaN(endDate)) {
-      document.getElementById('eventDate').innerText = event.date;
-      document.getElementById('eventTime').innerText = `${event.startTime} – ${event.endTime}`;
+    // Display date/time safely
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      console.error('Invalid date/time in JSON:', event.date, event.startTime, event.endTime);
+      document.getElementById('eventDate').innerText = event.date || '';
+      document.getElementById('eventTime').innerText = `${event.startTime || ''} – ${event.endTime || ''}`;
+      return;
     } else {
       const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
       document.getElementById('eventDate').innerText = startDate.toLocaleDateString('en-GB', options);
@@ -93,50 +97,80 @@ fetch(basePath)
     }
 
     // Map links
-    const loc = encodeURIComponent(event.location);
+    const loc = encodeURIComponent(event.location || '');
     document.getElementById('googleMapLink').href = `https://www.google.com/maps/search/?api=1&query=${loc}`;
     document.getElementById('appleMapLink').href = `https://maps.apple.com/?q=${loc}`;
 
-    // Calendar links
-    const start = startDate.toISOString().replace(/-|:|\.\d+/g,'');
-    const end = endDate.toISOString().replace(/-|:|\.\d+/g,'');
-    const title = encodeURIComponent(event.title);
-    const desc = encodeURIComponent(`${event.subtitle}\n${event.description}`);
-    const location = encodeURIComponent(event.location);
+    // Calendar formatting
+    const start = startDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+    const end = endDate.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
 
-    // Google, Outlook, Office, Yahoo
-    document.getElementById('googleLink').href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${desc}&location=${location}`;
-    document.getElementById('outlookLink').href = `https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${start}&enddt=${end}&location=${location}&body=${desc}`;
-    document.getElementById('officeLink').href = `https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${start}&enddt=${end}&location=${location}&body=${desc}`;
-    document.getElementById('yahooLink').href = `https://calendar.yahoo.com/?v=60&title=${title}&st=${start}&et=${end}&desc=${desc}&in_loc=${location}`;
+    const title = encodeURIComponent(event.title || '');
+    const desc = encodeURIComponent(`${event.subtitle || ''}\n${event.description || ''}`);
+    const location = encodeURIComponent(event.location || '');
 
-    // === Apple / ICS Download ===
-    const appleLink = document.getElementById('appleLink');
-    const icsLink = document.getElementById('icsLink');
+    // Web calendar links
+    document.getElementById('googleLink').href =
+      `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${desc}&location=${location}`;
 
-    const icsContent = `
-BEGIN:VCALENDAR
-VERSION:2.0
-BEGIN:VEVENT
-SUMMARY:${event.title}
-DESCRIPTION:${event.subtitle}\\n${event.description}
-LOCATION:${event.location}
-DTSTART:${start}
-DTEND:${end}
-END:VEVENT
-END:VCALENDAR
-`.trim();
+    document.getElementById('outlookLink').href =
+      `https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${encodeURIComponent(startDate.toISOString())}&enddt=${encodeURIComponent(endDate.toISOString())}&location=${location}&body=${desc}`;
+
+    document.getElementById('officeLink').href =
+      `https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${encodeURIComponent(startDate.toISOString())}&enddt=${encodeURIComponent(endDate.toISOString())}&location=${location}&body=${desc}`;
+
+    document.getElementById('yahooLink').href =
+      `https://calendar.yahoo.com/?v=60&title=${title}&st=${start.replace('Z','')}&et=${end.replace('Z','')}&desc=${desc}&in_loc=${location}`;
+
+    // Create ICS content for universal fallback download
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Hull Red CIO//Event Calendar//EN',
+      'BEGIN:VEVENT',
+      `UID:${(event.title || 'event').replace(/\s+/g, '-').toLowerCase()}-${event.date}@hullred.github.io`,
+      `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z')}`,
+      `SUMMARY:${(event.title || '').replace(/\n/g, ' ')}`,
+      `DESCRIPTION:${(`${event.subtitle || ''}\\n${event.description || ''}`).replace(/\n/g, '\\n')}`,
+      `LOCATION:${(event.location || '').replace(/\n/g, ', ')}`,
+      `DTSTART:${start}`,
+      `DTEND:${end}`,
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\r\n');
 
     const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
     const blobUrl = URL.createObjectURL(blob);
 
-    appleLink.href = blobUrl;
-    appleLink.setAttribute('download', `${event.title.replace(/\s+/g,'_')}.ics`);
+    const safeFileName = `${(event.title || 'event').replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '_') || 'event'}.ics`;
 
+    const appleLink = document.getElementById('appleLink');
+    const icsLink = document.getElementById('icsLink');
+
+    // Detect Apple devices
+    const isAppleDevice =
+      /Mac|iPhone|iPad|iPod/i.test(navigator.platform) ||
+      /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    // APPLE BUTTON:
+    // - Apple device: use hosted ICS file if you create data/event.ics
+    // - Everyone else: use blob download fallback
+    if (isAppleDevice) {
+      appleLink.href = hostedIcsPath;
+      appleLink.setAttribute('download', safeFileName);
+      appleLink.setAttribute('target', '_blank');
+    } else {
+      appleLink.href = blobUrl;
+      appleLink.setAttribute('download', safeFileName);
+    }
+
+    // ICS BUTTON: always universal download
     icsLink.href = blobUrl;
-    icsLink.setAttribute('download', `${event.title.replace(/\s+/g,'_')}.ics`);
+    icsLink.setAttribute('download', safeFileName);
   })
-  .catch(err => console.error(err));
+  .catch(err => {
+    console.error(err);
+  });
 </script>
 
 </body>
