@@ -150,3 +150,52 @@ h1 { margin:0; font-size:34px; line-height:1.15; font-weight:800; letter-spacing
   .subtitle { font-size:15px; }
   .nav-title { white-space: normal; }
 }
+
+.event-grid-map {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 28px;
+  align-items: start;
+}
+
+.poster-wrap {
+  width: 100%;
+}
+
+.event-poster {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 14px 28px rgba(0,0,0,0.28);
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .event-grid-map {
+    grid-template-columns: 1fr 340px;
+    gap: 20px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .event-grid-map {
+    grid-template-columns: 1fr;
+  }
+
+  .poster-wrap {
+    order: 2;
+    margin-top: 18px;
+  }
+
+  .event-details {
+    order: 1;
+  }
+
+  .event-poster {
+    max-width: 420px;
+    margin: 0 auto;
+  }
+}
