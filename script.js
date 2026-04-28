@@ -44,26 +44,17 @@ document.getElementById("googleMapLink").href=`https://www.google.com/maps/searc
 document.getElementById("appleMapLink").href=`https://maps.apple.com/?q=${loc}`;
 
 /* CALENDAR */
-const startISO=start.toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
-const endISO=end.toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
+const startISO = start.toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
+const endISO = end.toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
 
-const title=encodeURIComponent(event.title);
-const desc=encodeURIComponent(event.subtitle+"\n"+event.description);
-const location=encodeURIComponent(event.location);
+const title = encodeURIComponent(event.title);
+const desc = encodeURIComponent(event.subtitle + "\n" + event.description);
+const location = encodeURIComponent(event.location);
 
-document.getElementById("googleLink").href=
-`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&details=${desc}&location=${location}`;
+/* =========================
+ICS FILE (CREATE FIRST)
+========================= */
 
-document.getElementById("outlookLink").href=
-`https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${start.toISOString()}&enddt=${end.toISOString()}&location=${location}&body=${desc}`;
-
-document.getElementById("officeLink").href=
-`https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${start.toISOString()}&enddt=${end.toISOString()}&location=${location}&body=${desc}`;
-
-document.getElementById("yahooLink").href=
-`https://calendar.yahoo.com/?v=60&title=${title}&st=${startISO}&et=${endISO}&desc=${desc}&in_loc=${location}`;
-
-/* ICS */
 const ics =
 `BEGIN:VCALENDAR
 VERSION:2.0
@@ -79,11 +70,45 @@ LOCATION:${event.location}
 END:VEVENT
 END:VCALENDAR`;
 
-const blob=new Blob([ics],{type:"text/calendar"});
-const url=URL.createObjectURL(blob);
+const blob = new Blob([ics], { type: "text/calendar" });
+const url = URL.createObjectURL(blob);
 
-document.getElementById("icsLink").href=url;
-document.getElementById("icsLink").download="event.ics";
+/* =========================
+APPLE LOGIC (FIXED)
+========================= */
+
+const appleLink = document.getElementById("appleLink");
+
+const isAppleDevice =
+/iPhone|iPad|iPod|Mac/i.test(navigator.userAgent);
+
+if (isAppleDevice) {
+  appleLink.href = url;
+  appleLink.download = "event.ics";
+} else {
+  appleLink.href = url;
+  appleLink.download = "event.ics";
+}
+
+/* =========================
+OTHER CALENDARS
+========================= */
+
+document.getElementById("googleLink").href =
+`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&details=${desc}&location=${location}`;
+
+document.getElementById("outlookLink").href =
+`https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${start.toISOString()}&enddt=${end.toISOString()}&location=${location}&body=${desc}`;
+
+document.getElementById("officeLink").href =
+`https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${start.toISOString()}&enddt=${end.toISOString()}&location=${location}&body=${desc}`;
+
+document.getElementById("yahooLink").href =
+`https://calendar.yahoo.com/?v=60&title=${title}&st=${startISO}&et=${endISO}&desc=${desc}&in_loc=${location}`;
+
+/* ICS BUTTON */
+document.getElementById("icsLink").href = url;
+document.getElementById("icsLink").download = "event.ics";
 
 /* POSTER */
 const modal=document.getElementById("posterModal");
