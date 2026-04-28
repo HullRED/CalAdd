@@ -1,75 +1,94 @@
-// public/script.js
+fetch("data/event.json")
+.then(r => r.json())
+.then(event => {
 
-fetch('data/event.json')
-  .then(res => {
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    return res.json();
-  })
-  .then(event => {
-    // Event details
-    document.getElementById('eventTitle').innerText = event.title;
-    document.getElementById('eventSubtitle').innerText = event.subtitle;
-    document.getElementById('eventDescription').innerText = event.description;
-    document.getElementById('eventDate').innerText = event.date;
-    document.getElementById('eventTime').innerText = event.time;
-    document.getElementById('eventLocation').innerText = event.location;
+const start = new Date(event.date + "T" + event.startTime);
+const end = new Date(event.date + "T" + event.endTime);
 
-    // Map links
-    const loc = encodeURIComponent(event.location);
-    document.getElementById('googleMapLink').href = `https://www.google.com/maps/search/?api=1&query=${loc}`;
-    document.getElementById('appleMapLink').href  = `https://maps.apple.com/?q=${loc}`;
+/* TEXT */
+document.getElementById("eventTitle").innerText = event.title;
+document.getElementById("eventSubtitle").innerText = event.subtitle;
+document.getElementById("eventDescription").innerText = event.description;
+document.getElementById("eventLocation").innerText = event.location;
+document.getElementById("eventDate").innerText = start.toLocaleDateString("en-GB");
+document.getElementById("eventTime").innerText = event.startTime + " - " + event.endTime;
 
-    // Helper to parse date and time correctly
-    function parseEventDateTime(dateStr, timeStr) {
-      // Remove weekday, e.g. "Saturday, 30 May 2026" → "30 May 2026"
-      const cleanDate = dateStr.replace(/^[A-Za-z]+, /, '');
-      return new Date(`${cleanDate} ${timeStr}`);
-    }
+/* FLIP CLOCK CORE */
+function flip(id,val){
+const el=document.getElementById(id);
+if(el.innerText!==val){
+el.classList.add("flip-anim");
+setTimeout(()=>el.classList.remove("flip-anim"),250);
+el.innerText=val;
+}
+}
 
-    // Split time on any dash type: hyphen, en-dash, em-dash
-    const timeParts = event.time.split(/\s*[-–—]\s*/);
-    const startISO = parseEventDateTime(event.date, timeParts[0]).toISOString().replace(/-|:|\.\d+/g,'');
-    const endISO   = parseEventDateTime(event.date, timeParts[1]).toISOString().replace(/-|:|\.\d+/g,'');
+function update(){
+let diff=Math.max(0,Math.floor((start-new Date())/1000));
 
-    const title       = encodeURIComponent(event.title);
-    const description = encodeURIComponent(`${event.subtitle}\n${event.description}`);
-    const location    = encodeURIComponent(event.location);
+let h=String(Math.floor(diff/3600)).padStart(2,"0");
+let m=String(Math.floor((diff%3600)/60)).padStart(2,"0");
+let s=String(diff%60).padStart(2,"0");
 
-    // Apple ICS
-    document.getElementById('appleLink').href = `data:text/calendar;charset=utf8,BEGIN:VCALENDAR
+flip("h1",h[0]); flip("h2",h[1]);
+flip("m1",m[0]); flip("m2",m[1]);
+flip("s1",s[0]); flip("s2",s[1]);
+}
+
+setInterval(update,1000);
+update();
+
+/* MAPS */
+const loc=encodeURIComponent(event.location);
+document.getElementById("googleMapLink").href=`https://www.google.com/maps/search/?api=1&query=${loc}`;
+document.getElementById("appleMapLink").href=`https://maps.apple.com/?q=${loc}`;
+
+/* CALENDAR */
+const startISO=start.toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
+const endISO=end.toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
+
+const title=encodeURIComponent(event.title);
+const desc=encodeURIComponent(event.subtitle+"\n"+event.description);
+const location=encodeURIComponent(event.location);
+
+document.getElementById("googleLink").href=
+`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&details=${desc}&location=${location}`;
+
+document.getElementById("outlookLink").href=
+`https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${start.toISOString()}&enddt=${end.toISOString()}&location=${location}&body=${desc}`;
+
+document.getElementById("officeLink").href=
+`https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${start.toISOString()}&enddt=${end.toISOString()}&location=${location}&body=${desc}`;
+
+document.getElementById("yahooLink").href=
+`https://calendar.yahoo.com/?v=60&title=${title}&st=${startISO}&et=${endISO}&desc=${desc}&in_loc=${location}`;
+
+/* ICS */
+const ics =
+`BEGIN:VCALENDAR
 VERSION:2.0
+PRODID:-//Hull Red CIO
 BEGIN:VEVENT
-SUMMARY:${title}
-DESCRIPTION:${description}
-LOCATION:${location}
+UID:${Date.now()}@hullred
+DTSTAMP:${startISO}
 DTSTART:${startISO}
 DTEND:${endISO}
+SUMMARY:${event.title}
+DESCRIPTION:${event.subtitle}\\n${event.description}
+LOCATION:${event.location}
 END:VEVENT
 END:VCALENDAR`;
 
-    // Google Calendar
-    document.getElementById('googleLink').href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&details=${description}&location=${location}`;
+const blob=new Blob([ics],{type:"text/calendar"});
+const url=URL.createObjectURL(blob);
 
-    // Outlook.com
-    document.getElementById('outlookLink').href = `https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${startISO}&enddt=${endISO}&location=${location}&body=${description}`;
+document.getElementById("icsLink").href=url;
+document.getElementById("icsLink").download="event.ics";
 
-    // Office 365
-    document.getElementById('officeLink').href = `https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${startISO}&enddt=${endISO}&location=${location}&body=${description}`;
+/* POSTER */
+const modal=document.getElementById("posterModal");
+document.getElementById("posterThumb").onclick=()=>modal.classList.add("show");
+document.getElementById("posterClose").onclick=()=>modal.classList.remove("show");
+modal.onclick=e=>{if(e.target===modal)modal.classList.remove("show");};
 
-    // Yahoo
-    document.getElementById('yahooLink').href = `https://calendar.yahoo.com/?v=60&title=${title}&st=${startISO}&et=${endISO}&desc=${description}&in_loc=${location}`;
-
-    // ICS download
-    const icsLink = document.getElementById('icsLink');
-    icsLink.href = document.getElementById('appleLink').href;
-    icsLink.setAttribute('download', `${event.title}.ics`);
-
-    // Add selected hover effect for buttons
-    document.querySelectorAll('.calendar-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.calendar-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-      });
-    });
-  })
-  .catch(err => console.error('Could not load event.json:', err));
+});
