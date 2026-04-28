@@ -14,6 +14,9 @@ padding:20px;
 .topbar{
 background:#2a2931;
 padding:15px;
+position:sticky;
+top:0;
+z-index:50;
 }
 
 .topbar-inner{
@@ -25,58 +28,109 @@ align-items:center;
 .nav-brand{
 display:flex;
 align-items:center;
-gap:10px;
+gap:12px;
+font-weight:700;
 }
 
-.nav-logo img,
-.logo img{
-width:50px;
-height:50px;
+.nav-logo{
+width:42px;
+height:42px;
 border-radius:12px;
 }
 
+.admin-btn{
+padding:10px 14px;
+background:#31303a;
+border-radius:12px;
+color:#fff;
+text-decoration:none;
+}
+
 .hero{
-margin-top:20px;
+margin-top:25px;
 }
 
 .panel{
 background:#31303a;
-padding:25px;
-border-radius:18px;
+padding:28px;
+border-radius:22px;
 }
 
 .brand{
 display:grid;
-grid-template-columns:1fr 260px;
-gap:25px;
-align-items:center;
+grid-template-columns:1fr 300px;
+gap:30px;
+align-items:start;
 }
 
 .brand-left{
 display:flex;
-align-items:center;
 gap:18px;
+align-items:flex-start;
+}
+
+.logo{
+width:85px;
+height:85px;
+border-radius:18px;
+}
+
+h1{
+margin:0;
+font-size:36px;
+line-height:1.1;
+}
+
+.subtitle{
+color:#ccc;
+margin:8px 0 16px;
+}
+
+.countdown-wrap{
+background:#2a2931;
+padding:12px 14px;
+border-radius:14px;
+display:inline-block;
+}
+
+.countdown-label{
+font-size:12px;
+color:#bbb;
+margin-bottom:4px;
+}
+
+#countdown{
+font-size:22px;
+font-weight:800;
+color:#f15f0a;
 }
 
 .brand-poster{
 width:100%;
-border-radius:16px;
+border-radius:18px;
 cursor:pointer;
 transition:.25s;
+box-shadow:0 0 20px rgba(0,0,0,.3);
 }
 
 .brand-poster:hover{
-transform:scale(1.03);
-box-shadow:0 0 18px rgba(241,95,10,.8);
+transform:translateY(-4px) scale(1.02);
+box-shadow:
+0 0 24px rgba(241,95,10,.8),
+0 18px 34px rgba(0,0,0,.35);
 }
 
 .event-details{
-margin-top:20px;
+margin-top:28px;
+font-size:17px;
+}
+
+.map-row{
+margin-top:16px;
 }
 
 .map-btn,
-.calendar-btn,
-.admin-btn{
+.calendar-btn{
 display:inline-block;
 padding:10px 14px;
 margin:5px;
@@ -84,16 +138,17 @@ background:#2a2931;
 border-radius:12px;
 text-decoration:none;
 color:#fff;
+transition:.2s;
 }
 
 .map-btn:hover,
-.calendar-btn:hover,
-.admin-btn:hover{
+.calendar-btn:hover{
 background:#e90100;
+transform:translateY(-2px);
 }
 
 .calendar-actions{
-margin-top:20px;
+margin-top:24px;
 display:flex;
 flex-wrap:wrap;
 gap:10px;
@@ -102,7 +157,7 @@ gap:10px;
 .poster-modal{
 position:fixed;
 inset:0;
-background:rgba(0,0,0,.92);
+background:rgba(0,0,0,.94);
 display:none;
 align-items:center;
 justify-content:center;
@@ -122,15 +177,15 @@ border-radius:18px;
 .poster-close{
 position:absolute;
 top:20px;
-right:25px;
-font-size:42px;
+right:30px;
+font-size:44px;
 cursor:pointer;
 }
 
 .footer{
 text-align:center;
-padding:25px;
-color:#bbb;
+padding:30px;
+color:#aaa;
 }
 
 @media(max-width:768px){
@@ -141,13 +196,18 @@ grid-template-columns:1fr;
 
 .brand-left{
 flex-direction:column;
+align-items:center;
 text-align:center;
 }
 
 .brand-poster{
-max-width:320px;
+max-width:340px;
 margin:auto;
 display:block;
+}
+
+h1{
+font-size:30px;
 }
 
 }
