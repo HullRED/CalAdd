@@ -6,6 +6,7 @@
 <title>Hull Red CIO Event</title>
 <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 <!-- FULLSCREEN POSTER -->
@@ -32,51 +33,48 @@
 <section class="hero">
 <div class="panel">
 
-<!-- TOP SECTION -->
+<!-- BRAND -->
 <div class="brand">
 
-<div class="brand-left">
+  <div class="brand-left">
 
-<img src="public/HullRed2.png" class="logo" alt="">
+    <img src="public/HullRed2.png" class="logo" alt="">
 
-<div class="brand-text">
-<h1 id="eventTitle">Loading...</h1>
-<p class="subtitle" id="eventSubtitle">Please wait</p>
+    <div class="brand-text">
+      <h1 id="eventTitle">Loading...</h1>
+      <p class="subtitle" id="eventSubtitle">Loading...</p>
 
-<div class="countdown-wrap">
-<div class="countdown-label">Event Starts In</div>
-<div id="countdown">Loading...</div>
+      <div class="countdown-wrap">
+        <div class="countdown-label">Event Starts In</div>
+        <div id="countdown">--:--:--</div>
+      </div>
+
+      <div class="event-mini">
+        <div><strong>Date:</strong> <span id="eventDate"></span></div>
+        <div><strong>Time:</strong> <span id="eventTime"></span></div>
+        <div><strong>Location:</strong> <span id="eventLocation"></span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="brand-right">
+    <img src="public/poster.png" class="brand-poster" id="posterThumb">
+  </div>
+
 </div>
 
-</div>
-</div>
-
-<div class="brand-right">
-<img src="public/poster.png"
-     class="brand-poster"
-     id="posterThumb"
-     alt="Poster">
-</div>
-
-</div>
-
-<!-- DETAILS -->
+<!-- DESCRIPTION -->
 <div class="event-details">
+  <p id="eventDescription"></p>
 
-<p><strong>Date:</strong> <span id="eventDate"></span></p>
-<p><strong>Time:</strong> <span id="eventTime"></span></p>
-<p><strong>Location:</strong> <span id="eventLocation"></span></p>
-
-<p id="eventDescription"></p>
-
-<div class="map-row">
-<a id="googleMapLink" class="map-btn" target="_blank">Google Maps</a>
-<a id="appleMapLink" class="map-btn" target="_blank">Apple Maps</a>
+  <div class="map-row">
+    <a id="googleMapLink" class="map-btn" target="_blank">Google Maps</a>
+    <a id="appleMapLink" class="map-btn" target="_blank">Apple Maps</a>
+  </div>
 </div>
 
-</div>
-
-<!-- CALENDAR -->
+<!-- ACTIONS -->
 <div class="calendar-actions">
 
 <a id="appleLink" class="calendar-btn">Apple</a>
@@ -86,20 +84,24 @@
 <a id="yahooLink" class="calendar-btn">Yahoo</a>
 <a id="icsLink" class="calendar-btn">ICS</a>
 
+<a id="walletLink" class="calendar-btn">Apple Wallet</a>
+
 </div>
 
 </div>
 </section>
 
 <footer class="footer">
-© 2026 Hull Red CIO • Event Calendar Page
+© 2026 Hull Red CIO
 </footer>
 
 </main>
 
 <script>
+let eventStart = null;
+
 fetch("data/event.json")
-.then(res => res.json())
+.then(r => r.json())
 .then(event => {
 
 document.getElementById("eventTitle").innerText = event.title;
@@ -110,32 +112,13 @@ document.getElementById("eventLocation").innerText = event.location;
 const startDate = new Date(event.date + "T" + event.startTime);
 const endDate = new Date(event.date + "T" + event.endTime);
 
+eventStart = startDate;
+
 document.getElementById("eventDate").innerText =
 startDate.toLocaleDateString("en-GB");
 
 document.getElementById("eventTime").innerText =
 event.startTime + " – " + event.endTime;
-
-/* COUNTDOWN */
-function updateCountdown(){
-const now = new Date();
-const diff = startDate - now;
-
-if(diff <= 0){
-document.getElementById("countdown").innerText = "Now Live";
-return;
-}
-
-const d = Math.floor(diff / 86400000);
-const h = Math.floor((diff % 86400000)/3600000);
-const m = Math.floor((diff % 3600000)/60000);
-
-document.getElementById("countdown").innerText =
-d + "d " + h + "h " + m + "m";
-}
-
-updateCountdown();
-setInterval(updateCountdown,60000);
 
 /* MAPS */
 const loc = encodeURIComponent(event.location);
@@ -146,7 +129,7 @@ document.getElementById("googleMapLink").href =
 document.getElementById("appleMapLink").href =
 `https://maps.apple.com/?q=${loc}`;
 
-/* CALENDAR FORMAT */
+/* CALENDAR */
 const start = startDate.toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
 const end = endDate.toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
 
@@ -173,7 +156,7 @@ const ics =
 VERSION:2.0
 PRODID:-//Hull Red CIO//EN
 BEGIN:VEVENT
-UID:${Date.now()}@hullred.co.uk
+UID:${Date.now()}@hullred
 DTSTAMP:${start}
 DTSTART:${start}
 DTEND:${end}
@@ -189,12 +172,31 @@ const url = URL.createObjectURL(blob);
 document.getElementById("icsLink").href = url;
 document.getElementById("icsLink").download = "event.ics";
 
-document.getElementById("appleLink").href = url;
-document.getElementById("appleLink").download = "event.ics";
+/* WALLET (placeholder) */
+document.getElementById("walletLink").href = "wallet/event.pkpass";
 
 });
 
-/* POSTER MODAL */
+/* COUNTDOWN WITH SECONDS */
+function updateCountdown(){
+
+if(!eventStart) return;
+
+const now = new Date();
+const diff = Math.max(0, eventStart - now);
+
+const d = Math.floor(diff / 86400000);
+const h = Math.floor((diff % 86400000)/3600000);
+const m = Math.floor((diff % 3600000)/60000);
+const s = Math.floor((diff % 60000)/1000);
+
+document.getElementById("countdown").innerText =
+`${d}d ${h}h ${m}m ${s}s`;
+}
+
+setInterval(updateCountdown, 1000);
+
+/* POSTER */
 const posterThumb = document.getElementById("posterThumb");
 const posterModal = document.getElementById("posterModal");
 const posterClose = document.getElementById("posterClose");
@@ -202,7 +204,7 @@ const posterClose = document.getElementById("posterClose");
 posterThumb.onclick = () => posterModal.classList.add("show");
 posterClose.onclick = () => posterModal.classList.remove("show");
 
-posterModal.onclick = (e)=>{
+posterModal.onclick = e => {
 if(e.target === posterModal){
 posterModal.classList.remove("show");
 }
