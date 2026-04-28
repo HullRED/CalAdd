@@ -1,6 +1,6 @@
 body{
 margin:0;
-font-family:Arial;
+font-family:Arial,sans-serif;
 background:#212026;
 color:#fff;
 }
@@ -25,30 +25,23 @@ justify-content:space-between;
 align-items:center;
 }
 
-.nav-brand{
-display:flex;
-align-items:center;
-gap:12px;
-font-weight:700;
-}
-
-.nav-logo{
-width:42px;
-height:42px;
-border-radius:12px;
-}
+.nav-logo{width:42px;border-radius:10px;}
 
 .admin-btn{
 padding:10px 14px;
-background:#fff;
-color:#000;
+background:#31303a;
 border-radius:12px;
+color:#fff;
 text-decoration:none;
 transition:.2s;
 }
 
-.admin-btn:hover{
+/* RED HOVER EVERYTHING */
+.admin-btn:hover,
+.map-btn:hover,
+.calendar-btn:hover{
 background:#e90100;
+transform:translateY(-2px);
 color:#fff;
 }
 
@@ -60,49 +53,51 @@ padding:28px;
 border-radius:22px;
 }
 
+/* LAYOUT */
 .brand{
 display:grid;
 grid-template-columns:1fr 300px;
 gap:30px;
-align-items:start;
 }
 
 .brand-left{
 display:flex;
 gap:18px;
-align-items:flex-start;
 }
 
-.logo{
-width:85px;
-height:85px;
-border-radius:18px;
+.logo{width:85px;height:85px;border-radius:18px;}
+
+h1{font-size:40px;margin:0;}
+
+.subtitle{color:#ccc;margin-top:8px;font-size:18px;}
+
+/* BIGGER EVENT DETAILS */
+.event-details{
+margin-top:28px;
+font-size:20px;
+line-height:1.8;
 }
 
-h1{margin:0;font-size:36px;}
-
-.subtitle{color:#ccc;}
-
-.countdown-wrap{
-background:#fff;
-color:#000;
-padding:12px;
-border-radius:14px;
-display:inline-block;
+/* FLIP CLOCK */
+.flip-clock{
+display:flex;
+gap:4px;
+align-items:center;
+font-size:28px;
+font-weight:bold;
 margin-top:10px;
-font-weight:800;
 }
 
-#countdown{
-font-size:22px;
+.flip{
+background:#000;
+padding:6px 10px;
+border-radius:6px;
+min-width:20px;
+text-align:center;
+transition:transform .25s;
 }
 
-.event-mini{
-margin-top:10px;
-font-size:14px;
-color:#ddd;
-}
-
+/* POSTER */
 .brand-poster{
 width:100%;
 border-radius:18px;
@@ -115,40 +110,35 @@ box-shadow:0 0 25px rgba(241,95,10,.8);
 transform:scale(1.02);
 }
 
-.event-details{margin-top:20px;}
-
+/* BUTTONS */
 .map-btn,
 .calendar-btn{
-background:#fff;
-color:#000;
+background:#2a2931;
 padding:10px 14px;
 border-radius:12px;
+color:#fff;
 text-decoration:none;
 display:inline-block;
 margin:5px;
-font-weight:600;
+transition:.2s;
 }
 
-.map-btn:hover,
-.calendar-btn:hover{
-background:#000;
-color:#fff;
-}
-
+/* MODAL */
 .poster-modal{
 position:fixed;
 inset:0;
 background:rgba(0,0,0,.95);
 display:none;
-align-items:center;
 justify-content:center;
+align-items:center;
+z-index:9999;
 }
 
 .poster-modal.show{display:flex;}
 
 .poster-full{
-max-width:92vw;
-max-height:92vh;
+max-width:90vw;
+max-height:90vh;
 border-radius:18px;
 }
 
@@ -156,17 +146,16 @@ border-radius:18px;
 position:absolute;
 top:20px;
 right:30px;
-font-size:44px;
+font-size:40px;
 cursor:pointer;
 }
 
 .footer{
 text-align:center;
-padding:20px;
+padding:30px;
 color:#aaa;
 }
 
 @media(max-width:768px){
 .brand{grid-template-columns:1fr;}
-.brand-left{flex-direction:column;align-items:center;text-align:center;}
 }
