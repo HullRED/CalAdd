@@ -6,6 +6,10 @@
 <title>Hull Red CIO Event</title>
 <link rel="stylesheet" href="style.css">
 </head>
+  <div class="poster-modal" id="posterModal">
+  <span class="poster-close" id="posterClose">×</span>
+  <img src="public/poster.png" class="poster-full" id="posterFull">
+</div>
 <body>
 
 <header class="topbar">
@@ -26,14 +30,23 @@
   <section class="hero">
     <div class="panel">
       <div class="brand">
-        <div class="logo">
-          <img src="public/HullRed2.png" alt="Hull Red CIO Logo">
-        </div>
-        <div class="brand-text">
-          <h1 id="eventTitle">Hull Red: Event Description</h1>
-          <p class="subtitle" id="eventSubtitle">Add this event to your calendar</p>
-        </div>
-      </div>
+
+  <div class="brand-left">
+    <div class="logo">
+      <img src="public/HullRed2.png" alt="Hull Red CIO Logo">
+    </div>
+
+    <div class="brand-text">
+      <h1 id="eventTitle">Hull Red: Event Description</h1>
+      <p class="subtitle" id="eventSubtitle">Add this event to your calendar</p>
+    </div>
+  </div>
+
+  <div class="brand-poster-wrap">
+    <img src="public/poster.png" alt="Event Poster" class="brand-poster" id="posterThumb">
+  </div>
+
+</div>
 
       <div class="event-grid-map">
 
