@@ -33,26 +33,30 @@
 <section class="hero">
 <div class="panel">
 
-<!-- BRAND -->
+<!-- BRAND + POSTER -->
 <div class="brand">
 
   <div class="brand-left">
-
     <img src="public/HullRed2.png" class="logo" alt="">
 
     <div class="brand-text">
       <h1 id="eventTitle">Loading...</h1>
-      <p class="subtitle" id="eventSubtitle">Loading...</p>
+      <p class="subtitle" id="eventSubtitle"></p>
 
+      <!-- FLIP CLOCK -->
       <div class="countdown-wrap">
         <div class="countdown-label">Event Starts In</div>
-        <div id="countdown">--:--:--</div>
-      </div>
 
-      <div class="event-mini">
-        <div><strong>Date:</strong> <span id="eventDate"></span></div>
-        <div><strong>Time:</strong> <span id="eventTime"></span></div>
-        <div><strong>Location:</strong> <span id="eventLocation"></span></div>
+        <div class="flip-clock">
+          <div class="flip" id="h1">0</div>
+          <div class="flip" id="h2">0</div>
+          <span>:</span>
+          <div class="flip" id="m1">0</div>
+          <div class="flip" id="m2">0</div>
+          <span>:</span>
+          <div class="flip" id="s1">0</div>
+          <div class="flip" id="s2">0</div>
+        </div>
       </div>
 
     </div>
@@ -64,28 +68,27 @@
 
 </div>
 
-<!-- DESCRIPTION -->
+<!-- DETAILS -->
 <div class="event-details">
-  <p id="eventDescription"></p>
+<p><strong>Date:</strong> <span id="eventDate"></span></p>
+<p><strong>Time:</strong> <span id="eventTime"></span></p>
+<p><strong>Location:</strong> <span id="eventLocation"></span></p>
+<p id="eventDescription"></p>
 
-  <div class="map-row">
-    <a id="googleMapLink" class="map-btn" target="_blank">Google Maps</a>
-    <a id="appleMapLink" class="map-btn" target="_blank">Apple Maps</a>
-  </div>
+<div class="map-row">
+<a id="googleMapLink" class="map-btn" target="_blank">Google Maps</a>
+<a id="appleMapLink" class="map-btn" target="_blank">Apple Maps</a>
+</div>
 </div>
 
-<!-- ACTIONS -->
+<!-- CALENDAR -->
 <div class="calendar-actions">
-
 <a id="appleLink" class="calendar-btn">Apple</a>
 <a id="googleLink" class="calendar-btn">Google</a>
 <a id="officeLink" class="calendar-btn">Office 365</a>
 <a id="outlookLink" class="calendar-btn">Outlook</a>
 <a id="yahooLink" class="calendar-btn">Yahoo</a>
 <a id="icsLink" class="calendar-btn">ICS</a>
-
-<a id="walletLink" class="calendar-btn">Apple Wallet</a>
-
 </div>
 
 </div>
@@ -97,119 +100,7 @@
 
 </main>
 
-<script>
-let eventStart = null;
-
-fetch("data/event.json")
-.then(r => r.json())
-.then(event => {
-
-document.getElementById("eventTitle").innerText = event.title;
-document.getElementById("eventSubtitle").innerText = event.subtitle;
-document.getElementById("eventDescription").innerText = event.description;
-document.getElementById("eventLocation").innerText = event.location;
-
-const startDate = new Date(event.date + "T" + event.startTime);
-const endDate = new Date(event.date + "T" + event.endTime);
-
-eventStart = startDate;
-
-document.getElementById("eventDate").innerText =
-startDate.toLocaleDateString("en-GB");
-
-document.getElementById("eventTime").innerText =
-event.startTime + " – " + event.endTime;
-
-/* MAPS */
-const loc = encodeURIComponent(event.location);
-
-document.getElementById("googleMapLink").href =
-`https://www.google.com/maps/search/?api=1&query=${loc}`;
-
-document.getElementById("appleMapLink").href =
-`https://maps.apple.com/?q=${loc}`;
-
-/* CALENDAR */
-const start = startDate.toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
-const end = endDate.toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
-
-const title = encodeURIComponent(event.title);
-const desc = encodeURIComponent(event.subtitle + "\n" + event.description);
-const location = encodeURIComponent(event.location);
-
-/* LINKS */
-document.getElementById("googleLink").href =
-`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${desc}&location=${location}`;
-
-document.getElementById("outlookLink").href =
-`https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${startDate.toISOString()}&enddt=${endDate.toISOString()}&location=${location}&body=${desc}`;
-
-document.getElementById("officeLink").href =
-`https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${startDate.toISOString()}&enddt=${endDate.toISOString()}&location=${location}&body=${desc}`;
-
-document.getElementById("yahooLink").href =
-`https://calendar.yahoo.com/?v=60&title=${title}&st=${start.replace("Z","")}&et=${end.replace("Z","")}&desc=${desc}&in_loc=${location}`;
-
-/* ICS */
-const ics =
-`BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//Hull Red CIO//EN
-BEGIN:VEVENT
-UID:${Date.now()}@hullred
-DTSTAMP:${start}
-DTSTART:${start}
-DTEND:${end}
-SUMMARY:${event.title}
-DESCRIPTION:${event.subtitle}\\n${event.description}
-LOCATION:${event.location}
-END:VEVENT
-END:VCALENDAR`;
-
-const blob = new Blob([ics], {type:"text/calendar"});
-const url = URL.createObjectURL(blob);
-
-document.getElementById("icsLink").href = url;
-document.getElementById("icsLink").download = "event.ics";
-
-/* WALLET (placeholder) */
-document.getElementById("walletLink").href = "wallet/event.pkpass";
-
-});
-
-/* COUNTDOWN WITH SECONDS */
-function updateCountdown(){
-
-if(!eventStart) return;
-
-const now = new Date();
-const diff = Math.max(0, eventStart - now);
-
-const d = Math.floor(diff / 86400000);
-const h = Math.floor((diff % 86400000)/3600000);
-const m = Math.floor((diff % 3600000)/60000);
-const s = Math.floor((diff % 60000)/1000);
-
-document.getElementById("countdown").innerText =
-`${d}d ${h}h ${m}m ${s}s`;
-}
-
-setInterval(updateCountdown, 1000);
-
-/* POSTER */
-const posterThumb = document.getElementById("posterThumb");
-const posterModal = document.getElementById("posterModal");
-const posterClose = document.getElementById("posterClose");
-
-posterThumb.onclick = () => posterModal.classList.add("show");
-posterClose.onclick = () => posterModal.classList.remove("show");
-
-posterModal.onclick = e => {
-if(e.target === posterModal){
-posterModal.classList.remove("show");
-}
-};
-</script>
+<script src="script.js"></script>
 
 </body>
 </html>
