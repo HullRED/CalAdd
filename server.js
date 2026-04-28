@@ -165,22 +165,3 @@ app.post("/api/save-event", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
-
-
-const posterThumb = document.getElementById('posterThumb');
-const posterModal = document.getElementById('posterModal');
-const posterClose = document.getElementById('posterClose');
-
-posterThumb.addEventListener('click', () => {
-  posterModal.classList.add('show');
-});
-
-posterClose.addEventListener('click', () => {
-  posterModal.classList.remove('show');
-});
-
-posterModal.addEventListener('click', (e) => {
-  if (e.target === posterModal) {
-    posterModal.classList.remove('show');
-  }
-});
