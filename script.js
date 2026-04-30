@@ -16,20 +16,20 @@ fetch("data/event.json")
   countdown.innerHTML = "";
 
   /* ======================================================
-     BUILD COUNTDOWN UI
-     [00 Months] [00 Weeks] etc
+     BUILD UI
   ====================================================== */
   const units = [
-    { key:"M", label:"Months" },
-    { key:"W", label:"Weeks" },
-    { key:"D", label:"Days" },
-    { key:"H", label:"Hours" },
+    { key:"M", label:"Months"  },
+    { key:"W", label:"Weeks"   },
+    { key:"D", label:"Days"    },
+    { key:"H", label:"Hours"   },
     { key:"m", label:"Minutes" },
     { key:"s", label:"Seconds" }
   ];
 
   const ids = [];
   const state = {};
+  const animating = {};
 
   const row = document.createElement("div");
   row.className = "flip-row";
@@ -48,8 +48,10 @@ fetch("data/event.json")
     for (let i = 1; i <= 2; i++) {
 
       const id = unit.key + i;
+
       ids.push(id);
       state[id] = null;
+      animating[id] = false;
 
       const digit = document.createElement("div");
       digit.className = "flip-digit";
@@ -57,27 +59,29 @@ fetch("data/event.json")
 
       digit.innerHTML = `
         <div class="flip-current current">0</div>
-        <div class="flip-next next">1</div>
+        <div class="flip-next next">9</div>
       `;
 
       group.appendChild(digit);
     }
 
     const label = document.createElement("span");
+    label.className = "flip-unit-label";
     label.innerText = unit.label;
     label.style.color = "#fff";
     label.style.fontWeight = "700";
     label.style.fontSize = "15px";
-    label.style.minWidth = "76px";
+    label.style.minWidth = "78px";
 
     group.appendChild(label);
     row.appendChild(group);
+
   });
 
   countdown.appendChild(row);
 
   /* ======================================================
-     DATE DIFFERENCE
+     REAL DATE DIFFERENCE
   ====================================================== */
   function diff(from, to) {
 
@@ -86,16 +90,16 @@ fetch("data/event.json")
 
     if (end < start) [start, end] = [end, start];
 
-    let years = end.getFullYear() - start.getFullYear();
-    let months = end.getMonth() - start.getMonth();
-    let days = end.getDate() - start.getDate();
-    let hours = end.getHours() - start.getHours();
+    let years   = end.getFullYear() - start.getFullYear();
+    let months  = end.getMonth() - start.getMonth();
+    let days    = end.getDate() - start.getDate();
+    let hours   = end.getHours() - start.getHours();
     let minutes = end.getMinutes() - start.getMinutes();
     let seconds = end.getSeconds() - start.getSeconds();
 
     if (seconds < 0) { seconds += 60; minutes--; }
     if (minutes < 0) { minutes += 60; hours--; }
-    if (hours < 0) { hours += 24; days--; }
+    if (hours < 0)   { hours += 24; days--; }
 
     if (days < 0) {
       const prev = new Date(end.getFullYear(), end.getMonth(), 0);
@@ -109,9 +113,9 @@ fetch("data/event.json")
     }
 
     return {
-      months: months + years * 12,
-      weeks: Math.floor(days / 7),
-      days: days % 7,
+      months : years * 12 + months,
+      weeks  : Math.floor(days / 7),
+      days   : days % 7,
       hours,
       minutes,
       seconds
@@ -121,10 +125,24 @@ fetch("data/event.json")
   const pad2 = (n) => String(Math.max(0, n)).padStart(2, "0");
 
   /* ======================================================
-     UPWARD NUMBER SEQUENCE FLIP
-     0 ↑ 1 ↑ 2 ↑ 3 etc
+     DIGIT LIMITS
   ====================================================== */
-  function flipDigit(id, targetVal) {
+  const maxMap = {
+    M1:9, M2:9,
+    W1:9, W2:9,
+    D1:9, D2:9,
+    H1:2, H2:9,
+    m1:5, m2:9,
+    s1:5, s2:9
+  };
+
+  /* ======================================================
+     DOWNWARD UPWARD-MOTION FLIP
+     9 ↑ 8 ↑ 7 ↑ 6 ...
+  ====================================================== */
+  function animateDigit(id, target) {
+
+    if (animating[id]) return;
 
     const box = get(id);
     if (!box) return;
@@ -134,43 +152,50 @@ fetch("data/event.json")
 
     if (!current || !next) return;
 
-    targetVal = parseInt(targetVal);
+    target = parseInt(target);
 
     if (state[id] === null) {
-      current.innerText = targetVal;
-      next.innerText = (targetVal + 1) % 10;
-      state[id] = targetVal;
+      current.innerText = target;
+      next.innerText = target;
+      state[id] = target;
       return;
     }
 
-    let currentVal = state[id];
+    if (state[id] === target) return;
 
-    if (currentVal === targetVal) return;
+    animating[id] = true;
 
-    /* always count upward until target reached */
-    const nextVal = (currentVal + 1) % 10;
+    function step() {
 
-    next.innerText = nextVal;
-
-    box.classList.remove("flipping");
-    void box.offsetWidth;
-    box.classList.add("flipping");
-
-    setTimeout(() => {
-
-      current.innerText = nextVal;
-      next.innerText = (nextVal + 1) % 10;
-
-      box.classList.remove("flipping");
-
-      state[id] = nextVal;
-
-      /* keep climbing until target reached */
-      if (nextVal !== targetVal) {
-        setTimeout(() => flipDigit(id, targetVal), 40);
+      if (state[id] === target) {
+        animating[id] = false;
+        return;
       }
 
-    }, 220);
+      const max = maxMap[id];
+
+      let nextVal = state[id] - 1;
+      if (nextVal < 0) nextVal = max;
+
+      next.innerText = nextVal;
+
+      box.classList.remove("flipping");
+      void box.offsetWidth;
+      box.classList.add("flipping");
+
+      setTimeout(() => {
+
+        current.innerText = nextVal;
+        state[id] = nextVal;
+
+        box.classList.remove("flipping");
+
+        requestAnimationFrame(step);
+
+      }, 180);
+    }
+
+    step();
   }
 
   /* ======================================================
@@ -181,18 +206,18 @@ fetch("data/event.json")
     const now = new Date();
     const t = diff(now, startDate);
 
-    const full =
-      pad2(t.months) +
-      pad2(t.weeks) +
-      pad2(t.days) +
-      pad2(t.hours) +
-      pad2(t.minutes) +
-      pad2(t.seconds);
-
-    const digits = full.split("");
+    const digits =
+      (
+        pad2(t.months) +
+        pad2(t.weeks) +
+        pad2(t.days) +
+        pad2(t.hours) +
+        pad2(t.minutes) +
+        pad2(t.seconds)
+      ).split("");
 
     for (let i = 0; i < ids.length; i++) {
-      flipDigit(ids[i], digits[i]);
+      animateDigit(ids[i], digits[i]);
     }
   }
 
@@ -202,7 +227,7 @@ fetch("data/event.json")
   /* ======================================================
      TEXT CONTENT
   ====================================================== */
-  const set = (id, val) => {
+  const set = (id,val) => {
     const el = get(id);
     if (el) el.innerText = val;
   };
@@ -215,18 +240,25 @@ fetch("data/event.json")
   set("eventTime", event.startTime + " - " + event.endTime);
 
   /* ======================================================
-     LINKS
+     MAP LINKS
   ====================================================== */
   const loc = encodeURIComponent(event.location);
 
-  const gMap = get("googleMapLink");
-  if (gMap) gMap.href =
-    `https://www.google.com/maps/search/?api=1&query=${loc}`;
+  const googleMap = get("googleMapLink");
+  if (googleMap) {
+    googleMap.href =
+      `https://www.google.com/maps/search/?api=1&query=${loc}`;
+  }
 
-  const aMap = get("appleMapLink");
-  if (aMap) aMap.href =
-    `https://maps.apple.com/?q=${loc}`;
+  const appleMap = get("appleMapLink");
+  if (appleMap) {
+    appleMap.href =
+      `https://maps.apple.com/?q=${loc}`;
+  }
 
+  /* ======================================================
+     CALENDAR LINKS
+  ====================================================== */
   const startISO = startDate.toISOString();
   const endISO =
     new Date(startDate.getTime() + 3600000).toISOString();
@@ -236,9 +268,9 @@ fetch("data/event.json")
     event.subtitle + "\n" + event.description
   );
 
-  function setLink(id, url) {
+  function setLink(id,url){
     const el = get(id);
-    if (el) el.href = url;
+    if(el) el.href = url;
   }
 
   setLink(
@@ -264,7 +296,7 @@ fetch("data/event.json")
   /* ======================================================
      APPLE / IOS / MACOS / IPADOS
   ====================================================== */
-  const stamp = (d) =>
+  const stamp = d =>
     d.toISOString().replace(/[-:]/g,"").split(".")[0] + "Z";
 
   const ics =
@@ -314,7 +346,9 @@ END:VCALENDAR`;
 
   if (modal) {
     modal.onclick = (e) => {
-      if (e.target === modal) modal.classList.remove("show");
+      if (e.target === modal) {
+        modal.classList.remove("show");
+      }
     };
   }
 
