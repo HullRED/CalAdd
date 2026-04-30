@@ -1,3 +1,8 @@
+/* ======================================================
+   HULL RED V2 COUNTDOWN ENGINE
+   Replace your EXISTING flip clock/countdown section in script.js
+   ====================================================== */
+
 fetch("data/event.json")
 .then(r => r.json())
 .then(event => {
@@ -217,3 +222,5 @@ if(e.target === modal){
 modal.classList.remove("show");
 }
 };
+
+});
