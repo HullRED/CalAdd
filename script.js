@@ -1,177 +1,159 @@
-/* ======================================================
-   HULL RED V2 COUNTDOWN ENGINE (FIXED VERSION)
-====================================================== */
-
 document.addEventListener("DOMContentLoaded", () => {
 
+fetch("data/event.json")
+.then(r => {
+  if (!r.ok) throw new Error("event.json missing");
+  return r.json();
+})
+.then(event => {
+
+  const startDate = new Date(event.date + "T" + event.startTime);
+
+  const get = (id) => document.getElementById(id);
+
   /* ===============================
-     LOAD EVENT DATA
+     BUILD FLIP CLOCK
   ================================= */
-  fetch("data/event.json")
-    .then(r => {
-      if (!r.ok) throw new Error("event.json not found");
-      return r.json();
-    })
-    .then(event => {
+  const countdown = get("countdown");
+  if (!countdown) return;
 
-      const startDate = new Date(event.date + "T" + event.startTime);
-      const endDate   = new Date(event.date + "T" + event.endTime);
+  countdown.innerHTML = "";
 
-      /* ===============================
-         SAFE ELEMENT HELPERS
-      ================================= */
-      const get = (id) => document.getElementById(id);
+  const digitIds = [];
 
-      const setText = (id, value) => {
-        const el = get(id);
-        if (el) el.innerText = value;
-      };
+  function createDigit(id) {
+    const el = document.createElement("div");
+    el.className = "flip-digit";
+    el.id = id;
 
-      /* ===============================
-         TEXT CONTENT
-      ================================= */
-      setText("eventTitle", event.title);
-      setText("eventSubtitle", event.subtitle);
-      setText("eventDescription", event.description);
-      setText("eventLocation", event.location);
-      setText("eventDate", startDate.toLocaleDateString("en-GB"));
-      setText("eventTime", event.startTime + " - " + event.endTime);
+    el.innerHTML = `
+      <div class="flip-current current">0</div>
+      <div class="flip-next next">0</div>
+    `;
 
-      /* ===============================
-         BUILD FLIP CLOCK DYNAMICALLY
-      ================================= */
-      const countdown = get("countdown");
-      if (!countdown) return;
+    countdown.appendChild(el);
+    digitIds.push(id);
+  }
 
-      countdown.innerHTML = "";
+  /* FORMAT:
+     MM WW DD HH MM SS
+  */
 
-      const digitIds = [];
+  const labels = ["M1","M2","W1","W2","D1","D2","H1","H2","m1","m2","S1","S2"];
 
-      function createDigit(id) {
-        const el = document.createElement("div");
-        el.className = "flip-digit";
-        el.id = id;
+  labels.forEach(createDigit);
 
-        el.innerHTML = `
-          <div class="flip-current current">0</div>
-          <div class="flip-next next">0</div>
-        `;
+  /* ===============================
+     FLIP ENGINE (FIXED COLORS)
+  ================================= */
 
-        countdown.appendChild(el);
-        digitIds.push(id);
-      }
+  function flipDigit(id, val, state) {
+    const box = get(id);
+    if (!box) return;
 
-      // HH MM SS = 6 digits
-      createDigit("d1");
-      createDigit("d2");
-      createDigit("d3");
+    const current = box.querySelector(".current");
+    const next = box.querySelector(".next");
 
-      const colon1 = document.createElement("div");
-      colon1.className = "flip-colon";
-      colon1.innerText = ":";
-      countdown.appendChild(colon1);
+    if (!current || !next) return;
 
-      createDigit("d4");
-      createDigit("d5");
+    if (current.innerText === val) return;
 
-      const colon2 = document.createElement("div");
-      colon2.className = "flip-colon";
-      colon2.innerText = ":";
-      countdown.appendChild(colon2);
+    /* STATES:
+       current = white
+       next = grey (during flip)
+    */
 
-      createDigit("d6");
+    next.innerText = val;
 
-      /* ===============================
-         FLIP FUNCTION (SAFE)
-      ================================= */
-      function flipDigit(id, val) {
-        const box = get(id);
-        if (!box) return;
+    current.style.color = "#fff";
+    next.style.color = "#777";
 
-        const current = box.querySelector(".current");
-        const next = box.querySelector(".next");
+    next.style.transform = "translateY(0)";
+    current.style.transform = "translateY(-100%)";
 
-        if (!current || !next) return;
+    setTimeout(() => {
 
-        if (current.innerText === val) return;
+      current.innerText = val;
 
-        next.innerText = val;
+      /* settle state back to white */
+      current.style.color = "#fff";
+      next.style.color = "#fff";
 
-        current.style.transition = "transform .25s ease, color .25s ease";
-        next.style.transition = "transform .25s ease, color .25s ease";
+      current.style.transition = "none";
+      current.style.transform = "translateY(0)";
 
-        next.style.transform = "translateY(0)";
-        current.style.transform = "translateY(-100%)";
+      next.style.transition = "none";
+      next.style.transform = "translateY(100%)";
 
-        setTimeout(() => {
-          current.innerText = val;
-          current.style.transition = "none";
-          current.style.transform = "translateY(0)";
+    }, 260);
+  }
 
-          next.style.transition = "none";
-          next.style.transform = "translateY(100%)";
-        }, 260);
-      }
+  /* ===============================
+     TIME CONVERSION
+  ================================= */
 
-      /* ===============================
-         GREY LOGIC
-      ================================= */
-      function applyDigitColors(full) {
-        let firstNonZero = null;
+  function getTimeParts(diffSeconds) {
 
-        for (let i = 0; i < full.length; i++) {
-          if (full[i] !== "0") {
-            firstNonZero = i;
-            break;
-          }
-        }
+    const seconds = diffSeconds;
 
-        digitIds.forEach((id, index) => {
-          const box = get(id);
-          if (!box) return;
+    const minutes = Math.floor(seconds / 60);
+    const hours   = Math.floor(minutes / 60);
+    const days    = Math.floor(hours / 24);
+    const weeks   = Math.floor(days / 7);
+    const months  = Math.floor(days / 30.44); // average month
 
-          const cur = box.querySelector(".current");
-          const nxt = box.querySelector(".next");
+    const remWeeks = weeks % 4;
+    const remDays  = days % 7;
+    const remHours = hours % 24;
+    const remMins  = minutes % 60;
+    const remSecs  = seconds % 60;
 
-          if (!cur || !nxt) return;
+    return {
+      months,
+      weeks: remWeeks,
+      days: remDays,
+      hours: remHours,
+      minutes: remMins,
+      seconds: remSecs
+    };
+  }
 
-          const color = (!firstNonZero || index < firstNonZero) ? "#777" : "#fff";
+  /* ===============================
+     MAIN LOOP
+  ================================= */
 
-          cur.style.color = color;
-          nxt.style.color = color;
-        });
-      }
+  function updateCountdown() {
 
-      /* ===============================
-         MAIN COUNTDOWN LOOP
-      ================================= */
-      function updateCountdown() {
+    let diff = Math.floor((startDate - new Date()) / 1000);
+    if (diff < 0) diff = 0;
 
-        let diff = Math.floor((startDate - new Date()) / 1000);
-        if (diff < 0) diff = 0;
+    const t = getTimeParts(diff);
 
-        const hours = Math.floor(diff / 3600);
-        const minutes = Math.floor((diff % 3600) / 60);
-        const seconds = diff % 60;
+    const parts = [
+      t.months,
+      t.months % 10,
+      t.weeks,
+      t.weeks % 10,
+      t.days,
+      t.days % 10,
+      t.hours,
+      t.hours % 10,
+      t.minutes,
+      t.minutes % 10,
+      t.seconds,
+      t.seconds % 10
+    ].map(n => String(n).padStart(1, "0"));
 
-        const hh = String(hours).padStart(2, "0");
-        const mm = String(minutes).padStart(2, "0");
-        const ss = String(seconds).padStart(2, "0");
+    digitIds.forEach((id, i) => {
+      flipDigit(id, parts[i]);
+    });
+  }
 
-        const full = hh + mm + ss;
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
 
-        flipDigit("d1", full[0]);
-        flipDigit("d2", full[1]);
-        flipDigit("d3", full[2]);
-        flipDigit("d4", full[3]);
-        flipDigit("d5", full[4]);
-        flipDigit("d6", full[5]);
-
-        applyDigitColors(full);
-      }
-
-      updateCountdown();
-      setInterval(updateCountdown, 1000);
+});
+});
 
       /* ===============================
          MAP LINKS
