@@ -1,14 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
 
 fetch("data/event.json")
-.then(r => {
-  if (!r.ok) throw new Error("event.json not found");
-  return r.json();
-})
+.then(r => r.json())
 .then(event => {
 
   /* ======================================================
-     CORE SETUP
+     CORE ELEMENTS
   ====================================================== */
   const startDate = new Date(event.date + "T" + event.startTime);
   const get = (id) => document.getElementById(id);
@@ -19,10 +16,9 @@ fetch("data/event.json")
   countdown.innerHTML = "";
 
   /* ======================================================
-     DIGIT STRUCTURE (M W D H m s)
+     DIGITS
   ====================================================== */
-
-  const digitIds = [
+  const ids = [
     "M1","M2",
     "W1","W2",
     "D1","D2",
@@ -31,7 +27,16 @@ fetch("data/event.json")
     "s1","s2"
   ];
 
-  const digitState = {};
+  const state = {};
+
+  const row = document.createElement("div");
+  row.className = "flip-row";
+
+  row.style.display = "flex";
+  row.style.flexDirection = "row";
+  row.style.flexWrap = "nowrap";
+  row.style.gap = "8px";
+  row.style.alignItems = "center";
 
   function createDigit(id) {
     const el = document.createElement("div");
@@ -43,18 +48,17 @@ fetch("data/event.json")
       <div class="flip-next next">0</div>
     `;
 
-    countdown.appendChild(el);
-
-    digitState[id] = null;
+    row.appendChild(el);
+    state[id] = null;
   }
 
-  digitIds.forEach(createDigit);
+  ids.forEach(createDigit);
+  countdown.appendChild(row);
 
   /* ======================================================
-     REAL CALENDAR DIFFERENCE ENGINE
+     REAL CALENDAR DIFF
   ====================================================== */
-
-  function getDiff(from, to) {
+  function diff(from, to) {
 
     let start = new Date(from);
     let end = new Date(to);
@@ -68,24 +72,13 @@ fetch("data/event.json")
     let minutes = end.getMinutes() - start.getMinutes();
     let seconds = end.getSeconds() - start.getSeconds();
 
-    if (seconds < 0) {
-      seconds += 60;
-      minutes--;
-    }
-
-    if (minutes < 0) {
-      minutes += 60;
-      hours--;
-    }
-
-    if (hours < 0) {
-      hours += 24;
-      days--;
-    }
+    if (seconds < 0) { seconds += 60; minutes--; }
+    if (minutes < 0) { minutes += 60; hours--; }
+    if (hours < 0) { hours += 24; days--; }
 
     if (days < 0) {
-      const prevMonth = new Date(end.getFullYear(), end.getMonth(), 0);
-      days += prevMonth.getDate();
+      const prev = new Date(end.getFullYear(), end.getMonth(), 0);
+      days += prev.getDate();
       months--;
     }
 
@@ -94,23 +87,21 @@ fetch("data/event.json")
       years--;
     }
 
-    const weeks = Math.floor(days / 7);
-    const remDays = days % 7;
-
     return {
       months: months + years * 12,
-      weeks,
-      days: remDays,
+      weeks: Math.floor(days / 7),
+      days: days % 7,
       hours,
       minutes,
       seconds
     };
   }
 
-  /* ======================================================
-     DIGIT FLIP (DOWNWARD ONLY, NO JITTER)
-  ====================================================== */
+  const pad2 = (n) => String(n).padStart(2, "0");
 
+  /* ======================================================
+     FLIP DIGIT (UP ONLY)
+  ====================================================== */
   function flipDigit(id, newVal) {
 
     const box = get(id);
@@ -123,18 +114,16 @@ fetch("data/event.json")
 
     const currentVal = parseInt(current.innerText || "0");
 
-    /* INIT STATE */
-    if (digitState[id] === null) {
+    if (state[id] === null) {
       current.innerText = newVal;
-      digitState[id] = newVal;
+      state[id] = newVal;
       return;
     }
 
-    /* ONLY COUNT DOWN */
-    if (newVal > currentVal) return;
-
-    /* NO CHANGE */
     if (currentVal === newVal) return;
+
+    /* ONLY DOWNWARD */
+    if (newVal > currentVal) return;
 
     next.innerText = newVal;
 
@@ -144,7 +133,6 @@ fetch("data/event.json")
     next.style.color = "#777";
 
     setTimeout(() => {
-
       current.innerText = newVal;
 
       box.classList.remove("flipping");
@@ -152,37 +140,30 @@ fetch("data/event.json")
       current.style.color = "#fff";
       next.style.color = "#fff";
 
-      digitState[id] = newVal;
-
+      state[id] = newVal;
     }, 260);
   }
 
   /* ======================================================
-     MAIN LOOP (STABLE + MOBILE SAFE)
+     MAIN LOOP
   ====================================================== */
-
   function update() {
 
     const now = new Date();
-    const t = getDiff(now, startDate);
+    const t = diff(now, startDate);
 
-    const values = [
-      t.months,
-      t.months % 10,
-      t.weeks,
-      t.weeks % 10,
-      t.days,
-      t.days % 10,
-      t.hours,
-      t.hours % 10,
-      t.minutes,
-      t.minutes % 10,
-      t.seconds,
-      t.seconds % 10
-    ];
+    const full =
+      pad2(t.months) +
+      pad2(t.weeks) +
+      pad2(t.days) +
+      pad2(t.hours) +
+      pad2(t.minutes) +
+      pad2(t.seconds);
 
-    for (let i = 0; i < digitIds.length; i++) {
-      flipDigit(digitIds[i], values[i]);
+    const digits = full.split("");
+
+    for (let i = 0; i < ids.length; i++) {
+      flipDigit(ids[i], digits[i]);
     }
   }
 
@@ -192,7 +173,6 @@ fetch("data/event.json")
   /* ======================================================
      TEXT CONTENT
   ====================================================== */
-
   const set = (id, val) => {
     const el = get(id);
     if (el) el.innerText = val;
@@ -208,7 +188,6 @@ fetch("data/event.json")
   /* ======================================================
      MAP LINKS
   ====================================================== */
-
   const loc = encodeURIComponent(event.location);
 
   const g = get("googleMapLink");
@@ -218,7 +197,7 @@ fetch("data/event.json")
   if (a) a.href = `https://maps.apple.com/?q=${loc}`;
 
   /* ======================================================
-     CALENDAR LINKS
+     CALENDAR LINKS (ALL PLATFORMS FIXED)
   ====================================================== */
 
   const startISO = startDate.toISOString();
@@ -232,21 +211,52 @@ fetch("data/event.json")
     if (el) el.href = url;
   };
 
+  /* Google Calendar */
   link("googleLink",
     `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&details=${desc}&location=${loc}`
   );
 
+  /* Outlook Web */
   link("outlookLink",
     `https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${startISO}&enddt=${endISO}&location=${loc}&body=${desc}`
   );
 
+  /* Microsoft 365 */
   link("officeLink",
     `https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${startISO}&enddt=${endISO}&location=${loc}&body=${desc}`
   );
 
+  /* Yahoo */
   link("yahooLink",
     `https://calendar.yahoo.com/?v=60&title=${title}&st=${startISO}&et=${endISO}&desc=${desc}&in_loc=${loc}`
   );
+
+  /* ======================================================
+     🍎 iOS / macOS / iPadOS (NATIVE CALENDAR FILE)
+  ====================================================== */
+
+  const ics =
+`BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Hull Red CIO//EN
+CALSCALE:GREGORIAN
+BEGIN:VEVENT
+DTSTART:${startISO.replace(/[-:]/g,"").split(".")[0]}Z
+DTEND:${endISO.replace(/[-:]/g,"").split(".")[0]}Z
+SUMMARY:${event.title}
+DESCRIPTION:${event.subtitle} ${event.description}
+LOCATION:${event.location}
+END:VEVENT
+END:VCALENDAR`;
+
+  const blob = new Blob([ics], { type: "text/calendar" });
+  const url = URL.createObjectURL(blob);
+
+  const apple = get("appleLink");
+  if (apple) {
+    apple.href = url;
+    apple.download = "event.ics";
+  }
 
   /* ======================================================
      POSTER MODAL
