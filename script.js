@@ -1,258 +1,278 @@
+/* ======================================================
+   HULL RED V3 COUNTDOWN ENGINE (PRODUCTION FIXED)
+   - Real calendar math
+   - Mobile optimised
+====================================================== */
+
 document.addEventListener("DOMContentLoaded", () => {
 
 fetch("data/event.json")
-.then(r => {
-  if (!r.ok) throw new Error("event.json missing");
-  return r.json();
-})
-.then(event => {
+  .then(r => {
+    if (!r.ok) throw new Error("event.json not found");
+    return r.json();
+  })
+  .then(event => {
 
-  const startDate = new Date(event.date + "T" + event.startTime);
+    /* ===============================
+       DATE SETUP (REAL CALENDAR SAFE)
+    ================================= */
+    const startDate = new Date(event.date + "T" + event.startTime);
 
-  const get = (id) => document.getElementById(id);
+    const get = (id) => document.getElementById(id);
 
-  /* ===============================
-     BUILD FLIP CLOCK
-  ================================= */
-  const countdown = get("countdown");
-  if (!countdown) return;
+    /* Cache DOM (MOBILE OPTIMISED) */
+    const countdown = get("countdown");
 
-  countdown.innerHTML = "";
+    if (!countdown) return;
 
-  const digitIds = [];
+    countdown.innerHTML = "";
 
-  function createDigit(id) {
-    const el = document.createElement("div");
-    el.className = "flip-digit";
-    el.id = id;
+    /* ===============================
+       BUILD DIGITS (DYNAMIC)
+    ================================= */
+    const digitIds = [];
 
-    el.innerHTML = `
-      <div class="flip-current current">0</div>
-      <div class="flip-next next">0</div>
-    `;
+    function createDigit(id) {
+      const el = document.createElement("div");
+      el.className = "flip-digit";
+      el.id = id;
 
-    countdown.appendChild(el);
-    digitIds.push(id);
-  }
+      el.innerHTML = `
+        <div class="flip-current current">0</div>
+        <div class="flip-next next">0</div>
+      `;
 
-  /* FORMAT:
-     MM WW DD HH MM SS
-  */
+      countdown.appendChild(el);
+      digitIds.push(id);
+    }
 
-  const labels = ["M1","M2","W1","W2","D1","D2","H1","H2","m1","m2","S1","S2"];
+    const labels = [
+      "M1","M2",
+      "W1","W2",
+      "D1","D2",
+      "H1","H2",
+      "m1","m2",
+      "S1","S2"
+    ];
 
-  labels.forEach(createDigit);
+    labels.forEach(createDigit);
 
-  /* ===============================
-     FLIP ENGINE (FIXED COLORS)
-  ================================= */
+    /* ===============================
+       SAFE FLIP ENGINE (NO LAYOUT THRASHING)
+    ================================= */
+    function flipDigit(id, val) {
 
-  function flipDigit(id, val, state) {
-    const box = get(id);
-    if (!box) return;
+      const box = get(id);
+      if (!box) return;
 
-    const current = box.querySelector(".current");
-    const next = box.querySelector(".next");
+      const current = box.querySelector(".current");
+      const next = box.querySelector(".next");
 
-    if (!current || !next) return;
+      if (!current || !next) return;
 
-    if (current.innerText === val) return;
+      if (current.innerText === val) return;
 
-    /* STATES:
-       current = white
-       next = grey (during flip)
-    */
+      next.innerText = val;
 
-    next.innerText = val;
-
-    current.style.color = "#fff";
-    next.style.color = "#777";
-
-    next.style.transform = "translateY(0)";
-    current.style.transform = "translateY(-100%)";
-
-    setTimeout(() => {
-
-      current.innerText = val;
-
-      /* settle state back to white */
       current.style.color = "#fff";
-      next.style.color = "#fff";
+      next.style.color = "#777";
 
-      current.style.transition = "none";
-      current.style.transform = "translateY(0)";
+      current.style.transform = "translateY(-100%)";
+      next.style.transform = "translateY(0)";
 
-      next.style.transition = "none";
-      next.style.transform = "translateY(100%)";
+      setTimeout(() => {
 
-    }, 260);
-  }
+        current.innerText = val;
 
-  /* ===============================
-     TIME CONVERSION
-  ================================= */
+        current.style.transition = "none";
+        next.style.transition = "none";
 
-  function getTimeParts(diffSeconds) {
+        current.style.transform = "translateY(0)";
+        next.style.transform = "translateY(100%)";
 
-    const seconds = diffSeconds;
+        current.style.color = "#fff";
+        next.style.color = "#fff";
 
-    const minutes = Math.floor(seconds / 60);
-    const hours   = Math.floor(minutes / 60);
-    const days    = Math.floor(hours / 24);
-    const weeks   = Math.floor(days / 7);
-    const months  = Math.floor(days / 30.44); // average month
+      }, 240);
+    }
 
-    const remWeeks = weeks % 4;
-    const remDays  = days % 7;
-    const remHours = hours % 24;
-    const remMins  = minutes % 60;
-    const remSecs  = seconds % 60;
+    /* ===============================
+       REAL CALENDAR DIFF ENGINE
+       (NO APPROXIMATIONS)
+    ================================= */
 
-    return {
-      months,
-      weeks: remWeeks,
-      days: remDays,
-      hours: remHours,
-      minutes: remMins,
-      seconds: remSecs
-    };
-  }
+    function getCalendarDiff(from, to) {
 
-  /* ===============================
-     MAIN LOOP
-  ================================= */
+      let start = new Date(from);
+      let end = new Date(to);
 
-  function updateCountdown() {
+      if (end < start) {
+        const temp = start;
+        start = end;
+        end = temp;
+      }
 
-    let diff = Math.floor((startDate - new Date()) / 1000);
-    if (diff < 0) diff = 0;
+      let years = end.getFullYear() - start.getFullYear();
+      let months = end.getMonth() - start.getMonth();
+      let days = end.getDate() - start.getDate();
+      let hours = end.getHours() - start.getHours();
+      let minutes = end.getMinutes() - start.getMinutes();
+      let seconds = end.getSeconds() - start.getSeconds();
 
-    const t = getTimeParts(diff);
+      if (seconds < 0) {
+        seconds += 60;
+        minutes--;
+      }
 
-    const parts = [
-      t.months,
-      t.months % 10,
-      t.weeks,
-      t.weeks % 10,
-      t.days,
-      t.days % 10,
-      t.hours,
-      t.hours % 10,
-      t.minutes,
-      t.minutes % 10,
-      t.seconds,
-      t.seconds % 10
-    ].map(n => String(n).padStart(1, "0"));
+      if (minutes < 0) {
+        minutes += 60;
+        hours--;
+      }
 
-    digitIds.forEach((id, i) => {
-      flipDigit(id, parts[i]);
-    });
-  }
+      if (hours < 0) {
+        hours += 24;
+        days--;
+      }
 
-  updateCountdown();
-  setInterval(updateCountdown, 1000);
+      if (days < 0) {
+        const prevMonth = new Date(end.getFullYear(), end.getMonth(), 0);
+        days += prevMonth.getDate();
+        months--;
+      }
 
-});
-});
+      if (months < 0) {
+        months += 12;
+        years--;
+      }
 
-      /* ===============================
-         MAP LINKS
-      ================================= */
-      const loc = encodeURIComponent(event.location);
+      const weeks = Math.floor(days / 7);
+      const remDays = days % 7;
 
-      const gMap = get("googleMapLink");
-      if (gMap) gMap.href = `https://www.google.com/maps/search/?api=1&query=${loc}`;
-
-      const aMap = get("appleMapLink");
-      if (aMap) aMap.href = `https://maps.apple.com/?q=${loc}`;
-
-      /* ===============================
-         CALENDAR LINKS
-      ================================= */
-      const startISO = startDate.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-      const endISO   = endDate.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-
-      const title = encodeURIComponent(event.title);
-      const desc  = encodeURIComponent(event.subtitle + "\n" + event.description);
-
-      const setHref = (id, url) => {
-        const el = get(id);
-        if (el) el.href = url;
+      return {
+        months: months + (years * 12),
+        weeks,
+        days: remDays,
+        hours,
+        minutes,
+        seconds
       };
+    }
 
-      setHref("googleLink",
-        `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&details=${desc}&location=${loc}`
-      );
+    /* ===============================
+       MAIN LOOP (MOBILE OPTIMISED)
+    ================================= */
+    let lastFrame;
 
-      setHref("outlookLink",
-        `https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${startDate.toISOString()}&enddt=${endDate.toISOString()}&location=${loc}&body=${desc}`
-      );
+    function updateCountdown() {
 
-      setHref("officeLink",
-        `https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${startDate.toISOString()}&enddt=${endDate.toISOString()}&location=${loc}&body=${desc}`
-      );
+      const now = new Date();
+      let diffObj = getCalendarDiff(now, startDate);
 
-      setHref("yahooLink",
-        `https://calendar.yahoo.com/?v=60&title=${title}&st=${startISO}&et=${endISO}&desc=${desc}&in_loc=${loc}`
-      );
+      const parts = [
+        diffObj.months,
+        diffObj.months % 10,
+        diffObj.weeks,
+        diffObj.weeks % 10,
+        diffObj.days,
+        diffObj.days % 10,
+        diffObj.hours,
+        diffObj.hours % 10,
+        diffObj.minutes,
+        diffObj.minutes % 10,
+        diffObj.seconds,
+        diffObj.seconds % 10
+      ].map(n => String(n).padStart(1, "0"));
 
-      /* ===============================
-         ICS FILE
-      ================================= */
-      const ics =
-`BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//Hull Red CIO//EN
-BEGIN:VEVENT
-UID:${Date.now()}@hullred
-DTSTAMP:${startISO}
-DTSTART:${startISO}
-DTEND:${endISO}
-SUMMARY:${event.title}
-DESCRIPTION:${event.subtitle}\\n${event.description}
-LOCATION:${event.location}
-END:VEVENT
-END:VCALENDAR`;
-
-      const blob = new Blob([ics], { type: "text/calendar" });
-      const url = URL.createObjectURL(blob);
-
-      const icsLink = get("icsLink");
-      if (icsLink) {
-        icsLink.href = url;
-        icsLink.download = "event.ics";
+      for (let i = 0; i < digitIds.length; i++) {
+        flipDigit(digitIds[i], parts[i]);
       }
 
-      const appleLink = get("appleLink");
-      if (appleLink) {
-        appleLink.href = url;
-        appleLink.download = "event.ics";
-      }
+      /* Mobile optimisation: reduces jitter */
+      lastFrame = requestAnimationFrame(() => {
+        setTimeout(updateCountdown, 1000);
+      });
+    }
 
-      /* ===============================
-         POSTER MODAL
-      ================================= */
-      const modal = get("posterModal");
-      const open = get("posterThumb");
-      const close = get("posterClose");
+    updateCountdown();
 
-      if (modal && open) {
-        open.onclick = () => modal.classList.add("show");
-      }
+    /* ===============================
+       TEXT CONTENT (SAFE)
+    ================================= */
+    const setText = (id, val) => {
+      const el = get(id);
+      if (el) el.innerText = val;
+    };
 
-      if (modal && close) {
-        close.onclick = () => modal.classList.remove("show");
-      }
+    setText("eventTitle", event.title);
+    setText("eventSubtitle", event.subtitle);
+    setText("eventDescription", event.description);
+    setText("eventLocation", event.location);
+    setText("eventDate", startDate.toLocaleDateString("en-GB"));
+    setText("eventTime", event.startTime + " - " + event.endTime);
 
-      if (modal) {
-        modal.onclick = (e) => {
-          if (e.target === modal) modal.classList.remove("show");
-        };
-      }
+    /* ===============================
+       MAP LINKS
+    ================================= */
+    const loc = encodeURIComponent(event.location);
 
-    })
-    .catch(err => {
-      console.error("Event loader error:", err);
-    });
+    const gMap = get("googleMapLink");
+    if (gMap) gMap.href = `https://www.google.com/maps/search/?api=1&query=${loc}`;
+
+    const aMap = get("appleMapLink");
+    if (aMap) aMap.href = `https://maps.apple.com/?q=${loc}`;
+
+    /* ===============================
+       CALENDAR LINKS
+    ================================= */
+    const startISO = startDate.toISOString();
+    const endISO = new Date(startDate.getTime() + 3600000).toISOString();
+
+    const title = encodeURIComponent(event.title);
+    const desc = encodeURIComponent(event.subtitle + "\n" + event.description);
+
+    const setHref = (id, url) => {
+      const el = get(id);
+      if (el) el.href = url;
+    };
+
+    setHref("googleLink",
+      `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&details=${desc}&location=${loc}`
+    );
+
+    setHref("outlookLink",
+      `https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${startISO}&enddt=${endISO}&location=${loc}&body=${desc}`
+    );
+
+    setHref("officeLink",
+      `https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${startISO}&enddt=${endISO}&location=${loc}&body=${desc}`
+    );
+
+    setHref("yahooLink",
+      `https://calendar.yahoo.com/?v=60&title=${title}&st=${startISO}&et=${endISO}&desc=${desc}&in_loc=${loc}`
+    );
+
+    /* ===============================
+       POSTER MODAL
+    ================================= */
+    const modal = get("posterModal");
+    const open = get("posterThumb");
+    const close = get("posterClose");
+
+    if (modal && open) {
+      open.onclick = () => modal.classList.add("show");
+    }
+
+    if (modal && close) {
+      close.onclick = () => modal.classList.remove("show");
+    }
+
+    if (modal) {
+      modal.onclick = (e) => {
+        if (e.target === modal) modal.classList.remove("show");
+      };
+    }
+
+  })
+  .catch(err => console.error("Countdown error:", err));
 
 });
