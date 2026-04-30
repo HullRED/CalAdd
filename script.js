@@ -16,7 +16,7 @@ fetch("data/event.json")
   countdown.innerHTML = "";
 
   /* ======================================================
-     BUILD COUNTDOWN UI
+     BUILD UI
   ====================================================== */
   const units = [
     { key:"M", label:"Months"  },
@@ -49,6 +49,7 @@ fetch("data/event.json")
     for (let i = 1; i <= 2; i++) {
 
       const id = unit.key + i;
+
       ids.push(id);
       state[id] = null;
       animating[id] = false;
@@ -59,7 +60,7 @@ fetch("data/event.json")
 
       digit.innerHTML = `
         <div class="flip-current current">0</div>
-        <div class="flip-next next">0</div>
+        <div class="flip-next next">9</div>
       `;
 
       group.appendChild(digit);
@@ -68,10 +69,10 @@ fetch("data/event.json")
     const label = document.createElement("span");
     label.className = "flip-unit-label";
     label.innerText = unit.label;
-    label.style.minWidth = "76px";
+    label.style.color = "#fff";
     label.style.fontWeight = "700";
     label.style.fontSize = "15px";
-    label.style.color = "#fff";
+    label.style.minWidth = "78px";
 
     group.appendChild(label);
     row.appendChild(group);
@@ -81,7 +82,7 @@ fetch("data/event.json")
   countdown.appendChild(row);
 
   /* ======================================================
-     REAL CALENDAR DIFFERENCE
+     DATE DIFFERENCE
   ====================================================== */
   function diff(from, to) {
 
@@ -131,9 +132,7 @@ fetch("data/event.json")
     };
   }
 
-  function pad2(n) {
-    return String(Math.max(0, n)).padStart(2, "0");
-  }
+  const pad2 = n => String(Math.max(0, n)).padStart(2, "0");
 
   /* ======================================================
      DIGIT LIMITS
@@ -148,8 +147,10 @@ fetch("data/event.json")
   };
 
   /* ======================================================
-     MECHANICAL UPWARD MOTION / DOWNWARD COUNT
-     9 ↑ 8 ↑ 7 ↑ 6
+     ORIGINAL ROBLOX STYLE FLIP
+     current white
+     next grey
+     slide upward only
   ====================================================== */
   function animateDigit(id, target) {
 
@@ -160,6 +161,8 @@ fetch("data/event.json")
 
     const current = box.querySelector(".current");
     const next = box.querySelector(".next");
+
+    if (!current || !next) return;
 
     target = parseInt(target);
 
@@ -188,26 +191,45 @@ fetch("data/event.json")
 
       next.innerText = nextVal;
 
+      /* reset positions */
+      current.style.transition = "none";
+      next.style.transition = "none";
+
+      current.style.transform = "translateY(0%)";
+      next.style.transform = "translateY(100%)";
+
       current.style.color = "#fff";
       next.style.color = "#777";
 
-      box.classList.remove("flipping");
       void box.offsetWidth;
-      box.classList.add("flipping");
+
+      /* animate upward */
+      current.style.transition =
+        "transform .26s ease, color .26s ease";
+
+      next.style.transition =
+        "transform .26s ease, color .26s ease";
+
+      current.style.transform = "translateY(-100%)";
+      next.style.transform = "translateY(0%)";
 
       setTimeout(() => {
 
         current.innerText = nextVal;
         state[id] = nextVal;
 
+        current.style.transition = "none";
+        next.style.transition = "none";
+
+        current.style.transform = "translateY(0%)";
+        next.style.transform = "translateY(100%)";
+
         current.style.color = "#fff";
         next.style.color = "#fff";
 
-        box.classList.remove("flipping");
-
         requestAnimationFrame(step);
 
-      }, 180);
+      }, 260);
     }
 
     step();
@@ -216,7 +238,7 @@ fetch("data/event.json")
   /* ======================================================
      GREY LEADING ZEROS
   ====================================================== */
-  function applyLeadingZeroColors(fullDigits) {
+  function applyZeroColours(fullDigits) {
 
     let firstNonZero = fullDigits.findIndex(x => x !== "0");
 
@@ -258,24 +280,11 @@ fetch("data/event.json")
       animateDigit(ids[i], digits[i]);
     }
 
-    applyLeadingZeroColors(digits);
+    applyZeroColours(digits);
   }
 
   update();
-
-  let timer = setInterval(update, 1000);
-
-  /* ======================================================
-     PERFORMANCE (pause when hidden)
-  ====================================================== */
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
-      clearInterval(timer);
-    } else {
-      update();
-      timer = setInterval(update, 1000);
-    }
-  });
+  setInterval(update, 1000);
 
   /* ======================================================
      TEXT CONTENT
@@ -309,7 +318,8 @@ fetch("data/event.json")
      CALENDAR LINKS
   ====================================================== */
   const startISO = startDate.toISOString();
-  const endISO = new Date(startDate.getTime()+3600000).toISOString();
+  const endISO =
+    new Date(startDate.getTime()+3600000).toISOString();
 
   const title = encodeURIComponent(event.title);
   const desc = encodeURIComponent(
