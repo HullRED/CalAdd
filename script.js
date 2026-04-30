@@ -5,7 +5,7 @@ fetch("data/event.json")
 .then(event => {
 
   /* ======================================================
-     CORE ELEMENTS
+     CORE
   ====================================================== */
   const startDate = new Date(event.date + "T" + event.startTime);
   const get = (id) => document.getElementById(id);
@@ -16,47 +16,71 @@ fetch("data/event.json")
   countdown.innerHTML = "";
 
   /* ======================================================
-     DIGITS
+     BUILD COUNTDOWN UI
+     [M1][M2] Months [W1][W2] Weeks ...
   ====================================================== */
-  const ids = [
-    "M1","M2",
-    "W1","W2",
-    "D1","D2",
-    "H1","H2",
-    "m1","m2",
-    "s1","s2"
+
+  const units = [
+    { key:"M", label:"Months" },
+    { key:"W", label:"Weeks" },
+    { key:"D", label:"Days" },
+    { key:"H", label:"Hours" },
+    { key:"m", label:"Minutes" },
+    { key:"s", label:"Seconds" }
   ];
 
+  const ids = [];
   const state = {};
 
   const row = document.createElement("div");
   row.className = "flip-row";
-
   row.style.display = "flex";
-  row.style.flexDirection = "row";
-  row.style.flexWrap = "nowrap";
-  row.style.gap = "8px";
+  row.style.flexWrap = "wrap";
+  row.style.gap = "14px";
   row.style.alignItems = "center";
 
-  function createDigit(id) {
-    const el = document.createElement("div");
-    el.className = "flip-digit";
-    el.id = id;
+  units.forEach(unit => {
 
-    el.innerHTML = `
-      <div class="flip-current current">0</div>
-      <div class="flip-next next">0</div>
-    `;
+    const group = document.createElement("div");
+    group.className = "flip-group";
+    group.style.display = "flex";
+    group.style.alignItems = "center";
+    group.style.gap = "6px";
 
-    row.appendChild(el);
-    state[id] = null;
-  }
+    for (let i = 1; i <= 2; i++) {
 
-  ids.forEach(createDigit);
+      const id = unit.key + i;
+      ids.push(id);
+      state[id] = null;
+
+      const digit = document.createElement("div");
+      digit.className = "flip-digit";
+      digit.id = id;
+
+      digit.innerHTML = `
+        <div class="flip-current current">0</div>
+        <div class="flip-next next">0</div>
+      `;
+
+      group.appendChild(digit);
+    }
+
+    const label = document.createElement("span");
+    label.className = "flip-unit-label";
+    label.innerText = unit.label;
+    label.style.fontSize = "15px";
+    label.style.fontWeight = "700";
+    label.style.color = "#fff";
+    label.style.minWidth = "72px";
+
+    group.appendChild(label);
+    row.appendChild(group);
+  });
+
   countdown.appendChild(row);
 
   /* ======================================================
-     REAL CALENDAR DIFF
+     REAL DATE DIFFERENCE
   ====================================================== */
   function diff(from, to) {
 
@@ -97,10 +121,12 @@ fetch("data/event.json")
     };
   }
 
-  const pad2 = (n) => String(n).padStart(2, "0");
+  const pad2 = (n) => String(Math.max(0, n)).padStart(2, "0");
 
   /* ======================================================
-     FLIP DIGIT (UP ONLY)
+     TRUE INDIVIDUAL FLIP ENGINE
+     only changed digit flips
+     always upward
   ====================================================== */
   function flipDigit(id, newVal) {
 
@@ -112,21 +138,18 @@ fetch("data/event.json")
 
     if (!current || !next) return;
 
-    const currentVal = parseInt(current.innerText || "0");
-
     if (state[id] === null) {
       current.innerText = newVal;
       state[id] = newVal;
       return;
     }
 
-    if (currentVal === newVal) return;
-
-    /* ONLY DOWNWARD */
-    if (newVal > currentVal) return;
+    if (String(state[id]) === String(newVal)) return;
 
     next.innerText = newVal;
 
+    box.classList.remove("flipping");
+    void box.offsetWidth; // reflow restart animation
     box.classList.add("flipping");
 
     current.style.color = "#fff";
@@ -134,12 +157,9 @@ fetch("data/event.json")
 
     setTimeout(() => {
       current.innerText = newVal;
-
-      box.classList.remove("flipping");
-
       current.style.color = "#fff";
       next.style.color = "#fff";
-
+      box.classList.remove("flipping");
       state[id] = newVal;
     }, 260);
   }
@@ -152,15 +172,16 @@ fetch("data/event.json")
     const now = new Date();
     const t = diff(now, startDate);
 
-    const full =
-      pad2(t.months) +
-      pad2(t.weeks) +
-      pad2(t.days) +
-      pad2(t.hours) +
-      pad2(t.minutes) +
-      pad2(t.seconds);
+    const values = [
+      pad2(t.months),
+      pad2(t.weeks),
+      pad2(t.days),
+      pad2(t.hours),
+      pad2(t.minutes),
+      pad2(t.seconds)
+    ];
 
-    const digits = full.split("");
+    const digits = values.join("").split("");
 
     for (let i = 0; i < ids.length; i++) {
       flipDigit(ids[i], digits[i]);
@@ -190,66 +211,76 @@ fetch("data/event.json")
   ====================================================== */
   const loc = encodeURIComponent(event.location);
 
-  const g = get("googleMapLink");
-  if (g) g.href = `https://www.google.com/maps/search/?api=1&query=${loc}`;
+  const googleMap = get("googleMapLink");
+  if (googleMap) {
+    googleMap.href =
+      `https://www.google.com/maps/search/?api=1&query=${loc}`;
+  }
 
-  const a = get("appleMapLink");
-  if (a) a.href = `https://maps.apple.com/?q=${loc}`;
+  const appleMap = get("appleMapLink");
+  if (appleMap) {
+    appleMap.href =
+      `https://maps.apple.com/?q=${loc}`;
+  }
 
   /* ======================================================
-     CALENDAR LINKS (ALL PLATFORMS FIXED)
+     CALENDAR LINKS
   ====================================================== */
-
   const startISO = startDate.toISOString();
   const endISO = new Date(startDate.getTime() + 3600000).toISOString();
 
   const title = encodeURIComponent(event.title);
-  const desc = encodeURIComponent(event.subtitle + "\n" + event.description);
+  const desc = encodeURIComponent(
+    event.subtitle + "\n" + event.description
+  );
 
-  const link = (id, url) => {
+  function setLink(id, url) {
     const el = get(id);
     if (el) el.href = url;
-  };
+  }
 
-  /* Google Calendar */
-  link("googleLink",
+  setLink(
+    "googleLink",
     `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&details=${desc}&location=${loc}`
   );
 
-  /* Outlook Web */
-  link("outlookLink",
+  setLink(
+    "outlookLink",
     `https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${startISO}&enddt=${endISO}&location=${loc}&body=${desc}`
   );
 
-  /* Microsoft 365 */
-  link("officeLink",
+  setLink(
+    "officeLink",
     `https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${startISO}&enddt=${endISO}&location=${loc}&body=${desc}`
   );
 
-  /* Yahoo */
-  link("yahooLink",
+  setLink(
+    "yahooLink",
     `https://calendar.yahoo.com/?v=60&title=${title}&st=${startISO}&et=${endISO}&desc=${desc}&in_loc=${loc}`
   );
 
   /* ======================================================
-     🍎 iOS / macOS / iPadOS (NATIVE CALENDAR FILE)
+     APPLE / IOS / MACOS / IPADOS
   ====================================================== */
+  const stamp = (d) =>
+    d.toISOString().replace(/[-:]/g,"").split(".")[0] + "Z";
 
   const ics =
 `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Hull Red CIO//EN
-CALSCALE:GREGORIAN
 BEGIN:VEVENT
-DTSTART:${startISO.replace(/[-:]/g,"").split(".")[0]}Z
-DTEND:${endISO.replace(/[-:]/g,"").split(".")[0]}Z
+UID:${Date.now()}@hullred
+DTSTAMP:${stamp(new Date())}
+DTSTART:${stamp(startDate)}
+DTEND:${stamp(new Date(startDate.getTime()+3600000))}
 SUMMARY:${event.title}
-DESCRIPTION:${event.subtitle} ${event.description}
+DESCRIPTION:${event.subtitle}\\n${event.description}
 LOCATION:${event.location}
 END:VEVENT
 END:VCALENDAR`;
 
-  const blob = new Blob([ics], { type: "text/calendar" });
+  const blob = new Blob([ics], { type:"text/calendar" });
   const url = URL.createObjectURL(blob);
 
   const apple = get("appleLink");
@@ -258,25 +289,32 @@ END:VCALENDAR`;
     apple.download = "event.ics";
   }
 
+  const icsBtn = get("icsLink");
+  if (icsBtn) {
+    icsBtn.href = url;
+    icsBtn.download = "event.ics";
+  }
+
   /* ======================================================
      POSTER MODAL
   ====================================================== */
-
   const modal = get("posterModal");
   const thumb = get("posterThumb");
   const close = get("posterClose");
 
-  if (modal && thumb) {
+  if (thumb && modal) {
     thumb.onclick = () => modal.classList.add("show");
   }
 
-  if (modal && close) {
+  if (close && modal) {
     close.onclick = () => modal.classList.remove("show");
   }
 
   if (modal) {
     modal.onclick = (e) => {
-      if (e.target === modal) modal.classList.remove("show");
+      if (e.target === modal) {
+        modal.classList.remove("show");
+      }
     };
   }
 
