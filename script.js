@@ -1,164 +1,188 @@
-/* script.js */
+/* ======================================================
+   HULL RED V2 COUNTDOWN ENGINE
+   Replace your EXISTING flip clock/countdown section in script.js
+   ====================================================== */
 
 fetch("data/event.json")
-.then(r=>r.json())
-.then(event=>{
+.then(r => r.json())
+.then(event => {
 
-const start = new Date(event.date + "T" + event.startTime);
-const end   = new Date(event.date + "T" + event.endTime);
+const startDate = new Date(event.date + "T" + event.startTime);
+const endDate   = new Date(event.date + "T" + event.endTime);
 
-/* TEXT */
-eventTitle.innerText = event.title;
-eventSubtitle.innerText = event.subtitle;
-eventDescription.innerText = event.description;
-eventDate.innerText = start.toLocaleDateString("en-GB");
-eventTime.innerText = event.startTime + " - " + event.endTime;
-eventLocation.innerText = event.location;
+/* ===============================
+   TEXT CONTENT
+================================= */
+document.getElementById("eventTitle").innerText       = event.title;
+document.getElementById("eventSubtitle").innerText    = event.subtitle;
+document.getElementById("eventDescription").innerText = event.description;
+document.getElementById("eventLocation").innerText    = event.location;
+document.getElementById("eventDate").innerText        = startDate.toLocaleDateString("en-GB");
+document.getElementById("eventTime").innerText        = event.startTime + " - " + event.endTime;
 
-/* CLOCK BUILD */
-function digit(id){
-return `
-<div class="flip-digit" id="${id}">
-<div class="flip-current">0</div>
-<div class="flip-next">0</div>
-</div>`;
-}
+/* ===============================
+   FLIP CLOCK ENGINE
+================================= */
 
-countdown.innerHTML =
-digit("mo1")+digit("mo2")+
-`<div class="flip-colon">:</div>`+
-digit("wk1")+digit("wk2")+
-`<div class="flip-colon">:</div>`+
-digit("dy1")+digit("dy2")+
-`<div class="flip-colon">:</div>`+
-digit("hr1")+digit("hr2")+
-`<div class="flip-colon">:</div>`+
-digit("mi1")+digit("mi2")+
-`<div class="flip-colon">:</div>`+
-digit("se1")+digit("se2");
+const digitIds = [
+"d1","d2","d3","d4","d5","d6"
+];
 
-/* FLIP */
-function setDigit(id,val,grey=false){
+/* Creates upward mechanical flip */
+function flipDigit(id, newVal){
 
-const box=document.getElementById(id);
-const current=box.querySelector(".flip-current");
-const next=box.querySelector(".flip-next");
+const box = document.getElementById(id);
+const current = box.querySelector(".current");
+const next    = box.querySelector(".next");
 
-if(current.textContent===val){
-current.classList.toggle("zero-grey",grey);
-return;
-}
+if(current.innerText === newVal) return;
 
-next.textContent=val;
+/* new digit enters from below */
+next.innerText = newVal;
+next.style.transform = "translateY(100%)";
+next.style.opacity = "1";
 
-current.classList.remove("zero-grey");
-next.classList.remove("zero-grey");
+/* old goes upward grey */
+current.style.transition = "transform .26s ease, color .26s ease";
+next.style.transition    = "transform .26s ease, color .26s ease";
 
-if(grey) next.classList.add("zero-grey");
+current.style.transform = "translateY(-100%)";
+current.style.color = "#777";
 
-box.classList.add("flipping");
+next.style.transform = "translateY(0)";
+next.style.color = "#fff";
 
 setTimeout(()=>{
-current.textContent=val;
-current.className="flip-current";
-next.className="flip-next";
-if(grey) current.classList.add("zero-grey");
-box.classList.remove("flipping");
-},340);
+current.innerText = newVal;
+current.style.transition = "none";
+current.style.transform = "translateY(0)";
+current.style.color = "#fff";
+
+next.style.transition = "none";
+next.style.transform = "translateY(100%)";
+},270);
 
 }
 
-/* COUNTDOWN */
-function pad(n){
-return String(n).padStart(2,"0");
+/* Roblox grey-leading-zero logic */
+function applyDigitColors(fullString){
+
+let firstNonZero = null;
+
+for(let i=0;i<fullString.length;i++){
+if(fullString[i] !== "0"){
+firstNonZero = i;
+break;
+}
 }
 
-function tick(){
+digitIds.forEach((id,index)=>{
 
-let diff=Math.max(0,Math.floor((start-new Date())/1000));
+const box = document.getElementById(id);
+const cur = box.querySelector(".current");
+const nxt = box.querySelector(".next");
 
-let months=Math.floor(diff/2592000);
-diff-=months*2592000;
-
-let weeks=Math.floor(diff/604800);
-diff-=weeks*604800;
-
-let days=Math.floor(diff/86400);
-diff-=days*86400;
-
-let hrs=Math.floor(diff/3600);
-diff-=hrs*3600;
-
-let mins=Math.floor(diff/60);
-let secs=diff%60;
-
-const vals=[
-...pad(months),
-...pad(weeks),
-...pad(days),
-...pad(hrs),
-...pad(mins),
-...pad(secs)
-];
-
-const ids=[
-"mo1","mo2",
-"wk1","wk2",
-"dy1","dy2",
-"hr1","hr2",
-"mi1","mi2",
-"se1","se2"
-];
-
-for(let i=0;i<ids.length;i++){
-
-const left=i%2===0;
-let grey=false;
-
-if(left && vals[i]==="0") grey=true;
-if(!left && vals[i]==="0" && vals[i-1]==="0") grey=true;
-
-setDigit(ids[i],vals[i],grey);
+if(firstNonZero === null || index < firstNonZero){
+cur.style.color = "#777";
+nxt.style.color = "#777";
+}else{
+cur.style.color = "#fff";
+nxt.style.color = "#fff";
 }
+
+});
 
 }
 
-tick();
-setInterval(tick,1000);
+/* ===============================
+   MAIN TIMER LOOP
+================================= */
 
-/* MAPS */
-const loc=encodeURIComponent(event.location);
+function updateCountdown(){
 
-googleMapLink.href=
+let diff = Math.floor((startDate - new Date()) / 1000);
+
+if(diff <= 0){
+diff = 0;
+}
+
+const days    = Math.floor(diff / 86400);
+const hours   = Math.floor((diff % 86400) / 3600);
+const minutes = Math.floor((diff % 3600) / 60);
+const seconds = diff % 60;
+
+/* show days text separately */
+document.getElementById("dayText").innerText =
+days + " Day" + (days !== 1 ? "s" : "");
+
+/* HHMMSS string */
+const hh = String(hours).padStart(2,"0");
+const mm = String(minutes).padStart(2,"0");
+const ss = String(seconds).padStart(2,"0");
+
+const full = hh + mm + ss;
+
+/* flip changed digits */
+flipDigit("d1", full[0]);
+flipDigit("d2", full[1]);
+flipDigit("d3", full[2]);
+flipDigit("d4", full[3]);
+flipDigit("d5", full[4]);
+flipDigit("d6", full[5]);
+
+/* apply grey/white logic */
+applyDigitColors(full);
+
+}
+
+/* start */
+updateCountdown();
+setInterval(updateCountdown,1000);
+
+/* ===============================
+   MAP LINKS
+================================= */
+
+const loc = encodeURIComponent(event.location);
+
+document.getElementById("googleMapLink").href =
 `https://www.google.com/maps/search/?api=1&query=${loc}`;
 
-appleMapLink.href=
+document.getElementById("appleMapLink").href =
 `https://maps.apple.com/?q=${loc}`;
 
-/* CALENDAR */
-const startISO=start.toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
-const endISO=end.toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
+/* ===============================
+   CALENDAR LINKS
+================================= */
 
-const title=encodeURIComponent(event.title);
-const desc=encodeURIComponent(event.subtitle+"\n"+event.description);
-const location=encodeURIComponent(event.location);
+const startISO = startDate.toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
+const endISO   = endDate.toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
 
-googleLink.href=
+const title = encodeURIComponent(event.title);
+const desc  = encodeURIComponent(event.subtitle + "\n" + event.description);
+const location = encodeURIComponent(event.location);
+
+/* Google */
+document.getElementById("googleLink").href =
 `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&details=${desc}&location=${location}`;
 
-outlookLink.href=
-`https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${start.toISOString()}&enddt=${end.toISOString()}&location=${location}&body=${desc}`;
+/* Outlook */
+document.getElementById("outlookLink").href =
+`https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${startDate.toISOString()}&enddt=${endDate.toISOString()}&location=${location}&body=${desc}`;
 
-officeLink.href=
-`https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${start.toISOString()}&enddt=${end.toISOString()}&location=${location}&body=${desc}`;
+/* Office */
+document.getElementById("officeLink").href =
+`https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${startDate.toISOString()}&enddt=${endDate.toISOString()}&location=${location}&body=${desc}`;
 
-yahooLink.href=
+/* Yahoo */
+document.getElementById("yahooLink").href =
 `https://calendar.yahoo.com/?v=60&title=${title}&st=${startISO}&et=${endISO}&desc=${desc}&in_loc=${location}`;
 
-/* ICS */
-const ics=
+/* ICS / Apple */
+const ics =
 `BEGIN:VCALENDAR
 VERSION:2.0
+PRODID:-//Hull Red CIO//EN
 BEGIN:VEVENT
 UID:${Date.now()}@hullred
 DTSTAMP:${startISO}
@@ -170,22 +194,33 @@ LOCATION:${event.location}
 END:VEVENT
 END:VCALENDAR`;
 
-const blob=new Blob([ics],{type:"text/calendar"});
-const url=URL.createObjectURL(blob);
+const blob = new Blob([ics], {type:"text/calendar"});
+const url = URL.createObjectURL(blob);
 
-icsLink.href=url;
-icsLink.download="event.ics";
+document.getElementById("icsLink").href = url;
+document.getElementById("icsLink").download = "event.ics";
 
-appleLink.href=url;
-appleLink.download="event.ics";
+document.getElementById("appleLink").href = url;
+document.getElementById("appleLink").download = "event.ics";
 
-});
+/* ===============================
+   POSTER MODAL
+================================= */
 
-/* POSTER MODAL */
-posterThumb.onclick=()=>posterModal.classList.add("show");
-posterClose.onclick=()=>posterModal.classList.remove("show");
-posterModal.onclick=e=>{
-if(e.target===posterModal){
-posterModal.classList.remove("show");
+const modal = document.getElementById("posterModal");
+
+document.getElementById("posterThumb").onclick = ()=>{
+modal.classList.add("show");
+};
+
+document.getElementById("posterClose").onclick = ()=>{
+modal.classList.remove("show");
+};
+
+modal.onclick = (e)=>{
+if(e.target === modal){
+modal.classList.remove("show");
 }
 };
+
+});
