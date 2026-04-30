@@ -174,16 +174,12 @@ transform .34s cubic-bezier(.2,.8,.2,1),
 color .2s;
 }
 
-.flip-current{
-transform:translateY(0%);
-color:#fff;
-z-index:2;
+.flip-current {
+  color: #fff;
 }
 
-.flip-next{
-transform:translateY(100%);
-color:#666;
-z-index:1;
+.flip-next {
+  color: #777;
 }
 
 .flip-digit.flipping .flip-current{
