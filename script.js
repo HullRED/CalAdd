@@ -59,7 +59,7 @@ fetch("data/event.json")
 
       digit.innerHTML = `
         <div class="flip-current current">0</div>
-        <div class="flip-next next">9</div>
+        <div class="flip-next next">0</div>
       `;
 
       group.appendChild(digit);
@@ -81,14 +81,23 @@ fetch("data/event.json")
   countdown.appendChild(row);
 
   /* ======================================================
-     REAL DATE DIFFERENCE
+     DATE DIFFERENCE
   ====================================================== */
   function diff(from, to) {
 
+    if (to <= from) {
+      return {
+        months:0,
+        weeks:0,
+        days:0,
+        hours:0,
+        minutes:0,
+        seconds:0
+      };
+    }
+
     let start = new Date(from);
     let end = new Date(to);
-
-    if (end < start) [start, end] = [end, start];
 
     let years   = end.getFullYear() - start.getFullYear();
     let months  = end.getMonth() - start.getMonth();
@@ -122,7 +131,15 @@ fetch("data/event.json")
     };
   }
 
-  const pad2 = (n) => String(Math.max(0, n)).padStart(2, "0");
+  /* ======================================================
+     ALWAYS LEADING ZERO
+     0 => 00
+     4 => 04
+     9 => 09
+  ====================================================== */
+  function pad2(n) {
+    return String(Math.max(0, n)).padStart(2, "0");
+  }
 
   /* ======================================================
      DIGIT LIMITS
@@ -137,7 +154,7 @@ fetch("data/event.json")
   };
 
   /* ======================================================
-     DOWNWARD UPWARD-MOTION FLIP
+     DOWNWARD COUNT
      9 ↑ 8 ↑ 7 ↑ 6 ...
   ====================================================== */
   function animateDigit(id, target) {
@@ -149,8 +166,6 @@ fetch("data/event.json")
 
     const current = box.querySelector(".current");
     const next = box.querySelector(".next");
-
-    if (!current || !next) return;
 
     target = parseInt(target);
 
@@ -200,6 +215,8 @@ fetch("data/event.json")
 
   /* ======================================================
      MAIN LOOP
+     ALWAYS SHOWS:
+     00 Months 00 Weeks 00 Days etc
   ====================================================== */
   function update() {
 
@@ -225,11 +242,11 @@ fetch("data/event.json")
   setInterval(update, 1000);
 
   /* ======================================================
-     TEXT CONTENT
+     TEXT
   ====================================================== */
-  const set = (id,val) => {
+  const set = (id,val)=>{
     const el = get(id);
-    if (el) el.innerText = val;
+    if(el) el.innerText = val;
   };
 
   set("eventTitle", event.title);
@@ -244,27 +261,23 @@ fetch("data/event.json")
   ====================================================== */
   const loc = encodeURIComponent(event.location);
 
-  const googleMap = get("googleMapLink");
-  if (googleMap) {
-    googleMap.href =
-      `https://www.google.com/maps/search/?api=1&query=${loc}`;
-  }
+  const gm = get("googleMapLink");
+  if (gm) gm.href =
+    `https://www.google.com/maps/search/?api=1&query=${loc}`;
 
-  const appleMap = get("appleMapLink");
-  if (appleMap) {
-    appleMap.href =
-      `https://maps.apple.com/?q=${loc}`;
-  }
+  const am = get("appleMapLink");
+  if (am) am.href =
+    `https://maps.apple.com/?q=${loc}`;
 
   /* ======================================================
      CALENDAR LINKS
   ====================================================== */
   const startISO = startDate.toISOString();
   const endISO =
-    new Date(startDate.getTime() + 3600000).toISOString();
+    new Date(startDate.getTime()+3600000).toISOString();
 
   const title = encodeURIComponent(event.title);
-  const desc = encodeURIComponent(
+  const desc  = encodeURIComponent(
     event.subtitle + "\n" + event.description
   );
 
@@ -273,25 +286,17 @@ fetch("data/event.json")
     if(el) el.href = url;
   }
 
-  setLink(
-    "googleLink",
-    `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&details=${desc}&location=${loc}`
-  );
+  setLink("googleLink",
+    `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&details=${desc}&location=${loc}`);
 
-  setLink(
-    "outlookLink",
-    `https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${startISO}&enddt=${endISO}&location=${loc}&body=${desc}`
-  );
+  setLink("outlookLink",
+    `https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${startISO}&enddt=${endISO}&location=${loc}&body=${desc}`);
 
-  setLink(
-    "officeLink",
-    `https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${startISO}&enddt=${endISO}&location=${loc}&body=${desc}`
-  );
+  setLink("officeLink",
+    `https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${startISO}&enddt=${endISO}&location=${loc}&body=${desc}`);
 
-  setLink(
-    "yahooLink",
-    `https://calendar.yahoo.com/?v=60&title=${title}&st=${startISO}&et=${endISO}&desc=${desc}&in_loc=${loc}`
-  );
+  setLink("yahooLink",
+    `https://calendar.yahoo.com/?v=60&title=${title}&st=${startISO}&et=${endISO}&desc=${desc}&in_loc=${loc}`);
 
   /* ======================================================
      APPLE / IOS / MACOS / IPADOS
@@ -314,7 +319,7 @@ LOCATION:${event.location}
 END:VEVENT
 END:VCALENDAR`;
 
-  const blob = new Blob([ics], { type:"text/calendar" });
+  const blob = new Blob([ics], {type:"text/calendar"});
   const url = URL.createObjectURL(blob);
 
   const apple = get("appleLink");
@@ -345,14 +350,14 @@ END:VCALENDAR`;
   }
 
   if (modal) {
-    modal.onclick = (e) => {
-      if (e.target === modal) {
+    modal.onclick = (e)=>{
+      if(e.target === modal){
         modal.classList.remove("show");
       }
     };
   }
 
 })
-.catch(err => console.error("Countdown error:", err));
+.catch(err => console.error(err));
 
 });
