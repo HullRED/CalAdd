@@ -352,10 +352,17 @@ const blob = new Blob([ics], {type:"text/calendar"});
 const url = URL.createObjectURL(blob);
 
 get("appleLink").href = url;
-get("appleLink").download = "event.ics";
-
 get("icsLink").href = url;
-get("icsLink").download = "event.ics";
+
+const safeTitle = (event.title || "event")
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, "-")   // spaces/symbols → dash
+  .replace(/^-+|-+$/g, "");      // clean edges
+
+const fileName = `${safeTitle}.ics`;
+
+get("appleLink").download = fileName;
+get("icsLink").download = fileName;
 
 /* ======================================================
    POSTER MODAL
