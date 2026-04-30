@@ -212,26 +212,40 @@ step();
 /* ======================================================
    COLOURS
 ====================================================== */
-function applyColours(values,digits){
+function applyColours(values, digits) {
 
-let firstNonZero = digits.findIndex(x => x !== "0");
+  const order = ["M","W","D","H","m","s"];
 
-ids.forEach((id,index)=>{
+  // Build cumulative check (highest → lowest)
+  let seenNonZero = false;
 
-const cur = get(id).querySelector(".current");
+  order.forEach(key => {
 
-cur.style.color =
-(firstNonZero === -1 || index < firstNonZero)
-? "#666"
-: "#fff";
+    const label = labels[key];
+    const value = values[key];
 
-});
+    // Once we hit a non-zero unit, everything after stays active
+    if (value > 0) {
+      seenNonZero = true;
+      label.style.color = "#fff";
+    } else {
+      // Only grey out if NOTHING above it has value
+      label.style.color = seenNonZero ? "#fff" : "#666";
+    }
+  });
 
-["M","W","D","H","m","s"].forEach(key=>{
-labels[key].style.color =
-values[key] <= 0 ? "#666" : "#fff";
-});
+  // digit greying (unchanged but correct)
+  let firstNonZero = digits.findIndex(x => x !== "0");
 
+  ids.forEach((id, index) => {
+    const cur = get(id).querySelector(".current");
+
+    if (firstNonZero === -1 || index < firstNonZero) {
+      cur.style.color = "#666";
+    } else {
+      cur.style.color = "#fff";
+    }
+  });
 }
 
 /* ======================================================
