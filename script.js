@@ -1,199 +1,193 @@
-/* ======================================================
-   HULL RED V3 COUNTDOWN ENGINE (PRODUCTION FIXED)
-   - Real calendar math
-   - Mobile optimised
-====================================================== */
-
 document.addEventListener("DOMContentLoaded", () => {
 
 fetch("data/event.json")
-  .then(r => {
-    if (!r.ok) throw new Error("event.json not found");
-    return r.json();
-  })
-  .then(event => {
+.then(r => {
+  if (!r.ok) throw new Error("event.json not found");
+  return r.json();
+})
+.then(event => {
 
-    /* ===============================
-       DATE SETUP (REAL CALENDAR SAFE)
-    ================================= */
-    const startDate = new Date(event.date + "T" + event.startTime);
+  const startDate = new Date(event.date + "T" + event.startTime);
 
-    const get = (id) => document.getElementById(id);
+  const get = (id) => document.getElementById(id);
 
-    /* Cache DOM (MOBILE OPTIMISED) */
-    const countdown = get("countdown");
+  const countdown = get("countdown");
+  if (!countdown) return;
 
-    if (!countdown) return;
+  countdown.innerHTML = "";
 
-    countdown.innerHTML = "";
+  /* ===============================
+     LABEL ROW (RESTORED)
+  ================================= */
+  const labelRow = document.createElement("div");
+  labelRow.style.display = "flex";
+  labelRow.style.gap = "8px";
+  labelRow.style.marginBottom = "10px";
+  labelRow.style.fontSize = "12px";
+  labelRow.style.color = "#aaa";
+  labelRow.style.letterSpacing = "2px";
 
-    /* ===============================
-       BUILD DIGITS (DYNAMIC)
-    ================================= */
-    const digitIds = [];
+  const labels = ["M","M","W","W","D","D","H","H","m","m","s","s"];
 
-    function createDigit(id) {
-      const el = document.createElement("div");
-      el.className = "flip-digit";
-      el.id = id;
+  labels.forEach(l => {
+    const span = document.createElement("div");
+    span.style.width = "72px";
+    span.style.textAlign = "center";
+    span.innerText = l;
+    labelRow.appendChild(span);
+  });
 
-      el.innerHTML = `
-        <div class="flip-current current">0</div>
-        <div class="flip-next next">0</div>
-      `;
+  countdown.appendChild(labelRow);
 
-      countdown.appendChild(el);
-      digitIds.push(id);
-    }
+  /* ===============================
+     DIGITS ROW
+  ================================= */
+  const digitIds = [];
 
-    const labels = [
-      "M1","M2",
-      "W1","W2",
-      "D1","D2",
-      "H1","H2",
-      "m1","m2",
-      "S1","S2"
-    ];
+  const digitRow = document.createElement("div");
+  digitRow.style.display = "flex";
+  digitRow.style.gap = "8px";
+  digitRow.style.alignItems = "center";
 
-    labels.forEach(createDigit);
+  function createDigit(id) {
+    const el = document.createElement("div");
+    el.className = "flip-digit";
+    el.id = id;
 
-    /* ===============================
-       SAFE FLIP ENGINE (NO LAYOUT THRASHING)
-    ================================= */
-    function flipDigit(id, val) {
+    el.innerHTML = `
+      <div class="flip-current current">0</div>
+      <div class="flip-next next">0</div>
+    `;
 
-      const box = get(id);
-      if (!box) return;
+    digitRow.appendChild(el);
+    digitIds.push(id);
+  }
 
-      const current = box.querySelector(".current");
-      const next = box.querySelector(".next");
+  const ids = [
+    "M1","M2",
+    "W1","W2",
+    "D1","D2",
+    "H1","H2",
+    "m1","m2",
+    "s1","s2"
+  ];
 
-      if (!current || !next) return;
+  ids.forEach(createDigit);
+  countdown.appendChild(digitRow);
 
-      if (current.innerText === val) return;
+  /* ===============================
+     FLIP ANIMATION (RESTORED STYLE)
+  ================================= */
+  function flipDigit(id, value) {
 
-      next.innerText = val;
+    const box = get(id);
+    if (!box) return;
+
+    const current = box.querySelector(".current");
+    const next = box.querySelector(".next");
+
+    if (!current || !next) return;
+
+    if (current.innerText === value) return;
+
+    next.innerText = value;
+
+    /* trigger animation class (CSS-driven) */
+    box.classList.add("flipping");
+
+    current.style.color = "#fff";
+    next.style.color = "#777";
+
+    setTimeout(() => {
+
+      current.innerText = value;
+
+      box.classList.remove("flipping");
 
       current.style.color = "#fff";
-      next.style.color = "#777";
+      next.style.color = "#fff";
 
-      current.style.transform = "translateY(-100%)";
-      next.style.transform = "translateY(0)";
+    }, 300);
+  }
 
-      setTimeout(() => {
+  /* ===============================
+     REAL CALENDAR ENGINE (FIXED)
+  ================================= */
+  function getCalendarDiff(from, to) {
 
-        current.innerText = val;
+    let start = new Date(from);
+    let end = new Date(to);
 
-        current.style.transition = "none";
-        next.style.transition = "none";
+    let years = end.getFullYear() - start.getFullYear();
+    let months = end.getMonth() - start.getMonth();
+    let days = end.getDate() - start.getDate();
+    let hours = end.getHours() - start.getHours();
+    let minutes = end.getMinutes() - start.getMinutes();
+    let seconds = end.getSeconds() - start.getSeconds();
 
-        current.style.transform = "translateY(0)";
-        next.style.transform = "translateY(100%)";
+    if (seconds < 0) { seconds += 60; minutes--; }
+    if (minutes < 0) { minutes += 60; hours--; }
+    if (hours < 0) { hours += 24; days--; }
 
-        current.style.color = "#fff";
-        next.style.color = "#fff";
-
-      }, 240);
+    if (days < 0) {
+      const prev = new Date(end.getFullYear(), end.getMonth(), 0);
+      days += prev.getDate();
+      months--;
     }
 
-    /* ===============================
-       REAL CALENDAR DIFF ENGINE
-       (NO APPROXIMATIONS)
-    ================================= */
-
-    function getCalendarDiff(from, to) {
-
-      let start = new Date(from);
-      let end = new Date(to);
-
-      if (end < start) {
-        const temp = start;
-        start = end;
-        end = temp;
-      }
-
-      let years = end.getFullYear() - start.getFullYear();
-      let months = end.getMonth() - start.getMonth();
-      let days = end.getDate() - start.getDate();
-      let hours = end.getHours() - start.getHours();
-      let minutes = end.getMinutes() - start.getMinutes();
-      let seconds = end.getSeconds() - start.getSeconds();
-
-      if (seconds < 0) {
-        seconds += 60;
-        minutes--;
-      }
-
-      if (minutes < 0) {
-        minutes += 60;
-        hours--;
-      }
-
-      if (hours < 0) {
-        hours += 24;
-        days--;
-      }
-
-      if (days < 0) {
-        const prevMonth = new Date(end.getFullYear(), end.getMonth(), 0);
-        days += prevMonth.getDate();
-        months--;
-      }
-
-      if (months < 0) {
-        months += 12;
-        years--;
-      }
-
-      const weeks = Math.floor(days / 7);
-      const remDays = days % 7;
-
-      return {
-        months: months + (years * 12),
-        weeks,
-        days: remDays,
-        hours,
-        minutes,
-        seconds
-      };
+    if (months < 0) {
+      months += 12;
+      years--;
     }
 
-    /* ===============================
-       MAIN LOOP (MOBILE OPTIMISED)
-    ================================= */
-    let lastFrame;
+    const weeks = Math.floor(days / 7);
+    const remDays = days % 7;
 
-    function updateCountdown() {
+    return {
+      months: months + (years * 12),
+      weeks,
+      days: remDays,
+      hours,
+      minutes,
+      seconds
+    };
+  }
 
-      const now = new Date();
-      let diffObj = getCalendarDiff(now, startDate);
+  /* ===============================
+     MAIN LOOP (OPTIMISED)
+  ================================= */
+  function updateCountdown() {
 
-      const parts = [
-        diffObj.months,
-        diffObj.months % 10,
-        diffObj.weeks,
-        diffObj.weeks % 10,
-        diffObj.days,
-        diffObj.days % 10,
-        diffObj.hours,
-        diffObj.hours % 10,
-        diffObj.minutes,
-        diffObj.minutes % 10,
-        diffObj.seconds,
-        diffObj.seconds % 10
-      ].map(n => String(n).padStart(1, "0"));
+    let diff = Math.floor((startDate - new Date()) / 1000);
+    if (diff < 0) diff = 0;
 
-      for (let i = 0; i < digitIds.length; i++) {
-        flipDigit(digitIds[i], parts[i]);
-      }
+    const t = getCalendarDiff(new Date(), startDate);
 
-      /* Mobile optimisation: reduces jitter */
-      lastFrame = requestAnimationFrame(() => {
-        setTimeout(updateCountdown, 1000);
-      });
-    }
+    const values = [
+      t.months,
+      t.months % 10,
+      t.weeks,
+      t.weeks % 10,
+      t.days,
+      t.days % 10,
+      t.hours,
+      t.hours % 10,
+      t.minutes,
+      t.minutes % 10,
+      t.seconds,
+      t.seconds % 10
+    ].map(n => String(n).padStart(1, "0"));
 
-    updateCountdown();
+    ids.forEach((id, i) => {
+      flipDigit(id, values[i]);
+    });
+  }
+
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+});
+});
 
     /* ===============================
        TEXT CONTENT (SAFE)
