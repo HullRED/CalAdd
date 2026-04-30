@@ -8,7 +8,7 @@ fetch("data/event.json")
      CORE
   ====================================================== */
   const startDate = new Date(event.date + "T" + event.startTime);
-  const get = (id) => document.getElementById(id);
+  const get = id => document.getElementById(id);
 
   const countdown = get("countdown");
   if (!countdown) return;
@@ -16,7 +16,7 @@ fetch("data/event.json")
   countdown.innerHTML = "";
 
   /* ======================================================
-     BUILD UI
+     BUILD COUNTDOWN UI
   ====================================================== */
   const units = [
     { key:"M", label:"Months"  },
@@ -41,6 +41,7 @@ fetch("data/event.json")
   units.forEach(unit => {
 
     const group = document.createElement("div");
+    group.className = "flip-group";
     group.style.display = "flex";
     group.style.alignItems = "center";
     group.style.gap = "6px";
@@ -48,7 +49,6 @@ fetch("data/event.json")
     for (let i = 1; i <= 2; i++) {
 
       const id = unit.key + i;
-
       ids.push(id);
       state[id] = null;
       animating[id] = false;
@@ -68,10 +68,10 @@ fetch("data/event.json")
     const label = document.createElement("span");
     label.className = "flip-unit-label";
     label.innerText = unit.label;
-    label.style.color = "#fff";
+    label.style.minWidth = "76px";
     label.style.fontWeight = "700";
     label.style.fontSize = "15px";
-    label.style.minWidth = "78px";
+    label.style.color = "#fff";
 
     group.appendChild(label);
     row.appendChild(group);
@@ -81,7 +81,7 @@ fetch("data/event.json")
   countdown.appendChild(row);
 
   /* ======================================================
-     DATE DIFFERENCE
+     REAL CALENDAR DIFFERENCE
   ====================================================== */
   function diff(from, to) {
 
@@ -131,12 +131,6 @@ fetch("data/event.json")
     };
   }
 
-  /* ======================================================
-     ALWAYS LEADING ZERO
-     0 => 00
-     4 => 04
-     9 => 09
-  ====================================================== */
   function pad2(n) {
     return String(Math.max(0, n)).padStart(2, "0");
   }
@@ -154,8 +148,8 @@ fetch("data/event.json")
   };
 
   /* ======================================================
-     DOWNWARD COUNT
-     9 ↑ 8 ↑ 7 ↑ 6 ...
+     MECHANICAL UPWARD MOTION / DOWNWARD COUNT
+     9 ↑ 8 ↑ 7 ↑ 6
   ====================================================== */
   function animateDigit(id, target) {
 
@@ -194,6 +188,9 @@ fetch("data/event.json")
 
       next.innerText = nextVal;
 
+      current.style.color = "#fff";
+      next.style.color = "#777";
+
       box.classList.remove("flipping");
       void box.offsetWidth;
       box.classList.add("flipping");
@@ -202,6 +199,9 @@ fetch("data/event.json")
 
         current.innerText = nextVal;
         state[id] = nextVal;
+
+        current.style.color = "#fff";
+        next.style.color = "#fff";
 
         box.classList.remove("flipping");
 
@@ -214,35 +214,71 @@ fetch("data/event.json")
   }
 
   /* ======================================================
+     GREY LEADING ZEROS
+  ====================================================== */
+  function applyLeadingZeroColors(fullDigits) {
+
+    let firstNonZero = fullDigits.findIndex(x => x !== "0");
+
+    ids.forEach((id, index) => {
+
+      const box = get(id);
+      if (!box) return;
+
+      const cur = box.querySelector(".current");
+
+      if (firstNonZero === -1 || index < firstNonZero) {
+        cur.style.color = "#666";
+      } else {
+        cur.style.color = "#fff";
+      }
+
+    });
+  }
+
+  /* ======================================================
      MAIN LOOP
-     ALWAYS SHOWS:
-     00 Months 00 Weeks 00 Days etc
   ====================================================== */
   function update() {
 
     const now = new Date();
     const t = diff(now, startDate);
 
-    const digits =
-      (
-        pad2(t.months) +
-        pad2(t.weeks) +
-        pad2(t.days) +
-        pad2(t.hours) +
-        pad2(t.minutes) +
-        pad2(t.seconds)
-      ).split("");
+    const full =
+      pad2(t.months) +
+      pad2(t.weeks) +
+      pad2(t.days) +
+      pad2(t.hours) +
+      pad2(t.minutes) +
+      pad2(t.seconds);
+
+    const digits = full.split("");
 
     for (let i = 0; i < ids.length; i++) {
       animateDigit(ids[i], digits[i]);
     }
+
+    applyLeadingZeroColors(digits);
   }
 
   update();
-  setInterval(update, 1000);
+
+  let timer = setInterval(update, 1000);
 
   /* ======================================================
-     TEXT
+     PERFORMANCE (pause when hidden)
+  ====================================================== */
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      clearInterval(timer);
+    } else {
+      update();
+      timer = setInterval(update, 1000);
+    }
+  });
+
+  /* ======================================================
+     TEXT CONTENT
   ====================================================== */
   const set = (id,val)=>{
     const el = get(id);
@@ -273,11 +309,10 @@ fetch("data/event.json")
      CALENDAR LINKS
   ====================================================== */
   const startISO = startDate.toISOString();
-  const endISO =
-    new Date(startDate.getTime()+3600000).toISOString();
+  const endISO = new Date(startDate.getTime()+3600000).toISOString();
 
   const title = encodeURIComponent(event.title);
-  const desc  = encodeURIComponent(
+  const desc = encodeURIComponent(
     event.subtitle + "\n" + event.description
   );
 
@@ -302,7 +337,7 @@ fetch("data/event.json")
      APPLE / IOS / MACOS / IPADOS
   ====================================================== */
   const stamp = d =>
-    d.toISOString().replace(/[-:]/g,"").split(".")[0] + "Z";
+    d.toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
 
   const ics =
 `BEGIN:VCALENDAR
@@ -350,14 +385,12 @@ END:VCALENDAR`;
   }
 
   if (modal) {
-    modal.onclick = (e)=>{
-      if(e.target === modal){
-        modal.classList.remove("show");
-      }
+    modal.onclick = e => {
+      if (e.target === modal) modal.classList.remove("show");
     };
   }
 
 })
-.catch(err => console.error(err));
+.catch(err => console.error("Countdown error:", err));
 
 });
