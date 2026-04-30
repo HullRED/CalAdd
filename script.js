@@ -17,9 +17,8 @@ fetch("data/event.json")
 
   /* ======================================================
      BUILD COUNTDOWN UI
-     [M1][M2] Months [W1][W2] Weeks ...
+     [00 Months] [00 Weeks] etc
   ====================================================== */
-
   const units = [
     { key:"M", label:"Months" },
     { key:"W", label:"Weeks" },
@@ -42,7 +41,6 @@ fetch("data/event.json")
   units.forEach(unit => {
 
     const group = document.createElement("div");
-    group.className = "flip-group";
     group.style.display = "flex";
     group.style.alignItems = "center";
     group.style.gap = "6px";
@@ -59,19 +57,18 @@ fetch("data/event.json")
 
       digit.innerHTML = `
         <div class="flip-current current">0</div>
-        <div class="flip-next next">0</div>
+        <div class="flip-next next">1</div>
       `;
 
       group.appendChild(digit);
     }
 
     const label = document.createElement("span");
-    label.className = "flip-unit-label";
     label.innerText = unit.label;
-    label.style.fontSize = "15px";
-    label.style.fontWeight = "700";
     label.style.color = "#fff";
-    label.style.minWidth = "72px";
+    label.style.fontWeight = "700";
+    label.style.fontSize = "15px";
+    label.style.minWidth = "76px";
 
     group.appendChild(label);
     row.appendChild(group);
@@ -80,7 +77,7 @@ fetch("data/event.json")
   countdown.appendChild(row);
 
   /* ======================================================
-     REAL DATE DIFFERENCE
+     DATE DIFFERENCE
   ====================================================== */
   function diff(from, to) {
 
@@ -124,11 +121,10 @@ fetch("data/event.json")
   const pad2 = (n) => String(Math.max(0, n)).padStart(2, "0");
 
   /* ======================================================
-     TRUE INDIVIDUAL FLIP ENGINE
-     only changed digit flips
-     always upward
+     UPWARD NUMBER SEQUENCE FLIP
+     0 ↑ 1 ↑ 2 ↑ 3 etc
   ====================================================== */
-  function flipDigit(id, newVal) {
+  function flipDigit(id, targetVal) {
 
     const box = get(id);
     if (!box) return;
@@ -138,30 +134,43 @@ fetch("data/event.json")
 
     if (!current || !next) return;
 
+    targetVal = parseInt(targetVal);
+
     if (state[id] === null) {
-      current.innerText = newVal;
-      state[id] = newVal;
+      current.innerText = targetVal;
+      next.innerText = (targetVal + 1) % 10;
+      state[id] = targetVal;
       return;
     }
 
-    if (String(state[id]) === String(newVal)) return;
+    let currentVal = state[id];
 
-    next.innerText = newVal;
+    if (currentVal === targetVal) return;
+
+    /* always count upward until target reached */
+    const nextVal = (currentVal + 1) % 10;
+
+    next.innerText = nextVal;
 
     box.classList.remove("flipping");
-    void box.offsetWidth; // reflow restart animation
+    void box.offsetWidth;
     box.classList.add("flipping");
 
-    current.style.color = "#fff";
-    next.style.color = "#777";
-
     setTimeout(() => {
-      current.innerText = newVal;
-      current.style.color = "#fff";
-      next.style.color = "#fff";
+
+      current.innerText = nextVal;
+      next.innerText = (nextVal + 1) % 10;
+
       box.classList.remove("flipping");
-      state[id] = newVal;
-    }, 260);
+
+      state[id] = nextVal;
+
+      /* keep climbing until target reached */
+      if (nextVal !== targetVal) {
+        setTimeout(() => flipDigit(id, targetVal), 40);
+      }
+
+    }, 220);
   }
 
   /* ======================================================
@@ -172,16 +181,15 @@ fetch("data/event.json")
     const now = new Date();
     const t = diff(now, startDate);
 
-    const values = [
-      pad2(t.months),
-      pad2(t.weeks),
-      pad2(t.days),
-      pad2(t.hours),
-      pad2(t.minutes),
-      pad2(t.seconds)
-    ];
+    const full =
+      pad2(t.months) +
+      pad2(t.weeks) +
+      pad2(t.days) +
+      pad2(t.hours) +
+      pad2(t.minutes) +
+      pad2(t.seconds);
 
-    const digits = values.join("").split("");
+    const digits = full.split("");
 
     for (let i = 0; i < ids.length; i++) {
       flipDigit(ids[i], digits[i]);
@@ -207,27 +215,21 @@ fetch("data/event.json")
   set("eventTime", event.startTime + " - " + event.endTime);
 
   /* ======================================================
-     MAP LINKS
+     LINKS
   ====================================================== */
   const loc = encodeURIComponent(event.location);
 
-  const googleMap = get("googleMapLink");
-  if (googleMap) {
-    googleMap.href =
-      `https://www.google.com/maps/search/?api=1&query=${loc}`;
-  }
+  const gMap = get("googleMapLink");
+  if (gMap) gMap.href =
+    `https://www.google.com/maps/search/?api=1&query=${loc}`;
 
-  const appleMap = get("appleMapLink");
-  if (appleMap) {
-    appleMap.href =
-      `https://maps.apple.com/?q=${loc}`;
-  }
+  const aMap = get("appleMapLink");
+  if (aMap) aMap.href =
+    `https://maps.apple.com/?q=${loc}`;
 
-  /* ======================================================
-     CALENDAR LINKS
-  ====================================================== */
   const startISO = startDate.toISOString();
-  const endISO = new Date(startDate.getTime() + 3600000).toISOString();
+  const endISO =
+    new Date(startDate.getTime() + 3600000).toISOString();
 
   const title = encodeURIComponent(event.title);
   const desc = encodeURIComponent(
@@ -312,9 +314,7 @@ END:VCALENDAR`;
 
   if (modal) {
     modal.onclick = (e) => {
-      if (e.target === modal) {
-        modal.classList.remove("show");
-      }
+      if (e.target === modal) modal.classList.remove("show");
     };
   }
 
