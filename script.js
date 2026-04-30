@@ -4,369 +4,322 @@ fetch("data/event.json")
 .then(r => r.json())
 .then(event => {
 
-  /* ======================================================
-     CORE
-  ====================================================== */
-  const startDate = new Date(event.date + "T" + event.startTime);
-  const get = id => document.getElementById(id);
+const startDate = new Date(event.date + "T" + event.startTime);
+const get = id => document.getElementById(id);
 
-  const countdown = get("countdown");
-  if (!countdown) return;
+const countdown = get("countdown");
+if (!countdown) return;
 
-  countdown.innerHTML = "";
+countdown.innerHTML = "";
 
-  /* ======================================================
-     BUILD UI
-  ====================================================== */
-  const units = [
-    { key:"M", label:"Months"  },
-    { key:"W", label:"Weeks"   },
-    { key:"D", label:"Days"    },
-    { key:"H", label:"Hours"   },
-    { key:"m", label:"Minutes" },
-    { key:"s", label:"Seconds" }
-  ];
+/* ======================================================
+   BUILD UI
+====================================================== */
+const units = [
+  { key:"M", label:"Months" },
+  { key:"W", label:"Weeks" },
+  { key:"D", label:"Days" },
+  { key:"H", label:"Hours" },
+  { key:"m", label:"Minutes" },
+  { key:"s", label:"Seconds" }
+];
 
-  const ids = [];
-  const state = {};
-  const animating = {};
-  const labels = {};
+const ids = [];
+const state = {};
+const animating = {};
+const labels = {};
 
-  const row = document.createElement("div");
-  row.className = "flip-row";
-  row.style.display = "flex";
-  row.style.flexWrap = "wrap";
-  row.style.gap = "14px";
-  row.style.alignItems = "center";
+const row = document.createElement("div");
+row.className = "flip-row";
+row.style.display = "flex";
+row.style.flexWrap = "wrap";
+row.style.gap = "14px";
+row.style.alignItems = "center";
 
-  units.forEach(unit => {
+units.forEach(unit => {
 
-    const group = document.createElement("div");
-    group.className = "flip-group";
-    group.style.display = "flex";
-    group.style.alignItems = "center";
-    group.style.gap = "6px";
+  const group = document.createElement("div");
+  group.style.display = "flex";
+  group.style.alignItems = "center";
+  group.style.gap = "6px";
 
-    for (let i = 1; i <= 2; i++) {
+  for(let i=1;i<=2;i++){
 
-      const id = unit.key + i;
+    const id = unit.key + i;
 
-      ids.push(id);
-      state[id] = null;
-      animating[id] = false;
+    ids.push(id);
+    state[id] = null;
+    animating[id] = false;
 
-      const digit = document.createElement("div");
-      digit.className = "flip-digit";
-      digit.id = id;
+    const digit = document.createElement("div");
+    digit.className = "flip-digit";
+    digit.id = id;
 
-      digit.innerHTML = `
-        <div class="flip-current current">0</div>
-        <div class="flip-next next">9</div>
-      `;
+    digit.innerHTML = `
+      <div class="flip-current current">0</div>
+      <div class="flip-next next">9</div>
+    `;
 
-      group.appendChild(digit);
-    }
-
-    const label = document.createElement("span");
-    label.className = "flip-unit-label";
-    label.innerText = unit.label;
-    label.style.minWidth = "78px";
-    label.style.fontWeight = "700";
-    label.style.fontSize = "15px";
-    label.style.color = "#fff";
-
-    labels[unit.key] = label;
-
-    group.appendChild(label);
-    row.appendChild(group);
-
-  });
-
-  countdown.appendChild(row);
-
-  /* ======================================================
-     DATE DIFFERENCE
-  ====================================================== */
-  function diff(from, to) {
-
-    if (to <= from) {
-      return {
-        months:0,
-        weeks:0,
-        days:0,
-        hours:0,
-        minutes:0,
-        seconds:0
-      };
-    }
-
-    let start = new Date(from);
-    let end = new Date(to);
-
-    let years   = end.getFullYear() - start.getFullYear();
-    let months  = end.getMonth() - start.getMonth();
-    let days    = end.getDate() - start.getDate();
-    let hours   = end.getHours() - start.getHours();
-    let minutes = end.getMinutes() - start.getMinutes();
-    let seconds = end.getSeconds() - start.getSeconds();
-
-    if (seconds < 0) { seconds += 60; minutes--; }
-    if (minutes < 0) { minutes += 60; hours--; }
-    if (hours < 0)   { hours += 24; days--; }
-
-    if (days < 0) {
-      const prev = new Date(end.getFullYear(), end.getMonth(), 0);
-      days += prev.getDate();
-      months--;
-    }
-
-    if (months < 0) {
-      months += 12;
-      years--;
-    }
-
-    return {
-      months : years * 12 + months,
-      weeks  : Math.floor(days / 7),
-      days   : days % 7,
-      hours,
-      minutes,
-      seconds
-    };
+    group.appendChild(digit);
   }
 
-  const pad2 = n => String(Math.max(0, n)).padStart(2, "0");
+  const label = document.createElement("span");
+  label.innerText = unit.label;
+  label.className = "flip-unit-label";
+  label.style.minWidth = "78px";
+  label.style.fontWeight = "700";
+  label.style.fontSize = "15px";
+  label.style.color = "#fff";
 
-  /* ======================================================
-     DIGIT LIMITS
-  ====================================================== */
-  const maxMap = {
-    M1:9, M2:9,
-    W1:9, W2:9,
-    D1:9, D2:9,
-    H1:2, H2:9,
-    m1:5, m2:9,
-    s1:5, s2:9
-  };
+  labels[unit.key] = label;
 
-  /* ======================================================
-     FLIP ANIMATION
-  ====================================================== */
-  function animateDigit(id, target) {
+  group.appendChild(label);
+  row.appendChild(group);
 
-    if (animating[id]) return;
+});
 
-    const box = get(id);
-    if (!box) return;
+countdown.appendChild(row);
 
-    const current = box.querySelector(".current");
-    const next = box.querySelector(".next");
+/* ======================================================
+   DATE DIFFERENCE
+====================================================== */
+function diff(from,to){
 
-    target = parseInt(target);
+if(to <= from){
+return {
+months:0,weeks:0,days:0,
+hours:0,minutes:0,seconds:0
+};
+}
 
-    if (state[id] === null) {
-      current.innerText = target;
-      next.innerText = target;
-      state[id] = target;
-      return;
-    }
+let start = new Date(from);
+let end = new Date(to);
 
-    if (state[id] === target) return;
+let years = end.getFullYear()-start.getFullYear();
+let months = end.getMonth()-start.getMonth();
+let days = end.getDate()-start.getDate();
+let hours = end.getHours()-start.getHours();
+let minutes = end.getMinutes()-start.getMinutes();
+let seconds = end.getSeconds()-start.getSeconds();
 
-    animating[id] = true;
+if(seconds < 0){ seconds+=60; minutes--; }
+if(minutes < 0){ minutes+=60; hours--; }
+if(hours < 0){ hours+=24; days--; }
 
-    function step() {
+if(days < 0){
+const prev = new Date(end.getFullYear(),end.getMonth(),0);
+days += prev.getDate();
+months--;
+}
 
-      if (state[id] === target) {
-        animating[id] = false;
-        return;
-      }
+if(months < 0){
+months += 12;
+years--;
+}
 
-      const max = maxMap[id];
+return {
+months: years*12 + months,
+weeks: Math.floor(days/7),
+days: days%7,
+hours,
+minutes,
+seconds
+};
+}
 
-      let nextVal = state[id] - 1;
-      if (nextVal < 0) nextVal = max;
+const pad2 = n => String(Math.max(0,n)).padStart(2,"0");
 
-      next.innerText = nextVal;
+/* ======================================================
+   LIMITS
+====================================================== */
+const maxMap = {
+M1:9,M2:9,W1:9,W2:9,D1:9,D2:9,
+H1:2,H2:9,m1:5,m2:9,s1:5,s2:9
+};
 
-      current.style.transition = "none";
-      next.style.transition = "none";
+/* ======================================================
+   FLIP ANIMATION
+====================================================== */
+function animateDigit(id,target){
 
-      current.style.transform = "translateY(0%)";
-      next.style.transform = "translateY(100%)";
+if(animating[id]) return;
 
-      current.style.color = "#fff";
-      next.style.color = "#777";
+const box = get(id);
+const current = box.querySelector(".current");
+const next = box.querySelector(".next");
 
-      void box.offsetWidth;
+target = parseInt(target);
 
-      current.style.transition =
-        "transform .26s ease, color .26s ease";
+if(state[id] === null){
+current.innerText = target;
+next.innerText = target;
+state[id] = target;
+return;
+}
 
-      next.style.transition =
-        "transform .26s ease, color .26s ease";
+if(state[id] === target) return;
 
-      current.style.transform = "translateY(-100%)";
-      next.style.transform = "translateY(0%)";
+animating[id] = true;
 
-      setTimeout(() => {
+function step(){
 
-        current.innerText = nextVal;
-        state[id] = nextVal;
+if(state[id] === target){
+animating[id] = false;
+return;
+}
 
-        current.style.transition = "none";
-        next.style.transition = "none";
+let nextVal = state[id]-1;
+if(nextVal < 0) nextVal = maxMap[id];
 
-        current.style.transform = "translateY(0%)";
-        next.style.transform = "translateY(100%)";
+next.innerText = nextVal;
 
-        current.style.color = "#fff";
-        next.style.color = "#fff";
+current.style.transition = "none";
+next.style.transition = "none";
 
-        requestAnimationFrame(step);
+current.style.transform = "translateY(0%)";
+next.style.transform = "translateY(100%)";
 
-      }, 260);
-    }
+current.style.color = "#fff";
+next.style.color = "#777";
 
-    step();
-  }
+void box.offsetWidth;
 
-  /* ======================================================
-     GREY ZEROS + GREY LABELS
-  ====================================================== */
-  function applyColours(values, digits) {
+current.style.transition = "transform .26s ease,color .26s ease";
+next.style.transition = "transform .26s ease,color .26s ease";
 
-    const order = ["M","W","D","H","m","s"];
+current.style.transform = "translateY(-100%)";
+next.style.transform = "translateY(0%)";
 
-    /* leading zero digits */
-    let firstNonZero = digits.findIndex(x => x !== "0");
+setTimeout(()=>{
 
-    ids.forEach((id, index) => {
+current.innerText = nextVal;
+state[id] = nextVal;
 
-      const box = get(id);
-      if (!box) return;
+current.style.transition = "none";
+next.style.transition = "none";
 
-      const cur = box.querySelector(".current");
+current.style.transform = "translateY(0%)";
+next.style.transform = "translateY(100%)";
 
-      if (firstNonZero === -1 || index < firstNonZero) {
-        cur.style.color = "#666";
-      } else {
-        cur.style.color = "#fff";
-      }
+requestAnimationFrame(step);
 
-    });
+},260);
+}
 
-    /* labels */
-    order.forEach(key => {
-      labels[key].style.color =
-        values[key] <= 0 ? "#666" : "#fff";
-    });
-  }
+step();
+}
 
-  /* ======================================================
-     MAIN LOOP
-  ====================================================== */
-  function update() {
+/* ======================================================
+   COLOURS
+====================================================== */
+function applyColours(values,digits){
 
-    const now = new Date();
-    const t = diff(now, startDate);
+let firstNonZero = digits.findIndex(x => x !== "0");
 
-    const values = {
-      M:t.months,
-      W:t.weeks,
-      D:t.days,
-      H:t.hours,
-      m:t.minutes,
-      s:t.seconds
-    };
+ids.forEach((id,index)=>{
 
-    const full =
-      pad2(t.months) +
-      pad2(t.weeks) +
-      pad2(t.days) +
-      pad2(t.hours) +
-      pad2(t.minutes) +
-      pad2(t.seconds);
+const cur = get(id).querySelector(".current");
 
-    const digits = full.split("");
+cur.style.color =
+(firstNonZero === -1 || index < firstNonZero)
+? "#666"
+: "#fff";
 
-    for (let i = 0; i < ids.length; i++) {
-      animateDigit(ids[i], digits[i]);
-    }
+});
 
-    applyColours(values, digits);
-  }
+["M","W","D","H","m","s"].forEach(key=>{
+labels[key].style.color =
+values[key] <= 0 ? "#666" : "#fff";
+});
 
-  update();
-  setInterval(update, 1000);
+}
 
-  /* ======================================================
-     TEXT CONTENT
-  ====================================================== */
-  const set = (id,val)=>{
-    const el = get(id);
-    if(el) el.innerText = val;
-  };
+/* ======================================================
+   MAIN LOOP
+====================================================== */
+function update(){
 
-  set("eventTitle", event.title);
-  set("eventSubtitle", event.subtitle);
-  set("eventDescription", event.description);
-  set("eventLocation", event.location);
-  set("eventDate", startDate.toLocaleDateString("en-GB"));
-  set("eventTime", event.startTime + " - " + event.endTime);
+const now = new Date();
+const t = diff(now,startDate);
 
-})
-.catch(err => console.error(err));
+const values = {
+M:t.months,W:t.weeks,D:t.days,
+H:t.hours,m:t.minutes,s:t.seconds
+};
 
-  /* ======================================================
-     MAP LINKS
-  ====================================================== */
-  const loc = encodeURIComponent(event.location);
+const full =
+pad2(t.months)+
+pad2(t.weeks)+
+pad2(t.days)+
+pad2(t.hours)+
+pad2(t.minutes)+
+pad2(t.seconds);
 
-  const gm = get("googleMapLink");
-  if (gm) gm.href =
-    `https://www.google.com/maps/search/?api=1&query=${loc}`;
+const digits = full.split("");
 
-  const am = get("appleMapLink");
-  if (am) am.href =
-    `https://maps.apple.com/?q=${loc}`;
+for(let i=0;i<ids.length;i++){
+animateDigit(ids[i],digits[i]);
+}
 
-  /* ======================================================
-     CALENDAR LINKS
-  ====================================================== */
-  const startISO = startDate.toISOString();
-  const endISO =
-    new Date(startDate.getTime()+3600000).toISOString();
+applyColours(values,digits);
+}
 
-  const title = encodeURIComponent(event.title);
-  const desc = encodeURIComponent(
-    event.subtitle + "\n" + event.description
-  );
+update();
+setInterval(update,1000);
 
-  function setLink(id,url){
-    const el = get(id);
-    if(el) el.href = url;
-  }
+/* ======================================================
+   TEXT
+====================================================== */
+get("eventTitle").innerText = event.title;
+get("eventSubtitle").innerText = event.subtitle;
+get("eventDescription").innerText = event.description;
+get("eventLocation").innerText = event.location;
+get("eventDate").innerText = startDate.toLocaleDateString("en-GB");
+get("eventTime").innerText = event.startTime + " - " + event.endTime;
 
-  setLink("googleLink",
-    `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&details=${desc}&location=${loc}`);
+/* ======================================================
+   MAP LINKS
+====================================================== */
+const loc = encodeURIComponent(event.location);
 
-  setLink("outlookLink",
-    `https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${startISO}&enddt=${endISO}&location=${loc}&body=${desc}`);
+get("googleMapLink").href =
+`https://www.google.com/maps/search/?api=1&query=${loc}`;
 
-  setLink("officeLink",
-    `https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${startISO}&enddt=${endISO}&location=${loc}&body=${desc}`);
+get("appleMapLink").href =
+`https://maps.apple.com/?q=${loc}`;
 
-  setLink("yahooLink",
-    `https://calendar.yahoo.com/?v=60&title=${title}&st=${startISO}&et=${endISO}&desc=${desc}&in_loc=${loc}`);
+/* ======================================================
+   CALENDAR LINKS
+====================================================== */
+const startISO = startDate.toISOString();
+const endISO = new Date(startDate.getTime()+3600000).toISOString();
 
-  /* ======================================================
-     APPLE / IOS / MACOS / IPADOS
-  ====================================================== */
-  const stamp = d =>
-    d.toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
+const title = encodeURIComponent(event.title);
+const desc = encodeURIComponent(event.subtitle + "\n" + event.description);
 
-  const ics =
+/* Google */
+get("googleLink").href =
+`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&details=${desc}&location=${loc}`;
+
+/* Outlook */
+get("outlookLink").href =
+`https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${startISO}&enddt=${endISO}&location=${loc}&body=${desc}`;
+
+/* Office */
+get("officeLink").href =
+`https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${startISO}&enddt=${endISO}&location=${loc}&body=${desc}`;
+
+/* Yahoo */
+get("yahooLink").href =
+`https://calendar.yahoo.com/?v=60&title=${title}&st=${startISO}&et=${endISO}&desc=${desc}&in_loc=${loc}`;
+
+/* ======================================================
+   APPLE / IOS / MAC / IPAD ICS FILE
+====================================================== */
+const stamp = d =>
+d.toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
+
+const ics =
 `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Hull Red CIO//EN
@@ -381,41 +334,30 @@ LOCATION:${event.location}
 END:VEVENT
 END:VCALENDAR`;
 
-  const blob = new Blob([ics], {type:"text/calendar"});
-  const url = URL.createObjectURL(blob);
+const blob = new Blob([ics], {type:"text/calendar"});
+const url = URL.createObjectURL(blob);
 
-  const apple = get("appleLink");
-  if (apple) {
-    apple.href = url;
-    apple.download = "event.ics";
-  }
+get("appleLink").href = url;
+get("appleLink").download = "event.ics";
 
-  const icsBtn = get("icsLink");
-  if (icsBtn) {
-    icsBtn.href = url;
-    icsBtn.download = "event.ics";
-  }
+get("icsLink").href = url;
+get("icsLink").download = "event.ics";
 
-  /* ======================================================
-     POSTER MODAL
-  ====================================================== */
-  const modal = get("posterModal");
-  const thumb = get("posterThumb");
-  const close = get("posterClose");
+/* ======================================================
+   POSTER MODAL
+====================================================== */
+const modal = get("posterModal");
+const thumb = get("posterThumb");
+const close = get("posterClose");
 
-  if (thumb && modal) {
-    thumb.onclick = () => modal.classList.add("show");
-  }
+if(thumb) thumb.onclick = ()=>modal.classList.add("show");
+if(close) close.onclick = ()=>modal.classList.remove("show");
 
-  if (close && modal) {
-    close.onclick = () => modal.classList.remove("show");
-  }
-
-  if (modal) {
-    modal.onclick = e => {
-      if (e.target === modal) modal.classList.remove("show");
-    };
-  }
+if(modal){
+modal.onclick = e=>{
+if(e.target === modal) modal.classList.remove("show");
+};
+}
 
 })
 .catch(err => console.error("Countdown error:", err));
