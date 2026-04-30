@@ -6,127 +6,159 @@
 <title>Hull Red CIO Event</title>
 <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<!-- FULLSCREEN POSTER -->
+<!-- BACKGROUND BLOBS -->
+<div class="bg-orb orb1"></div>
+<div class="bg-orb orb2"></div>
+<div class="bg-orb orb3"></div>
+
+<!-- POSTER MODAL -->
 <div class="poster-modal" id="posterModal">
   <span class="poster-close" id="posterClose">&times;</span>
   <img src="public/poster.png" class="poster-full" alt="Poster">
 </div>
 
 <header class="topbar">
-  <div class="topbar-inner">
+  <div class="top-inner">
 
-    <div class="nav-brand">
-      <img src="public/HullRed2.png" class="nav-logo" alt="">
+    <div class="brand-mini">
+      <img src="public/HullRed2.png">
       <span>Hull Red CIO</span>
     </div>
 
-    <a href="admin/index.html" class="admin-btn">Admin</a>
+    <nav class="nav">
+      <a href="#">EVENT</a>
+      <a href="#">MAP</a>
+      <a href="#">INFO</a>
+      <a href="admin/index.html" class="admin-btn">ADMIN</a>
+    </nav>
 
   </div>
 </header>
 
-<main class="container">
+<main class="wrap">
 
-<section class="hero">
-<div class="panel">
+<section class="glass-panel">
 
-<!-- BRAND + POSTER -->
-<div class="brand">
+<div class="hero-grid">
 
-  <div class="brand-left">
-    <img src="public/HullRed2.png" class="logo" alt="">
+<!-- LEFT -->
+<div class="left">
 
-    <div class="brand-text">
-      <h1 id="eventTitle">Loading...</h1>
-      <p class="subtitle" id="eventSubtitle"></p>
+<h1 id="eventTitle">Loading...</h1>
+<p class="subtitle" id="eventSubtitle">Please wait...</p>
 
-      <!-- FLIP CLOCK -->
-      <div class="countdown-wrap">
-        <div class="countdown-label">Event Starts In</div>
+<div class="clock-card">
+<div class="clock-label">EVENT STARTS IN</div>
 
-        <div class="flip-clock">
-          <div class="flip" id="h1">0</div>
-          <div class="flip" id="h2">0</div>
-          <span>:</span>
-          <div class="flip" id="m1">0</div>
-          <div class="flip" id="m2">0</div>
-          <span>:</span>
-          <div class="flip" id="s1">0</div>
-          <div class="flip" id="s2">0</div>
-        </div>
-      </div>
+<div class="flip-clock">
+<div class="digit"><span id="h1">0</span></div>
+<div class="digit"><span id="h2">0</span></div>
 
-    </div>
-  </div>
+<div class="colon">:</div>
 
-  <div class="brand-right">
-    <img src="public/poster.png" class="brand-poster" id="posterThumb">
-  </div>
+<div class="digit"><span id="m1">0</span></div>
+<div class="digit"><span id="m2">0</span></div>
 
+<div class="colon">:</div>
+
+<div class="digit"><span id="s1">0</span></div>
+<div class="digit"><span id="s2">0</span></div>
+</div>
 </div>
 
-<!-- DETAILS -->
-<div class="event-details">
-<p><strong>Date:</strong> <span id="eventDate"></span></p>
-<p><strong>Time:</strong> <span id="eventTime"></span></p>
-<p><strong>Location:</strong> <span id="eventLocation"></span></p>
+<div class="details-card">
+
+<div class="row">
+<label>Date</label>
+<span id="eventDate"></span>
+</div>
+
+<div class="row">
+<label>Time</label>
+<span id="eventTime"></span>
+</div>
+
+<div class="row">
+<label>Location</label>
+<span id="eventLocation"></span>
+</div>
+
 <p id="eventDescription"></p>
 
-<div class="map-row">
+</div>
 
-<a id="googleMapLink" class="map-btn" target="_blank">
-  <img src="public/icons/google-maps.svg"> Google Maps
+<div class="button-grid">
+
+<a id="googleMapLink" class="tile-btn">
+<img src="public/icons/googlemaps.png">
+<span>Google Maps</span>
 </a>
 
-<a id="appleMapLink" class="map-btn" target="_blank">
-  <img src="public/icons/apple-maps.svg"> Apple Maps
+<a id="appleMapLink" class="tile-btn">
+<img src="public/icons/applemaps.png">
+<span>Apple Maps</span>
+</a>
+
+<a id="appleLink" class="tile-btn">
+<img src="public/icons/apple.svg">
+<span>Apple</span>
+</a>
+
+<a id="googleLink" class="tile-btn">
+<img src="public/icons/google.svg">
+<span>Google</span>
+</a>
+
+<a id="officeLink" class="tile-btn">
+<img src="public/icons/office365.svg">
+<span>Office 365</span>
+</a>
+
+<a id="outlookLink" class="tile-btn">
+<img src="public/icons/outlook.svg">
+<span>Outlook</span>
+</a>
+
+<a id="yahooLink" class="tile-btn">
+<img src="public/icons/yahoo.svg">
+<span>Yahoo</span>
+</a>
+
+<a id="icsLink" class="tile-btn">
+<img src="public/icons/ics.svg">
+<span>ICS</span>
 </a>
 
 </div>
+
 </div>
 
-<!-- CALENDAR -->
-<div class="calendar-actions">
+<!-- RIGHT -->
+<div class="right">
 
-<a id="appleLink" class="calendar-btn">
-  <img src="public/icons/apple.svg"> Apple
-</a>
+<div class="poster-card">
+<div class="poster-top">
+<h3>Live Event Poster</h3>
+</div>
 
-<a id="googleLink" class="calendar-btn">
-  <img src="public/icons/google.svg"> Google
-</a>
-
-<a id="officeLink" class="calendar-btn">
-  <img src="public/icons/office365.svg"> Office 365
-</a>
-
-<a id="outlookLink" class="calendar-btn">
-  <img src="public/icons/outlook.svg"> Outlook
-</a>
-
-<a id="yahooLink" class="calendar-btn">
-  <img src="public/icons/yahoo.svg"> Yahoo
-</a>
-
-<a id="icsLink" class="calendar-btn">
-  <img src="public/icons/ics.svg"> ICS
-</a>
+<img src="public/poster.png" id="posterThumb" class="poster">
 
 </div>
 
 </div>
+
+</div>
+
 </section>
 
-<footer class="footer">
+<footer>
 © 2026 Hull Red CIO
 </footer>
 
 </main>
 
 <script src="script.js"></script>
-
 </body>
 </html>
