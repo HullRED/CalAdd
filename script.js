@@ -7,6 +7,9 @@ fetch("data/event.json")
 })
 .then(event => {
 
+  /* ===============================
+     CORE SETUP
+  ================================= */
   const startDate = new Date(event.date + "T" + event.startTime);
 
   const get = (id) => document.getElementById(id);
@@ -17,24 +20,25 @@ fetch("data/event.json")
   countdown.innerHTML = "";
 
   /* ===============================
-     LABEL ROW (RESTORED)
+     LABELS ROW (RESTORED)
   ================================= */
   const labelRow = document.createElement("div");
-  labelRow.style.display = "flex";
-  labelRow.style.gap = "8px";
-  labelRow.style.marginBottom = "10px";
-  labelRow.style.fontSize = "12px";
-  labelRow.style.color = "#aaa";
-  labelRow.style.letterSpacing = "2px";
+  labelRow.className = "flip-label-row";
 
-  const labels = ["M","M","W","W","D","D","H","H","m","m","s","s"];
+  const labels = [
+    "M","M",
+    "W","W",
+    "D","D",
+    "H","H",
+    "m","m",
+    "s","s"
+  ];
 
   labels.forEach(l => {
-    const span = document.createElement("div");
-    span.style.width = "72px";
-    span.style.textAlign = "center";
-    span.innerText = l;
-    labelRow.appendChild(span);
+    const el = document.createElement("div");
+    el.className = "flip-label";
+    el.innerText = l;
+    labelRow.appendChild(el);
   });
 
   countdown.appendChild(labelRow);
@@ -45,9 +49,7 @@ fetch("data/event.json")
   const digitIds = [];
 
   const digitRow = document.createElement("div");
-  digitRow.style.display = "flex";
-  digitRow.style.gap = "8px";
-  digitRow.style.alignItems = "center";
+  digitRow.className = "flip-row";
 
   function createDigit(id) {
     const el = document.createElement("div");
@@ -76,7 +78,7 @@ fetch("data/event.json")
   countdown.appendChild(digitRow);
 
   /* ===============================
-     FLIP ANIMATION (RESTORED STYLE)
+     FLIP ENGINE (STABLE + CORRECT)
   ================================= */
   function flipDigit(id, value) {
 
@@ -92,7 +94,7 @@ fetch("data/event.json")
 
     next.innerText = value;
 
-    /* trigger animation class (CSS-driven) */
+    /* trigger animation */
     box.classList.add("flipping");
 
     current.style.color = "#fff";
@@ -107,16 +109,18 @@ fetch("data/event.json")
       current.style.color = "#fff";
       next.style.color = "#fff";
 
-    }, 300);
+    }, 280);
   }
 
   /* ===============================
-     REAL CALENDAR ENGINE (FIXED)
+     REAL CALENDAR DIFFERENCE ENGINE
   ================================= */
   function getCalendarDiff(from, to) {
 
     let start = new Date(from);
     let end = new Date(to);
+
+    if (end < start) [start, end] = [end, start];
 
     let years = end.getFullYear() - start.getFullYear();
     let months = end.getMonth() - start.getMonth();
@@ -125,13 +129,24 @@ fetch("data/event.json")
     let minutes = end.getMinutes() - start.getMinutes();
     let seconds = end.getSeconds() - start.getSeconds();
 
-    if (seconds < 0) { seconds += 60; minutes--; }
-    if (minutes < 0) { minutes += 60; hours--; }
-    if (hours < 0) { hours += 24; days--; }
+    if (seconds < 0) {
+      seconds += 60;
+      minutes--;
+    }
+
+    if (minutes < 0) {
+      minutes += 60;
+      hours--;
+    }
+
+    if (hours < 0) {
+      hours += 24;
+      days--;
+    }
 
     if (days < 0) {
-      const prev = new Date(end.getFullYear(), end.getMonth(), 0);
-      days += prev.getDate();
+      const prevMonth = new Date(end.getFullYear(), end.getMonth(), 0);
+      days += prevMonth.getDate();
       months--;
     }
 
@@ -144,7 +159,7 @@ fetch("data/event.json")
     const remDays = days % 7;
 
     return {
-      months: months + (years * 12),
+      months: months + years * 12,
       weeks,
       days: remDays,
       hours,
@@ -154,14 +169,12 @@ fetch("data/event.json")
   }
 
   /* ===============================
-     MAIN LOOP (OPTIMISED)
+     MAIN LOOP (MOBILE SAFE)
   ================================= */
   function updateCountdown() {
 
-    let diff = Math.floor((startDate - new Date()) / 1000);
-    if (diff < 0) diff = 0;
-
-    const t = getCalendarDiff(new Date(), startDate);
+    const now = new Date();
+    const t = getCalendarDiff(now, startDate);
 
     const values = [
       t.months,
@@ -178,95 +191,92 @@ fetch("data/event.json")
       t.seconds % 10
     ].map(n => String(n).padStart(1, "0"));
 
-    ids.forEach((id, i) => {
-      flipDigit(id, values[i]);
-    });
+    for (let i = 0; i < ids.length; i++) {
+      flipDigit(ids[i], values[i]);
+    }
   }
 
   updateCountdown();
   setInterval(updateCountdown, 1000);
 
-});
-});
+  /* ===============================
+     TEXT CONTENT (SAFE)
+  ================================= */
+  const setText = (id, val) => {
+    const el = get(id);
+    if (el) el.innerText = val;
+  };
 
-    /* ===============================
-       TEXT CONTENT (SAFE)
-    ================================= */
-    const setText = (id, val) => {
-      const el = get(id);
-      if (el) el.innerText = val;
+  setText("eventTitle", event.title);
+  setText("eventSubtitle", event.subtitle);
+  setText("eventDescription", event.description);
+  setText("eventLocation", event.location);
+  setText("eventDate", startDate.toLocaleDateString("en-GB"));
+  setText("eventTime", event.startTime + " - " + event.endTime);
+
+  /* ===============================
+     MAP LINKS
+  ================================= */
+  const loc = encodeURIComponent(event.location);
+
+  const gMap = get("googleMapLink");
+  if (gMap) gMap.href = `https://www.google.com/maps/search/?api=1&query=${loc}`;
+
+  const aMap = get("appleMapLink");
+  if (aMap) aMap.href = `https://maps.apple.com/?q=${loc}`;
+
+  /* ===============================
+     CALENDAR LINKS
+  ================================= */
+  const startISO = startDate.toISOString();
+  const endISO = new Date(startDate.getTime() + 3600000).toISOString();
+
+  const title = encodeURIComponent(event.title);
+  const desc = encodeURIComponent(event.subtitle + "\n" + event.description);
+
+  const setHref = (id, url) => {
+    const el = get(id);
+    if (el) el.href = url;
+  };
+
+  setHref("googleLink",
+    `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&details=${desc}&location=${loc}`
+  );
+
+  setHref("outlookLink",
+    `https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${startISO}&enddt=${endISO}&location=${loc}&body=${desc}`
+  );
+
+  setHref("officeLink",
+    `https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${startISO}&enddt=${endISO}&location=${loc}&body=${desc}`
+  );
+
+  setHref("yahooLink",
+    `https://calendar.yahoo.com/?v=60&title=${title}&st=${startISO}&et=${endISO}&desc=${desc}&in_loc=${loc}`
+  );
+
+  /* ===============================
+     POSTER MODAL
+  ================================= */
+  const modal = get("posterModal");
+  const open = get("posterThumb");
+  const close = get("posterClose");
+
+  if (modal && open) {
+    open.onclick = () => modal.classList.add("show");
+  }
+
+  if (modal && close) {
+    close.onclick = () => modal.classList.remove("show");
+  }
+
+  if (modal) {
+    modal.onclick = (e) => {
+      if (e.target === modal) modal.classList.remove("show");
     };
+  }
 
-    setText("eventTitle", event.title);
-    setText("eventSubtitle", event.subtitle);
-    setText("eventDescription", event.description);
-    setText("eventLocation", event.location);
-    setText("eventDate", startDate.toLocaleDateString("en-GB"));
-    setText("eventTime", event.startTime + " - " + event.endTime);
-
-    /* ===============================
-       MAP LINKS
-    ================================= */
-    const loc = encodeURIComponent(event.location);
-
-    const gMap = get("googleMapLink");
-    if (gMap) gMap.href = `https://www.google.com/maps/search/?api=1&query=${loc}`;
-
-    const aMap = get("appleMapLink");
-    if (aMap) aMap.href = `https://maps.apple.com/?q=${loc}`;
-
-    /* ===============================
-       CALENDAR LINKS
-    ================================= */
-    const startISO = startDate.toISOString();
-    const endISO = new Date(startDate.getTime() + 3600000).toISOString();
-
-    const title = encodeURIComponent(event.title);
-    const desc = encodeURIComponent(event.subtitle + "\n" + event.description);
-
-    const setHref = (id, url) => {
-      const el = get(id);
-      if (el) el.href = url;
-    };
-
-    setHref("googleLink",
-      `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startISO}/${endISO}&details=${desc}&location=${loc}`
-    );
-
-    setHref("outlookLink",
-      `https://outlook.live.com/owa/?rru=addevent&subject=${title}&startdt=${startISO}&enddt=${endISO}&location=${loc}&body=${desc}`
-    );
-
-    setHref("officeLink",
-      `https://outlook.office.com/owa/?path=/calendar/action/compose&subject=${title}&startdt=${startISO}&enddt=${endISO}&location=${loc}&body=${desc}`
-    );
-
-    setHref("yahooLink",
-      `https://calendar.yahoo.com/?v=60&title=${title}&st=${startISO}&et=${endISO}&desc=${desc}&in_loc=${loc}`
-    );
-
-    /* ===============================
-       POSTER MODAL
-    ================================= */
-    const modal = get("posterModal");
-    const open = get("posterThumb");
-    const close = get("posterClose");
-
-    if (modal && open) {
-      open.onclick = () => modal.classList.add("show");
-    }
-
-    if (modal && close) {
-      close.onclick = () => modal.classList.remove("show");
-    }
-
-    if (modal) {
-      modal.onclick = (e) => {
-        if (e.target === modal) modal.classList.remove("show");
-      };
-    }
-
-  })
-  .catch(err => console.error("Countdown error:", err));
+})
+.catch(err => console.error("Countdown error:", err));
 
 });
