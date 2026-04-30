@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,79 +9,65 @@
 </head>
 <body>
 
-<!-- BACKGROUND BLOBS -->
-<div class="bg-orb orb1"></div>
-<div class="bg-orb orb2"></div>
-<div class="bg-orb orb3"></div>
+<!-- BACKGROUND -->
+<div class="bg-glow glow1"></div>
+<div class="bg-glow glow2"></div>
 
 <!-- POSTER MODAL -->
 <div class="poster-modal" id="posterModal">
   <span class="poster-close" id="posterClose">&times;</span>
-  <img src="public/poster.png" class="poster-full" alt="Poster">
+  <img src="public/poster.png" class="poster-full">
 </div>
 
 <header class="topbar">
-  <div class="top-inner">
+  <div class="topbar-inner">
 
     <div class="brand-mini">
       <img src="public/HullRed2.png">
       <span>Hull Red CIO</span>
     </div>
 
-    <nav class="nav">
-      <a href="#">EVENT</a>
-      <a href="#">MAP</a>
-      <a href="#">INFO</a>
-      <a href="admin/index.html" class="admin-btn">ADMIN</a>
+    <nav class="nav-links">
+      <a href="#" class="nav-btn">Event</a>
+      <a href="#" class="nav-btn">Info</a>
+      <a href="admin/index.html" class="admin-btn">Admin</a>
     </nav>
 
   </div>
 </header>
 
-<main class="wrap">
+<main class="container">
 
-<section class="glass-panel">
+<section class="hero-panel">
 
-<div class="hero-grid">
+<div class="main-grid">
 
 <!-- LEFT -->
-<div class="left">
+<div class="left-col">
 
 <h1 id="eventTitle">Loading...</h1>
 <p class="subtitle" id="eventSubtitle">Please wait...</p>
 
-<div class="clock-card">
-<div class="clock-label">EVENT STARTS IN</div>
-
-<div class="flip-clock">
-<div class="digit"><span id="h1">0</span></div>
-<div class="digit"><span id="h2">0</span></div>
-
-<div class="colon">:</div>
-
-<div class="digit"><span id="m1">0</span></div>
-<div class="digit"><span id="m2">0</span></div>
-
-<div class="colon">:</div>
-
-<div class="digit"><span id="s1">0</span></div>
-<div class="digit"><span id="s2">0</span></div>
-</div>
+<!-- CLOCK -->
+<div class="count-wrap">
+<div class="count-label">EVENT STARTS IN</div>
+<div id="countdown" class="flip-clock"></div>
 </div>
 
-<div class="details-card">
+<!-- DETAILS -->
+<div class="details-box">
 
-<div class="row">
+<div class="detail-row">
 <label>Date</label>
 <span id="eventDate"></span>
 </div>
 
-<div class="row">
+<div class="detail-row">
 <label>Time</label>
 <span id="eventTime"></span>
 </div>
 
-<div class="row">
+<div class="detail-row">
 <label>Location</label>
 <span id="eventLocation"></span>
 </div>
@@ -89,44 +76,45 @@
 
 </div>
 
+<!-- BUTTONS -->
 <div class="button-grid">
 
-<a id="googleMapLink" class="tile-btn">
+<a id="googleMapLink" class="action-btn">
 <img src="public/icons/googlemaps.png">
 <span>Google Maps</span>
 </a>
 
-<a id="appleMapLink" class="tile-btn">
+<a id="appleMapLink" class="action-btn">
 <img src="public/icons/applemaps.png">
 <span>Apple Maps</span>
 </a>
 
-<a id="appleLink" class="tile-btn">
+<a id="appleLink" class="action-btn">
 <img src="public/icons/apple.svg">
 <span>Apple</span>
 </a>
 
-<a id="googleLink" class="tile-btn">
+<a id="googleLink" class="action-btn">
 <img src="public/icons/google.svg">
 <span>Google</span>
 </a>
 
-<a id="officeLink" class="tile-btn">
+<a id="officeLink" class="action-btn">
 <img src="public/icons/office365.svg">
 <span>Office 365</span>
 </a>
 
-<a id="outlookLink" class="tile-btn">
+<a id="outlookLink" class="action-btn">
 <img src="public/icons/outlook.svg">
 <span>Outlook</span>
 </a>
 
-<a id="yahooLink" class="tile-btn">
+<a id="yahooLink" class="action-btn">
 <img src="public/icons/yahoo.svg">
 <span>Yahoo</span>
 </a>
 
-<a id="icsLink" class="tile-btn">
+<a id="icsLink" class="action-btn">
 <img src="public/icons/ics.svg">
 <span>ICS</span>
 </a>
@@ -136,15 +124,11 @@
 </div>
 
 <!-- RIGHT -->
-<div class="right">
+<div class="right-col">
 
-<div class="poster-card">
-<div class="poster-top">
-<h3>Live Event Poster</h3>
-</div>
-
-<img src="public/poster.png" id="posterThumb" class="poster">
-
+<div class="poster-box">
+<div class="poster-head">Live Event Poster</div>
+<img src="public/poster.png" id="posterThumb" class="poster-img">
 </div>
 
 </div>
@@ -153,7 +137,7 @@
 
 </section>
 
-<footer>
+<footer class="footer">
 © 2026 Hull Red CIO
 </footer>
 
