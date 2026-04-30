@@ -30,6 +30,7 @@ fetch("data/event.json")
   const ids = [];
   const state = {};
   const animating = {};
+  const labels = {};
 
   const row = document.createElement("div");
   row.className = "flip-row";
@@ -69,10 +70,12 @@ fetch("data/event.json")
     const label = document.createElement("span");
     label.className = "flip-unit-label";
     label.innerText = unit.label;
-    label.style.color = "#fff";
+    label.style.minWidth = "78px";
     label.style.fontWeight = "700";
     label.style.fontSize = "15px";
-    label.style.minWidth = "78px";
+    label.style.color = "#fff";
+
+    labels[unit.key] = label;
 
     group.appendChild(label);
     row.appendChild(group);
@@ -147,10 +150,7 @@ fetch("data/event.json")
   };
 
   /* ======================================================
-     ORIGINAL ROBLOX STYLE FLIP
-     current white
-     next grey
-     slide upward only
+     FLIP ANIMATION
   ====================================================== */
   function animateDigit(id, target) {
 
@@ -161,8 +161,6 @@ fetch("data/event.json")
 
     const current = box.querySelector(".current");
     const next = box.querySelector(".next");
-
-    if (!current || !next) return;
 
     target = parseInt(target);
 
@@ -191,7 +189,6 @@ fetch("data/event.json")
 
       next.innerText = nextVal;
 
-      /* reset positions */
       current.style.transition = "none";
       next.style.transition = "none";
 
@@ -203,7 +200,6 @@ fetch("data/event.json")
 
       void box.offsetWidth;
 
-      /* animate upward */
       current.style.transition =
         "transform .26s ease, color .26s ease";
 
@@ -236,11 +232,14 @@ fetch("data/event.json")
   }
 
   /* ======================================================
-     GREY LEADING ZEROS
+     GREY ZEROS + GREY LABELS
   ====================================================== */
-  function applyZeroColours(fullDigits) {
+  function applyColours(values, digits) {
 
-    let firstNonZero = fullDigits.findIndex(x => x !== "0");
+    const order = ["M","W","D","H","m","s"];
+
+    /* leading zero digits */
+    let firstNonZero = digits.findIndex(x => x !== "0");
 
     ids.forEach((id, index) => {
 
@@ -256,6 +255,12 @@ fetch("data/event.json")
       }
 
     });
+
+    /* labels */
+    order.forEach(key => {
+      labels[key].style.color =
+        values[key] <= 0 ? "#666" : "#fff";
+    });
   }
 
   /* ======================================================
@@ -265,6 +270,15 @@ fetch("data/event.json")
 
     const now = new Date();
     const t = diff(now, startDate);
+
+    const values = {
+      M:t.months,
+      W:t.weeks,
+      D:t.days,
+      H:t.hours,
+      m:t.minutes,
+      s:t.seconds
+    };
 
     const full =
       pad2(t.months) +
@@ -280,7 +294,7 @@ fetch("data/event.json")
       animateDigit(ids[i], digits[i]);
     }
 
-    applyZeroColours(digits);
+    applyColours(values, digits);
   }
 
   update();
@@ -300,6 +314,11 @@ fetch("data/event.json")
   set("eventLocation", event.location);
   set("eventDate", startDate.toLocaleDateString("en-GB"));
   set("eventTime", event.startTime + " - " + event.endTime);
+
+})
+.catch(err => console.error(err));
+
+});
 
   /* ======================================================
      MAP LINKS
