@@ -328,10 +328,11 @@ get("yahooLink").href =
 `https://calendar.yahoo.com/?v=60&title=${title}&st=${startISO}&et=${endISO}&desc=${desc}&in_loc=${loc}`;
 
 /* ======================================================
-   APPLE / IOS / MAC / IPAD ICS FILE
+   APPLE / IOS / MAC FIX (SAFARI SAFE)
 ====================================================== */
+
 const stamp = d =>
-d.toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
+  d.toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
 
 const ics =
 `BEGIN:VCALENDAR
@@ -348,21 +349,42 @@ LOCATION:${event.location}
 END:VEVENT
 END:VCALENDAR`;
 
-const blob = new Blob([ics], {type:"text/calendar"});
-const url = URL.createObjectURL(blob);
-
-get("appleLink").href = url;
-get("icsLink").href = url;
-
 const safeTitle = (event.title || "event")
   .toLowerCase()
-  .replace(/[^a-z0-9]+/g, "-")   // spaces/symbols → dash
-  .replace(/^-+|-+$/g, "");      // clean edges
+  .replace(/[^a-z0-9]+/g, "-")
+  .replace(/^-+|-+$/g, "");
 
 const fileName = `${safeTitle}.ics`;
 
-get("appleLink").download = fileName;
-get("icsLink").download = fileName;
+/* Detect Safari */
+const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+/* Create file */
+const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+
+if (isSafari) {
+  // Safari workaround: open instead of download
+  const reader = new FileReader();
+
+  reader.onload = function() {
+    const dataUrl = reader.result;
+
+    get("appleLink").href = dataUrl;
+    get("icsLink").href = dataUrl;
+  };
+
+  reader.readAsDataURL(blob);
+
+} else {
+  // Normal browsers
+  const url = URL.createObjectURL(blob);
+
+  get("appleLink").href = url;
+  get("appleLink").download = fileName;
+
+  get("icsLink").href = url;
+  get("icsLink").download = fileName;
+}
 
 /* ======================================================
    POSTER MODAL
